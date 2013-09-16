@@ -1,0 +1,106 @@
+﻿<Window x:Class="SharpAvi.Sample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SharpAvi.Sample"
+        Title="SharpAvi - Screencast Sample" 
+        Height="350" Width="525" SizeToContent="WidthAndHeight"
+        WindowStyle="None" AllowsTransparency="True" 
+        WindowStartupLocation="CenterScreen" Topmost="True" 
+        Background="Transparent">
+    
+    <Window.Resources>
+        <ResourceDictionary Source="Styles.xaml"/>
+    </Window.Resources>
+
+    <Border Background="White" 
+            BorderBrush="DarkGray" BorderThickness="2"
+            CornerRadius="28"
+            Padding="7">
+        <StackPanel Orientation="Horizontal">
+            <Button Visibility="{Binding IsRecording, Converter={StaticResource VcBool2VisInv}}"
+                    Click="StartRecording_Click"
+                    ToolTip="Start Capture"
+                    Style="{StaticResource RoundButton}">
+                <Path Style="{StaticResource RoundButtonGlyph}">
+                    <Path.Data>
+                        <PathGeometry>
+                            <PathGeometry.Figures>
+                                <PathFigureCollection>
+                                    <PathFigure IsClosed="True" IsFilled="True" StartPoint="0.125,0">
+                                        <LineSegment Point="0.5,0.25"/>
+                                        <LineSegment Point="0.125,0.5"/>
+                                    </PathFigure>
+                                </PathFigureCollection>
+                            </PathGeometry.Figures>
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
+            </Button>
+        
+            <Button Visibility="{Binding IsRecording, Converter={StaticResource VcBool2Vis}}"
+                    Click="StopRecording_Click"
+                    Style="{StaticResource RoundButton}"
+                    ToolTip="Stop Capture">
+                <Path Style="{StaticResource RoundButtonGlyph}">
+                    <Path.Data>
+                        <RectangleGeometry Rect="0,0,0.35,0.35"/>
+                    </Path.Data>
+                </Path>
+            </Button>
+            
+            <Ellipse VerticalAlignment="Center"
+                     Width="15" Height="15" Margin="7,0,0,0"
+                     Fill="Red"
+                     Visibility="{Binding IsRecording, Converter={StaticResource VcBool2Vis}}"/>
+            
+            <TextBox VerticalAlignment="Center"
+                     Margin="7,0,0,0"
+                     IsReadOnly="True"
+                     FontSize="14" FontFamily="Verdana"
+                     Text="{Binding Elapsed, Mode=OneWay}"
+                     Visibility="{Binding IsRecording, Converter={StaticResource VcBool2Vis}}"/>
+            
+            <Button Margin="7,0,0,0"
+                    Style="{StaticResource RoundButton}"
+                    ToolTip="Settings">
+                <Path Style="{StaticResource RoundButtonGlyph}">
+                    <Path.Data>
+                        <GeometryGroup>
+                            <GeometryGroup.Transform>
+                                <TransformGroup>
+                                    <TranslateTransform X="-14" Y="-14"/>
+                                    <ScaleTransform ScaleX="0.025" ScaleY="0.025"/>
+                                </TransformGroup>
+                            </GeometryGroup.Transform>
+                            <StreamGeometry>
+                                F1 M 24.69,17.5542L 27.9094,14.793C 28.5138,15.05 29.0876,15.3647 29.6241,15.7302L 29.0458,19.93L 33.2747,20.2541C 33.5166,20.8524 33.7023,21.4794 33.8252,22.1286L 30.4458,24.69L 33.207,27.9094C 32.95,28.5137 32.6353,29.0876 32.2698,29.6241L 28.07,29.0458L 27.7459,33.2747C 27.1476,33.5166 26.5206,33.7023 25.8714,33.8252L 23.3099,30.4458L 20.0906,33.207C 19.4862,32.95 18.9124,32.6353 18.3759,32.2698L 18.9542,28.0699L 14.7253,27.7459C 14.4834,27.1476 14.2977,26.5206 14.1748,25.8713L 17.5542,23.3099L 14.793,20.0906C 15.05,19.4862 15.3647,18.9124 15.7302,18.3759L 19.93,18.9542L 20.2541,14.7252C 20.8524,14.4834 21.4794,14.2977 22.1286,14.1748L 24.69,17.5542 Z M 24,20C 21.7909,20 20,21.7909 20,24C 20,26.2091 21.7909,28 24,28C 26.2091,28 28,26.2091 28,24C 28,21.7909 26.2091,20 24,20 Z
+                            </StreamGeometry>
+                        </GeometryGroup>
+                    </Path.Data>
+                </Path>
+            </Button>
+            
+            <Button Margin="7,0,0,0"
+                    IsCancel="True"
+                    Click="Exit_Click"
+                    Style="{StaticResource RoundButton}"
+                    ToolTip="Exit">
+                <Path Style="{StaticResource RoundButtonGlyph}">
+                    <Path.Data>
+                        <GeometryGroup>
+                            <GeometryGroup.Transform>
+                                <TransformGroup>
+                                    <TranslateTransform X="-13.5" Y="-14"/>
+                                    <ScaleTransform ScaleX="0.020833" ScaleY="0.020833"/>
+                                </TransformGroup>
+                            </GeometryGroup.Transform>
+                            <StreamGeometry>
+                                F1 M 17,14L 24,21L 30.9999,14.0001L 33.9999,17.0001L 27,24L 33.9999,31L 31,34L 24,27L 17,34L 14,31L 21,24L 14,17L 17,14 Z
+                            </StreamGeometry>
+                        </GeometryGroup>
+                    </Path.Data>
+                </Path>
+            </Button>
+        </StackPanel>
+    </Border>
+</Window>
