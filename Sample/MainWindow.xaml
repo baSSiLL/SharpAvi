@@ -14,8 +14,8 @@
 
     <Border Background="White" 
             BorderBrush="DarkGray" BorderThickness="2"
-            CornerRadius="28"
-            Padding="7">
+            CornerRadius="26"
+            Padding="7,6">
         <StackPanel Orientation="Horizontal">
             <Button Visibility="{Binding IsRecording, Converter={StaticResource VcBool2VisInv}}"
                     Click="StartRecording_Click"
@@ -23,16 +23,7 @@
                     Style="{StaticResource RoundButton}">
                 <Path Style="{StaticResource RoundButtonGlyph}">
                     <Path.Data>
-                        <PathGeometry>
-                            <PathGeometry.Figures>
-                                <PathFigureCollection>
-                                    <PathFigure IsClosed="True" IsFilled="True" StartPoint="0.125,0">
-                                        <LineSegment Point="0.5,0.25"/>
-                                        <LineSegment Point="0.125,0.5"/>
-                                    </PathFigure>
-                                </PathFigureCollection>
-                            </PathGeometry.Figures>
-                        </PathGeometry>
+                        <EllipseGeometry Center="0.2,0.2" RadiusX="0.2" RadiusY="0.2"/>
                     </Path.Data>
                 </Path>
             </Button>
@@ -59,6 +50,28 @@
                      FontSize="14" FontFamily="Verdana"
                      Text="{Binding Elapsed, Mode=OneWay}"
                      Visibility="{Binding IsRecording, Converter={StaticResource VcBool2Vis}}"/>
+            
+            <Button Style="{StaticResource RoundButton}"
+                    Margin="7,0,0,0"
+                    ToolTip="Go To Last Screencast"
+                    Visibility="{Binding HasLastScreencast, Converter={StaticResource VcBool2Vis}}"
+                    Click="GoToLastScreencast_Click">
+                <Path Style="{StaticResource RoundButtonGlyph}">
+                    <Path.Data>
+                        <GeometryGroup>
+                            <GeometryGroup.Transform>
+                                <TransformGroup>
+                                    <TranslateTransform X="-12" Y="-14"/>
+                                    <ScaleTransform ScaleX="0.020833" ScaleY="0.020833"/>
+                                </TransformGroup>
+                            </GeometryGroup.Transform>
+                            <StreamGeometry>
+                                F1 M 13,16L 23,16L 23,15C 23,13.8954 23.8954,13 25,13L 32,13C 33.1046,13 35,14.8954 35,16L 35,32L 13,32L 13,16 Z
+                            </StreamGeometry>
+                        </GeometryGroup>
+                    </Path.Data>
+                </Path>
+            </Button>
             
             <Button Margin="7,0,0,0"
                     Style="{StaticResource RoundButton}"

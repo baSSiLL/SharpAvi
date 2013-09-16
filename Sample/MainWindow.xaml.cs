@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
-using System.Threading;
 
 namespace SharpAvi.Sample
 {
@@ -14,15 +15,17 @@ namespace SharpAvi.Sample
         {
             InitializeComponent();
 
+            recordingTimer = new Timer(recordingTimer_Tick);
             DataContext = this;
         }
 
 
         #region Recording
 
+        private readonly Timer recordingTimer;
         private DateTime recordingStartTime;
-        private Thread recordingThread;
-        private ManualResetEvent stopRecordingThread = new ManualResetEvent(false);
+        private Recorder recorder;
+        private string lastFileName;
 
         private static readonly DependencyPropertyKey IsRecordingPropertyKey =
             DependencyProperty.RegisterReadOnly("IsRecording", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
@@ -44,22 +47,30 @@ namespace SharpAvi.Sample
             private set { SetValue(ElapsedPropertyKey, value); }
         }
 
+        private static readonly DependencyPropertyKey HasLastScreencastPropertyKey =
+            DependencyProperty.RegisterReadOnly("HasLastScreencast", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
+        public static readonly DependencyProperty HasLastScreencastProperty = HasLastScreencastPropertyKey.DependencyProperty;
+
+        public bool HasLastScreencast
+        {
+            get { return (bool)GetValue(HasLastScreencastProperty); }
+            private set { SetValue(HasLastScreencastPropertyKey, value); }
+        }
+
         private void StartRecording()
         {
             if (IsRecording)
                 throw new InvalidOperationException("Already recording.");
 
             Elapsed = "00:00";
+            HasLastScreencast = false;
             IsRecording = true;
 
-            recordingThread = new Thread(Record)
-            {
-                Name = "Record",
-                IsBackground = true
-            };
             recordingStartTime = DateTime.Now;
-            stopRecordingThread.Reset();
-            recordingThread.Start();
+            recordingTimer.Change(1000, 1000);
+
+            lastFileName = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".avi";
+            recorder = new Recorder(lastFileName);
         }
 
         private void StopRecording()
@@ -67,24 +78,20 @@ namespace SharpAvi.Sample
             if (!IsRecording)
                 throw new InvalidOperationException("Not recording.");
 
-            if (recordingThread.IsAlive)
-            {
-                stopRecordingThread.Set();
-                recordingThread.Join();
-            }
-            recordingThread = null;
+            recorder.Dispose();
+            recorder = null;
+
+            recordingTimer.Change(0, 0);
 
             IsRecording = false;
+            HasLastScreencast = true;
         }
 
-        private void Record()
+        private void recordingTimer_Tick(object state)
         {
-            while (!stopRecordingThread.WaitOne(500))
-            {
-                var elapsed = DateTime.Now - recordingStartTime;
-                var elapsedString = string.Format("{0:00}:{1:00}", Math.Floor(elapsed.TotalMinutes), elapsed.Seconds);
-                Dispatcher.BeginInvoke(new Action(() => { Elapsed = elapsedString; }));
-            }
+            var elapsed = DateTime.Now - recordingStartTime;
+            var elapsedString = string.Format("{0:00}:{1:00}", Math.Floor(elapsed.TotalMinutes), elapsed.Seconds);
+            Dispatcher.BeginInvoke(new Action(() => { Elapsed = elapsedString; }));
         }
 
         #endregion
@@ -154,6 +161,11 @@ namespace SharpAvi.Sample
         private void StopRecording_Click(object sender, RoutedEventArgs e)
         {
             StopRecording();
+        }
+
+        private void GoToLastScreencast_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("explorer.exe", string.Format("/select, \"{0}\"", lastFileName));
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
