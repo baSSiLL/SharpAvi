@@ -17,6 +17,10 @@ namespace SharpAvi.Sample
 
             recordingTimer = new Timer(recordingTimer_Tick);
             DataContext = this;
+
+            InitDefaultSettings();
+
+            WindowMoveBehavior.Attach(this);
         }
 
 
@@ -62,6 +66,9 @@ namespace SharpAvi.Sample
             if (IsRecording)
                 throw new InvalidOperationException("Already recording.");
 
+            if (minimizeOnStart)
+                WindowState = WindowState.Minimized;
+
             Elapsed = "00:00";
             HasLastScreencast = false;
             IsRecording = true;
@@ -69,8 +76,8 @@ namespace SharpAvi.Sample
             recordingStartTime = DateTime.Now;
             recordingTimer.Change(1000, 1000);
 
-            lastFileName = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".avi";
-            recorder = new Recorder(lastFileName);
+            lastFileName = System.IO.Path.Combine(outputFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".avi");
+            recorder = new Recorder(lastFileName, encoder, encodingQuality);
         }
 
         private void StopRecording()
@@ -85,6 +92,8 @@ namespace SharpAvi.Sample
 
             IsRecording = false;
             HasLastScreencast = true;
+
+            WindowState = WindowState.Normal;
         }
 
         private void recordingTimer_Tick(object state)
@@ -97,57 +106,42 @@ namespace SharpAvi.Sample
         #endregion
 
 
-        #region Moving Window
+        #region Settings
 
-        private Point moveOrigin;
+        private string outputFolder;
+        private FourCC encoder;
+        private int encodingQuality;
+        private bool minimizeOnStart;
 
-        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        private void InitDefaultSettings()
         {
-            base.OnMouseLeftButtonDown(e);
+            var exePath = new Uri(System.Reflection.Assembly.GetEntryAssembly().Location).LocalPath;
+            outputFolder = System.IO.Path.GetDirectoryName(exePath);
 
-            moveOrigin = e.GetPosition(this);
-            CaptureMouse();
+            encoder = KnownFourCCs.Codecs.MotionJpeg;
+            encodingQuality = 70;
+
+            minimizeOnStart = true;
         }
 
-        protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
+        private void ShowSettingsDialog()
         {
-            if (IsMouseCaptured)
+            var dlg = new SettingsWindow()
             {
-                ReleaseMouseCapture();
-            }
-
-            base.OnMouseLeftButtonUp(e);
-        }
-
-        protected override void OnMouseMove(MouseEventArgs e)
-        {
-            base.OnMouseMove(e);
-
-            if (IsMouseCaptured)
+                Owner = this,
+                Folder = outputFolder,
+                Encoder = encoder,
+                Quality = encodingQuality,
+                MinimizeOnStart = minimizeOnStart
+            };
+            
+            if (dlg.ShowDialog() == true)
             {
-                var offset = e.GetPosition(this) - moveOrigin;
-                Left += offset.X;
-                Top += offset.Y;
+                outputFolder = dlg.Folder;
+                encoder = dlg.Encoder;
+                encodingQuality = dlg.Quality;
+                minimizeOnStart = dlg.MinimizeOnStart;
             }
-        }
-
-        #endregion
-
-
-        #region Window opacity
-
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-
-            Opacity = 1;
-        }
-
-        protected override void OnDeactivated(EventArgs e)
-        {
-            Opacity = 0.5;
-
-            base.OnDeactivated(e);
         }
 
         #endregion
@@ -166,6 +160,11 @@ namespace SharpAvi.Sample
         private void GoToLastScreencast_Click(object sender, RoutedEventArgs e)
         {
             Process.Start("explorer.exe", string.Format("/select, \"{0}\"", lastFileName));
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            ShowSettingsDialog();
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)

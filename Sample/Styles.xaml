@@ -4,11 +4,75 @@
 
     <BooleanToVisibilityConverter x:Key="VcBool2Vis"/>
     <local:BooleanToObjectConverter x:Key="VcBool2VisInv" FalseValue="Visible" TrueValue="Collapsed"/>
+    <local:BooleanToObjectConverter x:Key="VcBoolInv" FalseValue="True" TrueValue="False"/>
     
     <Style TargetType="TextBox">
         <Setter Property="BorderThickness" Value="2"/>
         <Setter Property="BorderBrush" Value="DarkGray"/>
         <Setter Property="Foreground" Value="DarkGray"/>
+    </Style>
+    
+    <Style TargetType="Label">
+        <Setter Property="Foreground" Value="DarkGray"/>
+    </Style>
+    
+    <Style TargetType="Button">
+        <Setter Property="MinWidth" Value="80"/>
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="BorderBrush" Value="DarkGray"/>
+        <Setter Property="BorderThickness" Value="3"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="DarkGray"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ButtonBase}">
+                    <ControlTemplate.Resources>
+                        <DropShadowEffect x:Key="ButtonOverEffect" ShadowDepth="2" Color="LightGray" Opacity="0.75" Direction="285" BlurRadius="4" />
+                        <local:BooleanToObjectConverter x:Key="VcButtonOverEffect" TrueValue="{StaticResource ButtonOverEffect}"/>
+                    </ControlTemplate.Resources>
+
+                    <Grid>
+                        <Rectangle Effect="{TemplateBinding IsMouseOver, Converter={StaticResource VcButtonOverEffect}}"
+                                   Fill="{TemplateBinding BorderBrush}"
+                                   SnapsToDevicePixels="True"/>
+                        <Border BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                Background="{TemplateBinding Background}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="DarkGray"/>
+                <Setter Property="Foreground" Value="DarkGray"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="BorderBrush" Value="DarkGray"/>
+                <Setter Property="Background" Value="DarkGray"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Trigger>
+            <Trigger Property="ToggleButton.IsChecked" Value="True">
+                <Setter Property="BorderBrush" Value="DarkGray"/>
+                <Setter Property="Background" Value="DarkGray"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="BorderBrush" Value="LightGray"/>
+                <Setter Property="Foreground" Value="LightGray"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="RoundButton" TargetType="{x:Type ButtonBase}">
@@ -25,7 +89,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ButtonBase}">
                     <ControlTemplate.Resources>
-                        <DropShadowEffect x:Key="ButtonOverEffect" ShadowDepth="2" Color="DarkGray" Opacity="0.75" Direction="285" BlurRadius="4" />
+                        <DropShadowEffect x:Key="ButtonOverEffect" ShadowDepth="2" Color="LightGray" Opacity="0.75" Direction="285" BlurRadius="4" />
                         <local:BooleanToObjectConverter x:Key="VcButtonOverEffect" TrueValue="{StaticResource ButtonOverEffect}"/>
                     </ControlTemplate.Resources>
 
@@ -58,8 +122,8 @@
                 <Setter Property="Foreground" Value="White"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="BorderBrush" Value="Gray"/>
-                <Setter Property="Foreground" Value="Gray"/>
+                <Setter Property="BorderBrush" Value="LightGray"/>
+                <Setter Property="Foreground" Value="LightGray"/>
             </Trigger>
         </Style.Triggers>
     </Style>

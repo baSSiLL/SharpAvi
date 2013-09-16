@@ -19,7 +19,7 @@ namespace SharpAvi.Sample
         private readonly Thread thread;
         private readonly ManualResetEvent stopThread = new ManualResetEvent(false);
 
-        public Recorder(string fileName)
+        public Recorder(string fileName, FourCC codec, int quality)
         {
             screenWidth = (int)SystemParameters.PrimaryScreenWidth;
             screenHeight = (int)SystemParameters.PrimaryScreenHeight;
@@ -31,7 +31,7 @@ namespace SharpAvi.Sample
             };
 
             // Create video encoder
-            encoder = new MotionJpegVideoEncoderWpf(screenWidth, screenHeight, 70);
+            encoder = CreateEncoder(codec, quality);
 
             // Create video stream, wrapping it for encoding and asynchronous operations
             stream = writer.AddVideoStream().WithEncoder(encoder).Async();
@@ -47,6 +47,29 @@ namespace SharpAvi.Sample
                 IsBackground = true
             };
             thread.Start();
+        }
+
+        private IVideoEncoder CreateEncoder(FourCC codec, int quality)
+        {
+            // Select encoder type based on FOURCC of codec
+            if (codec == KnownFourCCs.Codecs.Uncompressed)
+            {
+                return new RgbVideoEncoder(screenWidth, screenHeight);
+            }
+            else if (codec == KnownFourCCs.Codecs.MotionJpeg)
+            {
+                return new MotionJpegVideoEncoderWpf(screenWidth, screenHeight, quality);
+            }
+            else
+            {
+                // It seems that all tested MPEG-4 VfW codecs ignore the quality affecting parameters passed through VfW API
+                // They only respect the settings from their own configuration dialogs, and Mpeg4VideoEncoder currently has no support for this
+                
+                // Most of VfW codecs expect single-threaded use, so we wrap this encoder to special wrapper
+                // Thus all calls to the encoder (including its instantiation) will be invoked on a single thread although encoding (and writing) is performed asynchronously
+                return new SingleThreadedVideoEncoderWrapper(
+                    () => new Mpeg4VideoEncoder(screenWidth, screenHeight, (double)writer.FramesPerSecond, 0, quality, codec));
+            }
         }
 
         public void Dispose()

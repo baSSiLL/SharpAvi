@@ -8,6 +8,14 @@
         WindowStartupLocation="CenterScreen" Topmost="True" 
         Background="Transparent">
     
+    <Window.Opacity>
+        <Binding Path="IsActive" RelativeSource="{RelativeSource Self}">
+            <Binding.Converter>
+                <local:BooleanToObjectConverter FalseValue="0.5" TrueValue="1"/>
+            </Binding.Converter>
+        </Binding>
+    </Window.Opacity>
+    
     <Window.Resources>
         <ResourceDictionary Source="Styles.xaml"/>
     </Window.Resources>
@@ -75,7 +83,9 @@
             
             <Button Margin="7,0,0,0"
                     Style="{StaticResource RoundButton}"
-                    ToolTip="Settings">
+                    ToolTip="Settings"
+                    Click="Settings_Click"
+                    IsEnabled="{Binding IsRecording, Converter={StaticResource VcBoolInv}}">
                 <Path Style="{StaticResource RoundButtonGlyph}">
                     <Path.Data>
                         <GeometryGroup>
