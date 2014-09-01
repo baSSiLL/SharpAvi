@@ -48,6 +48,7 @@ namespace SharpAvi.Codecs
             dispatcherCreated.WaitOne();
             this.dispatcher = Dispatcher.FromThread(thread);
 
+            // TODO: Create encoder on the first frame
             this.encoder = (IVideoEncoder)dispatcher.Invoke(encoderFactory);
             if (encoder == null)
                 throw new InvalidOperationException("Encoder factory has created no instance.");
