@@ -3,24 +3,20 @@ using System.Diagnostics.Contracts;
 
 namespace SharpAvi.Output
 {
-    internal class AviVideoStream : IAviVideoStream, IAviStreamInternal
+    internal class AviVideoStream : AviStreamBase, IAviVideoStream
     {
-        private bool isFrozen;
-        private readonly int index;
         private readonly IAviStreamDataHandler dataHandler;
-        private string name;
         private FourCC streamCodec = KnownFourCCs.Codecs.Uncompressed;
         private int width;
         private int height;
         private BitsPerPixel bitsPerPixel = BitsPerPixel.Bpp24;
-        private FourCC chunkId;
 
         public AviVideoStream(int index, IAviStreamDataHandler dataHandler)
+            : base(index)
         {
             Contract.Requires(index >= 0);
             Contract.Requires(dataHandler != null);
 
-            this.index = index;
             this.dataHandler = dataHandler;
         }
 
@@ -57,31 +53,6 @@ namespace SharpAvi.Output
             }
         }
 
-        public void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
-        {
-            dataHandler.WriteVideoFrame(this, isKeyFrame, frameData, startIndex, count);
-        }
-        
-        #endregion
-
-
-        #region IAviStream implementation
-
-        public int Index
-        {
-            get { return index; }
-        }
-
-        public string Name
-        {
-            get { return name; }
-            set
-            {
-                CheckNotFrozen();
-                name = value;
-            }
-        }
-
         public FourCC Codec
         {
             get { return streamCodec; }
@@ -92,32 +63,25 @@ namespace SharpAvi.Output
             }
         }
 
+        public void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
+        {
+            dataHandler.WriteVideoFrame(this, isKeyFrame, frameData, startIndex, count);
+        }
+        
         #endregion
 
 
-        #region IAviStreamInternal implementation
-
-        public FourCC StreamType
+        public override FourCC StreamType
         {
             get { return KnownFourCCs.StreamTypes.Video; }
         }
 
-        public FourCC ChunkId
+        protected override FourCC GenerateChunkId()
         {
-            get { return chunkId; }
+            return KnownFourCCs.Chunks.VideoFrame(Index, Codec != KnownFourCCs.Codecs.Uncompressed);
         }
 
-        public void Freeze()
-        {
-            if (!isFrozen)
-            {
-                isFrozen = true;
-
-                chunkId = KnownFourCCs.Chunks.VideoFrame(Index, Codec != KnownFourCCs.Codecs.Uncompressed);
-            }
-        }
-
-        public void WriteFormat(System.IO.BinaryWriter writer)
+        public override void WriteFormat(System.IO.BinaryWriter writer)
         {
             // See BITMAPINFOHEADER structure
             writer.Write(40U); // size of structure
@@ -131,17 +95,6 @@ namespace SharpAvi.Output
             writer.Write(0); // Y pixels per meter
             writer.Write(0U); // palette colors used
             writer.Write(0U); // palette colors important
-        }
-
-        #endregion
-
-
-        private void CheckNotFrozen()
-        {
-            if (isFrozen)
-            {
-                throw new InvalidOperationException("No stream information can be changed after starting to write frames.");
-            }
         }
     }
 }

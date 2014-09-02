@@ -61,7 +61,7 @@ namespace SharpAvi.Output
             get { return encoder.Codec; }
         }
 
-        FourCC IAviStream.Codec
+        FourCC IAviVideoStream.Codec
         {
             get { return Codec; }
             set

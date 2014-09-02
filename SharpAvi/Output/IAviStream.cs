@@ -17,11 +17,6 @@ namespace SharpAvi.Output
         /// <summary>Name of the stream.</summary>
         /// <remarks>May be used by some players when displaying the list of available streams.</remarks>
         string Name { get; set; }
-
-        /// <summary>
-        /// ID of the codec used to encode the stream contents.
-        /// </summary>
-        FourCC Codec { get; set; }
     }
 
 
@@ -40,17 +35,6 @@ namespace SharpAvi.Output
             }
 
             public string Name
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                }
-            }
-
-            public FourCC Codec
             {
                 get
                 {

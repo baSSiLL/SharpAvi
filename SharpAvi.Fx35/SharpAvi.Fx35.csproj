@@ -40,6 +40,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Compile Include="..\SharpAvi\AudioFormats.cs">
+      <Link>AudioFormats.cs</Link>
+    </Compile>
     <Compile Include="..\SharpAvi\AviUtils.cs">
       <Link>AviUtils.cs</Link>
     </Compile>
@@ -85,6 +88,12 @@
     <Compile Include="..\SharpAvi\Output\AsyncVideoStreamWrapper.cs">
       <Link>Output\AsyncVideoStreamWrapper.cs</Link>
     </Compile>
+    <Compile Include="..\SharpAvi\Output\AviAudioStream.cs">
+      <Link>Output\AviAudioStream.cs</Link>
+    </Compile>
+    <Compile Include="..\SharpAvi\Output\AviStreamBase.cs">
+      <Link>Output\AviStreamBase.cs</Link>
+    </Compile>
     <Compile Include="..\SharpAvi\Output\AviStreamExtensions.cs">
       <Link>Output\AviStreamExtensions.cs</Link>
     </Compile>
@@ -99,6 +108,9 @@
     </Compile>
     <Compile Include="..\SharpAvi\Output\EncodingVideoStreamWrapper.cs">
       <Link>Output\EncodingVideoStreamWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\SharpAvi\Output\IAviAudioStream.cs">
+      <Link>Output\IAviAudioStream.cs</Link>
     </Compile>
     <Compile Include="..\SharpAvi\Output\IAviStream.cs">
       <Link>Output\IAviStream.cs</Link>

@@ -23,6 +23,11 @@ namespace SharpAvi.Output
         /// </summary>
         BitsPerPixel BitsPerPixel { get; set; }
 
+        /// <summary>
+        /// ID of the codec used to encode the stream contents.
+        /// </summary>
+        FourCC Codec { get; set; }
+
         /// <summary>Writes a frame to the stream.</summary>
         /// <param name="isKeyFrame">Is this frame a key frame?</param>
         /// <param name="frameData">Array containing the frame data.</param>
@@ -75,6 +80,17 @@ namespace SharpAvi.Output
                 }
             }
 
+            public FourCC Codec
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                }
+            }
+
             public void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
             {
                 Contract.Requires(frameData != null);
@@ -102,17 +118,6 @@ namespace SharpAvi.Output
             public FourCC StreamType
             {
                 get { throw new NotImplementedException(); }
-            }
-
-            public FourCC Codec
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                }
             }
         }
     }

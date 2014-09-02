@@ -76,10 +76,30 @@ namespace SharpAvi.Output
             get { return streamsRO; }
         }
 
-        /// <summary>Adds a new video stream.</summary>
+        /// <summary>Adds new video stream.</summary>
         /// <returns>Newly added video stream.</returns>
         public IAviVideoStream AddVideoStream()
         {
+            Contract.Requires(Streams.Count < 100);
+            Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
+
+            return AddStream<IAviVideoStream>(index => new AviVideoStream(index, this));
+        }
+
+        /// <summary>Adds new audio stream.</summary>
+        /// <returns>Newly added audio stream.</returns>
+        public IAviAudioStream AddAudioStream()
+        {
+            Contract.Requires(Streams.Count < 100);
+            Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
+
+            return AddStream<IAviAudioStream>(index => new AviAudioStream(index));
+        }
+
+        private TStream AddStream<TStream>(Func<int, TStream> streamFactory)
+            where TStream : IAviStream
+        {
+            Contract.Requires(streamFactory != null);
             Contract.Requires(Streams.Count < 100);
 
             lock (syncWrite)
@@ -87,7 +107,7 @@ namespace SharpAvi.Output
                 CheckNotClosed();
                 CheckNotStartedWriting();
 
-                var stream = new AviVideoStream(streams.Count, this);
+                var stream = streamFactory.Invoke(streams.Count);
                 streams.Add(stream);
                 return stream;
             }
@@ -300,10 +320,11 @@ namespace SharpAvi.Output
 
         private void WriteStreamHeader(IAviStream stream)
         {
+            var videoStream = stream as IAviVideoStream;
             // See AVISTREAMHEADER structure
             var chunk = fileWriter.OpenChunk(KnownFourCCs.Chunks.StreamHeader);
             fileWriter.Write((uint)((IAviStreamInternal)stream).StreamType);
-            fileWriter.Write((uint)stream.Codec);
+            fileWriter.Write(videoStream != null ? (uint)videoStream.Codec : 0U);
             fileWriter.Write(0U); // StreamHeaderFlags
             fileWriter.Write((ushort)0); // priority
             fileWriter.Write((ushort)0); // language
@@ -317,7 +338,6 @@ namespace SharpAvi.Output
             fileWriter.Write(0U); // sample size
             fileWriter.Write((short)0); // rectangle left
             fileWriter.Write((short)0); // rectangle top
-            var videoStream = stream as IAviVideoStream;
             short right = (short)(videoStream != null ? videoStream.Width : 0);
             short bottom = (short)(videoStream != null ? videoStream.Height : 0);
             fileWriter.Write(right); // rectangle right
