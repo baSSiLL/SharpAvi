@@ -4,6 +4,7 @@ using System;
 using System.Windows.Interop;
 using System.Collections.Generic;
 using SharpAvi.Codecs;
+using NAudio.Wave;
 
 namespace SharpAvi.Sample
 {
@@ -18,6 +19,8 @@ namespace SharpAvi.Sample
 
             InitAvailableCodecs();
 
+            InitAvailableAudioSources();
+
             DataContext = this;
 
             WindowMoveBehavior.Attach(this);
@@ -30,6 +33,22 @@ namespace SharpAvi.Sample
             codecs.Add(new CodecInfo(KnownFourCCs.Codecs.MotionJpeg, "Motion JPEG"));
             codecs.AddRange(Mpeg4VideoEncoder.GetAvailableCodecs());
             AvailableCodecs = codecs;
+        }
+
+        private void InitAvailableAudioSources()
+        {
+            var deviceList = new Dictionary<int, string>();
+            deviceList.Add(-1, "(no sound)");
+            for (var i = 0; i < WaveInEvent.DeviceCount; i++)
+            {
+                var caps = WaveInEvent.GetCapabilities(i);
+                if (caps.SupportsWaveFormat(AudioWaveFormat))
+                {
+                    deviceList.Add(i, caps.ProductName);
+                }
+            }
+            AvailableAudioSources = deviceList;
+            SelectedAudioSourceIndex = -1;
         }
 
 
@@ -60,6 +79,21 @@ namespace SharpAvi.Sample
             set { SetValue(QualityProperty, value); }
         }
 
+        public static readonly DependencyProperty SelectedAudioSourceIndexProperty =
+            DependencyProperty.Register("SelectedAudioSourceIndex", typeof(int), typeof(SettingsWindow));
+
+        public int SelectedAudioSourceIndex
+        {
+            get { return (int)GetValue(SelectedAudioSourceIndexProperty); }
+            set { SetValue(SelectedAudioSourceIndexProperty, value); }
+        }
+
+        public SupportedWaveFormat AudioWaveFormat
+        {
+            // TODO: Make wave format adjustable
+            get { return SupportedWaveFormat.WAVE_FORMAT_44M16; }
+        }
+
         public static readonly DependencyProperty MinimizeOnStartProperty =
             DependencyProperty.Register("MinimizeOnStart", typeof(bool), typeof(SettingsWindow));
 
@@ -70,6 +104,12 @@ namespace SharpAvi.Sample
         }
 
         public IEnumerable<CodecInfo> AvailableCodecs
+        {
+            get;
+            private set;
+        }
+
+        public IEnumerable<KeyValuePair<int, string>> AvailableAudioSources
         {
             get;
             private set;

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
+using NAudio.Wave;
 using SharpAvi.Codecs;
 using SharpAvi.Output;
 
@@ -15,11 +17,15 @@ namespace SharpAvi.Sample
         private readonly int screenHeight;
         private readonly AviWriter writer;
         private readonly IVideoEncoder encoder;
-        private readonly AsyncVideoStreamWrapper stream;
-        private readonly Thread thread;
+        private readonly AsyncVideoStreamWrapper videoStream;
+        private readonly IAviAudioStream audioStream;
+        private readonly WaveInEvent audioSource;
+        private readonly Thread screenThread;
         private readonly ManualResetEvent stopThread = new ManualResetEvent(false);
 
-        public Recorder(string fileName, FourCC codec, int quality)
+        public Recorder(string fileName, 
+            FourCC codec, int quality, 
+            int audioSourceIndex, SupportedWaveFormat audioWaveFormat)
         {
             screenWidth = (int)SystemParameters.PrimaryScreenWidth;
             screenHeight = (int)SystemParameters.PrimaryScreenHeight;
@@ -34,19 +40,43 @@ namespace SharpAvi.Sample
             encoder = CreateEncoder(codec, quality);
 
             // Create video stream, wrapping it for encoding and asynchronous operations
-            stream = writer.AddVideoStream().WithEncoder(encoder).Async();
+            videoStream = writer.AddVideoStream().WithEncoder(encoder).Async();
 
             // Set video stream parameters (BitsPerPixel and Codec are internally set by the encoder used)
-            stream.Name = "Screencast";
-            stream.Width = screenWidth;
-            stream.Height = screenHeight;
+            videoStream.Name = "Screencast";
+            videoStream.Width = screenWidth;
+            videoStream.Height = screenHeight;
 
-            thread = new Thread(Record)
+            if (audioSourceIndex >= 0)
             {
-                Name = typeof(Recorder).Name + ".Record",
+                var waveFormat = CreateWaveFormat(audioWaveFormat);
+
+                audioStream = writer.AddAudioStream();
+                audioStream.Format = AudioFormats.Pcm;
+                audioStream.ChannelCount = waveFormat.Channels;
+                audioStream.SamplesPerSecond = waveFormat.SampleRate;
+                audioStream.BitsPerSample = waveFormat.BitsPerSample;
+
+                audioSource = new WaveInEvent
+                {
+                    DeviceNumber = audioSourceIndex,
+                    WaveFormat = waveFormat,
+                    BufferMilliseconds = (int)Math.Ceiling(1000 / writer.FramesPerSecond),
+                };
+                audioSource.DataAvailable += audioSource_DataAvailable;
+            }
+
+            screenThread = new Thread(RecordScreen)
+            {
+                Name = typeof(Recorder).Name + ".RecordScreen",
                 IsBackground = true
             };
-            thread.Start();
+
+            screenThread.Start();
+            if (audioSource != null)
+            {
+                audioSource.StartRecording();
+            }
         }
 
         private IVideoEncoder CreateEncoder(FourCC codec, int quality)
@@ -72,10 +102,29 @@ namespace SharpAvi.Sample
             }
         }
 
+        private static WaveFormat CreateWaveFormat(SupportedWaveFormat waveFormat)
+        {
+            switch (waveFormat)
+            {
+                case SupportedWaveFormat.WAVE_FORMAT_44M16:
+                    return new WaveFormat(44100, 16, 1);
+                default:
+                    throw new NotSupportedException("Wave formats other than '16-bit Mono 44.1kHz' are not currently supported.");
+            }
+        }
+
         public void Dispose()
         {
+            if (audioSource != null)
+            {
+                audioSource.StopRecording();
+            }
             stopThread.Set();
-            thread.Join();
+            screenThread.Join();
+            if (audioSource != null)
+            {
+                audioSource.DataAvailable -= audioSource_DataAvailable;
+            }
 
             // Close writer: the remaining data is written to a file and file is closed
             writer.Close();
@@ -88,7 +137,7 @@ namespace SharpAvi.Sample
             }
         }
 
-        private void Record()
+        private void RecordScreen()
         {
             var frameInterval = TimeSpan.FromSeconds(1 / (double)writer.FramesPerSecond);
             var buffer = new byte[screenWidth * screenHeight * 4];
@@ -103,11 +152,11 @@ namespace SharpAvi.Sample
                 // Wait for the previous frame is written
                 if (!isFirstFrame)
                 {
-                    stream.EndWriteFrame();
+                    videoStream.EndWriteFrame();
                 }
 
                 // Start asynchronous (encoding and) writing of the new frame
-                stream.BeginWriteFrame(true, buffer, 0, buffer.Length);
+                videoStream.BeginWriteFrame(true, buffer, 0, buffer.Length);
 
                 timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
                 if (timeTillNextFrame < TimeSpan.Zero)
@@ -119,7 +168,7 @@ namespace SharpAvi.Sample
             // Wait for the last frame is written
             if (!isFirstFrame)
             {
-                stream.EndWriteFrame();
+                videoStream.EndWriteFrame();
             }
         }
 
@@ -136,6 +185,11 @@ namespace SharpAvi.Sample
                 // Should also capture the mouse cursor here, but skipping for simplicity
                 // For those who are interested, look at http://www.codeproject.com/Articles/12850/Capturing-the-Desktop-Screen-with-the-Mouse-Cursor
             }
+        }
+
+        private void audioSource_DataAvailable(object sender, WaveInEventArgs e)
+        {
+            audioStream.WriteBlock(e.Buffer, 0, e.BytesRecorded);
         }
     }
 }

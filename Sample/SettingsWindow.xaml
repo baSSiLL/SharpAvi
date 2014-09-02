@@ -6,7 +6,11 @@
         WindowStyle="None" AllowsTransparency="True" Background="White">
     
     <Window.Resources>
-        <ResourceDictionary Source="Styles.xaml"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
     
     <Border BorderBrush="DarkGray" BorderThickness="2"
@@ -25,56 +29,79 @@
                 <Button Content="Cancel" IsCancel="True"
                         Margin="7,0,0,0"/>
             </StackPanel>
-            <Grid Margin="7,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="7"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition MinHeight="7" Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="7"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                
-                <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Folder</Label>
-                <DockPanel Grid.Row="0" Grid.Column="1">
-                    <Button DockPanel.Dock="Right" MinWidth="0"
-                            Click="BrowseFolder_Click">
-                        ...
-                    </Button>
-                    <TextBox IsReadOnly="True"
-                             Text="{Binding Folder, Mode=OneWay}"/>
-                </DockPanel>
+            <StackPanel Orientation="Vertical"
+                        Margin="7,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right">Encoder</Label>
-                <ComboBox Grid.Row="2" Grid.Column="1"
-                          ItemsSource="{Binding AvailableCodecs}"
-                          SelectedValuePath="Codec"
-                          DisplayMemberPath="Name"
-                          SelectedValue="{Binding Encoder, Mode=TwoWay}"/>
-                <TextBlock Grid.Row="3" Grid.Column="1"
-                           TextWrapping="Wrap" Foreground="DarkGray" Margin="0,0,0,7"
-                           Visibility="{Binding Is64BitProcess, Mode=OneTime, Converter={StaticResource VcBool2Vis}}">
-                    Switch target platform to 'x86' to use 32-bit VfW codecs.
-                </TextBlock>
-                
-                <Label Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right">Quality</Label>
-                <Slider Grid.Row="4" Grid.Column="1" Orientation="Horizontal" 
-                        Minimum="1" Maximum="100" LargeChange="10" SmallChange="1"
-                        IsSnapToTickEnabled="True" TickFrequency="1"
-                        AutoToolTipPrecision="0" AutoToolTipPlacement="TopLeft"
-                        Value="{Binding Quality, Mode=TwoWay}"/>
+                    <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Folder</Label>
+                    <DockPanel Grid.Row="0" Grid.Column="1">
+                        <Button DockPanel.Dock="Right" MinWidth="0"
+                                Click="BrowseFolder_Click">
+                            ...
+                        </Button>
+                        <TextBox IsReadOnly="True"
+                                 Text="{Binding Folder, Mode=OneWay}"/>
+                    </DockPanel>
+                </Grid>
+                <Expander Margin="0,7,0,0"
+                          Header="Video">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" MinHeight="7"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <CheckBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
-                          Foreground="DarkGray"
-                          IsChecked="{Binding MinimizeOnStart, Mode=TwoWay}">
+                        <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Encoder</Label>
+                        <ComboBox Grid.Row="0" Grid.Column="1"
+                                  ItemsSource="{Binding AvailableCodecs}"
+                                  SelectedValuePath="Codec"
+                                  DisplayMemberPath="Name"
+                                  SelectedValue="{Binding Encoder, Mode=TwoWay}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                   TextWrapping="Wrap" Foreground="DarkGray" Margin="0,0,0,7"
+                                   Visibility="{Binding Is64BitProcess, Mode=OneTime, Converter={StaticResource VcBool2Vis}}">
+                            Switch target platform to 'x86' to use 32-bit VfW codecs.
+                        </TextBlock>
+
+                        <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right">Quality</Label>
+                        <Slider Grid.Row="2" Grid.Column="1" Orientation="Horizontal" 
+                                Minimum="1" Maximum="100" LargeChange="10" SmallChange="1"
+                                IsSnapToTickEnabled="True" TickFrequency="1"
+                                AutoToolTipPrecision="0" AutoToolTipPlacement="TopLeft"
+                                Value="{Binding Quality, Mode=TwoWay}"/>
+                    </Grid>
+                </Expander>
+                <Expander Margin="0,7,0,0"
+                          Header="Audio">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Source</Label>
+                        <ComboBox Grid.Row="0" Grid.Column="1"
+                                  ItemsSource="{Binding AvailableAudioSources}"
+                                  DisplayMemberPath="Value"
+                                  SelectedValuePath="Key"
+                                  SelectedValue="{Binding SelectedAudioSourceIndex, Mode=TwoWay}"/>
+                    </Grid>
+                </Expander>
+                <CheckBox Foreground="DarkGray"
+                          IsChecked="{Binding MinimizeOnStart, Mode=TwoWay}"
+                          Margin="0,7,0,0">
                     Minimize on capture start
                 </CheckBox>
-            </Grid>
+            </StackPanel>
         </DockPanel>
     </Border>
 </Window>

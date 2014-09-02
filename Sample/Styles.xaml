@@ -138,4 +138,9 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
+    <Style TargetType="{x:Type Expander}">
+        <Setter Property="BorderBrush" Value="LightGray"/>
+        <Setter Property="Padding" Value="7"/>
+    </Style>
 </ResourceDictionary>

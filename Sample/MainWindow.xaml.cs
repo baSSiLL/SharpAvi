@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using NAudio.Wave;
 
 namespace SharpAvi.Sample
 {
@@ -77,7 +78,7 @@ namespace SharpAvi.Sample
             recordingTimer.Change(1000, 1000);
 
             lastFileName = System.IO.Path.Combine(outputFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".avi");
-            recorder = new Recorder(lastFileName, encoder, encodingQuality);
+            recorder = new Recorder(lastFileName, encoder, encodingQuality, audioSourceIndex, audioWaveFormat);
         }
 
         private void StopRecording()
@@ -111,6 +112,8 @@ namespace SharpAvi.Sample
         private string outputFolder;
         private FourCC encoder;
         private int encodingQuality;
+        private int audioSourceIndex;
+        private SupportedWaveFormat audioWaveFormat;
         private bool minimizeOnStart;
 
         private void InitDefaultSettings()
@@ -120,6 +123,9 @@ namespace SharpAvi.Sample
 
             encoder = KnownFourCCs.Codecs.MotionJpeg;
             encodingQuality = 70;
+
+            audioSourceIndex = -1;
+            audioWaveFormat = SupportedWaveFormat.WAVE_FORMAT_44M16;
 
             minimizeOnStart = true;
         }
@@ -132,6 +138,7 @@ namespace SharpAvi.Sample
                 Folder = outputFolder,
                 Encoder = encoder,
                 Quality = encodingQuality,
+                SelectedAudioSourceIndex = audioSourceIndex,
                 MinimizeOnStart = minimizeOnStart
             };
             
@@ -140,6 +147,8 @@ namespace SharpAvi.Sample
                 outputFolder = dlg.Folder;
                 encoder = dlg.Encoder;
                 encodingQuality = dlg.Quality;
+                audioSourceIndex = dlg.SelectedAudioSourceIndex;
+                audioWaveFormat = dlg.AudioWaveFormat;
                 minimizeOnStart = dlg.MinimizeOnStart;
             }
         }
