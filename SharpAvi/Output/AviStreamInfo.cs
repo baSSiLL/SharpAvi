@@ -13,12 +13,15 @@ namespace SharpAvi.Output
         {
             this.standardIndexChunkId = standardIndexChunkId;
             FrameCount = 0;
-            MaxChunkSize = 0;
+            MaxChunkDataSize = 0;
+            TotalDataSize = 0;
         }
 
         public int FrameCount { get; private set; }
         
-        public int MaxChunkSize { get; private set; }
+        public int MaxChunkDataSize { get; private set; }
+
+        public long TotalDataSize { get; private set; }
 
         public IList<SuperIndexEntry> SuperIndex
         {
@@ -35,10 +38,11 @@ namespace SharpAvi.Output
             get { return standardIndexChunkId; }
         }
 
-        public void OnFrameWritten(int chunkSize)
+        public void OnFrameWritten(int chunkDataSize)
         {
             FrameCount++;
-            MaxChunkSize = Math.Max(MaxChunkSize, chunkSize);
+            MaxChunkDataSize = Math.Max(MaxChunkDataSize, chunkDataSize);
+            TotalDataSize += chunkDataSize;
         }
     }
 }

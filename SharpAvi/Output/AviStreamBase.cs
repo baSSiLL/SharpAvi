@@ -51,7 +51,9 @@ namespace SharpAvi.Output
             }
         }
 
-        public abstract void WriteFormat(BinaryWriter writer);
+        public abstract void WriteHeader();
+
+        public abstract void WriteFormat();
 
         public void Freeze()
         {

@@ -115,11 +115,11 @@
     <Compile Include="..\SharpAvi\Output\IAviStream.cs">
       <Link>Output\IAviStream.cs</Link>
     </Compile>
-    <Compile Include="..\SharpAvi\Output\IAviStreamDataHandler.cs">
-      <Link>Output\IAviStreamDataHandler.cs</Link>
-    </Compile>
     <Compile Include="..\SharpAvi\Output\IAviStreamInternal.cs">
       <Link>Output\IAviStreamInternal.cs</Link>
+    </Compile>
+    <Compile Include="..\SharpAvi\Output\IAviStreamWriteHandler.cs">
+      <Link>Output\IAviStreamWriteHandler.cs</Link>
     </Compile>
     <Compile Include="..\SharpAvi\Output\IAviVideoStream.cs">
       <Link>Output\IAviVideoStream.cs</Link>

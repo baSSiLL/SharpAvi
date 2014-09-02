@@ -145,7 +145,7 @@
     <Compile Include="Output\IAviAudioStream.cs" />
     <Compile Include="Output\IAviStreamInternal.cs" />
     <Compile Include="Output\IAviVideoStream.cs" />
-    <Compile Include="Output\IAviStreamDataHandler.cs" />
+    <Compile Include="Output\IAviStreamWriteHandler.cs" />
     <Compile Include="KnownFourCCs.cs" />
     <Compile Include="MainHeaderFlags.cs" />
     <Compile Include="Output\AviWriter.cs" />

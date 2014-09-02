@@ -9,6 +9,7 @@ namespace SharpAvi.Output
 {
     internal class AviAudioStream : AviStreamBase, IAviAudioStream
     {
+        private readonly IAviStreamWriteHandler writeHandler;
         private int channelCount = 1;
         private int samplesPerSecond = 44100;
         private int bitsPerSample = 8;
@@ -16,10 +17,13 @@ namespace SharpAvi.Output
         private byte[] formatData;
 
 
-        public AviAudioStream(int index)
+        public AviAudioStream(int index, IAviStreamWriteHandler writeHandler)
             : base(index)
         {
             Contract.Requires(index >= 0);
+            Contract.Requires(writeHandler != null);
+
+            this.writeHandler = writeHandler;
         }
 
         
@@ -75,6 +79,11 @@ namespace SharpAvi.Output
             }
         }
 
+        public void WriteBlock(byte[] buffer, int startIndex, int count)
+        {
+            writeHandler.WriteAudioBlock(this, buffer, startIndex, count);
+        }
+
         #endregion
 
 
@@ -88,34 +97,14 @@ namespace SharpAvi.Output
  	        return KnownFourCCs.Chunks.AudioData(Index);
         }
 
-        public override void WriteFormat(BinaryWriter writer)
+        public override void WriteHeader()
         {
-            // See WAVEFORMATEX structure
-            writer.Write(Format);
-            writer.Write((ushort)ChannelCount);
-            writer.Write(SamplesPerSecond);
-            if (Format == AudioFormats.Pcm)
-            {
-                var sampleByteSize = (ChannelCount * BitsPerSample) / 8;
-                var byteRate = sampleByteSize * SamplesPerSecond;
-                writer.Write((uint)byteRate);
-                writer.Write((ushort)sampleByteSize);
-                writer.Write((ushort)BitsPerSample);
-            }
-            else
-            {
-                // TODO: Get block size and byte rate info from format-specific strategy
-                throw new NotImplementedException("Support for audio formats other than PCM is not currently implemented.");
-            }
-            if (FormatSpecificData != null)
-            {
-                writer.Write((ushort)FormatSpecificData.Length);
-                writer.Write(FormatSpecificData);
-            }
-            else
-            {
-                writer.Write((ushort)0);
-            }
+            writeHandler.WriteStreamHeader(this);
+        }
+
+        public override void WriteFormat()
+        {
+            writeHandler.WriteStreamFormat(this);
         }
     }
 }

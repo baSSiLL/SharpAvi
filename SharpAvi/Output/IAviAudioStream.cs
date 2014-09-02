@@ -40,6 +40,19 @@ namespace SharpAvi.Output
         /// Extra data defined by a specific format which should be added to the stream header.
         /// </summary>
         byte[] FormatSpecificData { get; set; }
+
+        /// <summary>
+        /// Writes a block of audio data.
+        /// </summary>
+        /// <remarks>
+        /// Division of audio data into blocks may be arbitrary.
+        /// However, it is reasonable to write blocks of approximately the same duration
+        /// as a single video frame.
+        /// </remarks>
+        /// <param name="data">Data buffer.</param>
+        /// <param name="startIndex">Start index of data.</param>
+        /// <param name="length">Length of data.</param>
+        void WriteBlock(byte[] data, int startIndex, int length);
     }
 
     
@@ -107,6 +120,14 @@ namespace SharpAvi.Output
                 set
                 {
                 }
+            }
+
+            public void WriteBlock(byte[] data, int startIndex, int length)
+            {
+                Contract.Requires(data != null);
+                Contract.Requires(startIndex >= 0);
+                Contract.Requires(length >= 0);
+                Contract.Requires(startIndex + length <= data.Length);
             }
 
             public int Index

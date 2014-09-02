@@ -7,6 +7,7 @@ namespace SharpAvi.Output
         FourCC StreamType { get; }
         FourCC ChunkId { get; }
         void Freeze();
-        void WriteFormat(BinaryWriter writer);
+        void WriteHeader();
+        void WriteFormat();
     }
 }
