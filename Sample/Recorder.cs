@@ -22,6 +22,8 @@ namespace SharpAvi.Sample
         private readonly WaveInEvent audioSource;
         private readonly Thread screenThread;
         private readonly ManualResetEvent stopThread = new ManualResetEvent(false);
+        private readonly AutoResetEvent videoFrameReady = new AutoResetEvent(false);
+        private readonly AutoResetEvent audioBlockReady = new AutoResetEvent(false);
 
         public Recorder(string fileName, 
             FourCC codec, int quality, 
@@ -61,7 +63,9 @@ namespace SharpAvi.Sample
                 {
                     DeviceNumber = audioSourceIndex,
                     WaveFormat = waveFormat,
+                    // Buffer size to store duration of 1 frame
                     BufferMilliseconds = (int)Math.Ceiling(1000 / writer.FramesPerSecond),
+                    NumberOfBuffers = 3,
                 };
                 audioSource.DataAvailable += audioSource_DataAvailable;
             }
@@ -72,11 +76,17 @@ namespace SharpAvi.Sample
                 IsBackground = true
             };
 
-            screenThread.Start();
+            videoFrameReady.Reset();
             if (audioSource != null)
             {
+                audioBlockReady.Reset();
                 audioSource.StartRecording();
             }
+            else
+            {
+                audioBlockReady.Set();
+            }
+            screenThread.Start();
         }
 
         private IVideoEncoder CreateEncoder(FourCC codec, int quality)
@@ -115,14 +125,15 @@ namespace SharpAvi.Sample
 
         public void Dispose()
         {
-            if (audioSource != null)
-            {
-                audioSource.StopRecording();
-            }
             stopThread.Set();
             screenThread.Join();
             if (audioSource != null)
             {
+                while (audioStream.BlocksWritten < videoStream.FramesWritten)
+                {
+                    Thread.Yield();
+                }
+                audioSource.StopRecording();
                 audioSource.DataAvailable -= audioSource_DataAvailable;
             }
 
@@ -139,6 +150,9 @@ namespace SharpAvi.Sample
 
         private void RecordScreen()
         {
+            // Wait for the first audio block
+            audioBlockReady.WaitOne();
+
             var frameInterval = TimeSpan.FromSeconds(1 / (double)writer.FramesPerSecond);
             var buffer = new byte[screenWidth * screenHeight * 4];
             var isFirstFrame = true;
@@ -148,6 +162,7 @@ namespace SharpAvi.Sample
                 var timestamp = DateTime.Now;
 
                 GetScreenshot(buffer);
+                videoFrameReady.Set();
 
                 // Wait for the previous frame is written
                 if (!isFirstFrame)
@@ -189,7 +204,12 @@ namespace SharpAvi.Sample
 
         private void audioSource_DataAvailable(object sender, WaveInEventArgs e)
         {
-            audioStream.WriteBlock(e.Buffer, 0, e.BytesRecorded);
+            audioBlockReady.Set();
+            var finishing = stopThread.WaitOne(0) && videoStream.FramesWritten > audioStream.BlocksWritten;
+            if (finishing || videoFrameReady.WaitOne(TimeSpan.FromSeconds(0.5 / (double)writer.FramesPerSecond)))
+            {
+                audioStream.WriteBlock(e.Buffer, 0, e.BytesRecorded);
+            }
         }
     }
 }
