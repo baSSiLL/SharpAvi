@@ -34,6 +34,11 @@ namespace SharpAvi.Output
         /// <param name="startIndex">Index of the first byte of the frame data.</param>
         /// <param name="count">Length of the frame data.</param>
         void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count);
+
+        /// <summary>
+        /// Number of frames written.
+        /// </summary>
+        int FramesWritten { get; }
     }
 
     
@@ -97,6 +102,15 @@ namespace SharpAvi.Output
                 Contract.Requires(startIndex >= 0);
                 Contract.Requires(count >= 0);
                 Contract.Requires(startIndex + count <= frameData.Length);
+            }
+
+            public int FramesWritten
+            {
+                get
+                {
+                    Contract.Ensures(Contract.Result<int>() >= 0);
+                    throw new NotImplementedException();
+                }
             }
 
             public int Index

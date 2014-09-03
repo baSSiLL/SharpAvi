@@ -134,6 +134,11 @@ namespace SharpAvi.Output
             EndWriteFrame();
         }
 
+        public int FramesWritten
+        {
+            get { return stream.FramesWritten; }
+        }
+
         #endregion
 
 

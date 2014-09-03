@@ -53,6 +53,11 @@ namespace SharpAvi.Output
         /// <param name="startIndex">Start index of data.</param>
         /// <param name="length">Length of data.</param>
         void WriteBlock(byte[] data, int startIndex, int length);
+
+        /// <summary>
+        /// Number of blocks written.
+        /// </summary>
+        int BlocksWritten { get; }
     }
 
     
@@ -128,6 +133,15 @@ namespace SharpAvi.Output
                 Contract.Requires(startIndex >= 0);
                 Contract.Requires(length >= 0);
                 Contract.Requires(startIndex + length <= data.Length);
+            }
+
+            public int BlocksWritten
+            {
+                get 
+                {
+                    Contract.Ensures(Contract.Result<int>() >= 0);
+                    throw new NotImplementedException();
+                }
             }
 
             public int Index

@@ -24,6 +24,7 @@ namespace SharpAvi.Output
             Contract.Requires(writeHandler != null);
 
             this.writeHandler = writeHandler;
+            BlocksWritten = 0;
         }
 
         
@@ -82,6 +83,13 @@ namespace SharpAvi.Output
         public void WriteBlock(byte[] buffer, int startIndex, int count)
         {
             writeHandler.WriteAudioBlock(this, buffer, startIndex, count);
+            BlocksWritten++;
+        }
+
+        public int BlocksWritten
+        {
+            get;
+            private set;
         }
 
         #endregion

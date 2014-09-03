@@ -117,6 +117,11 @@ namespace SharpAvi.Output
             stream.WriteFrame(isKeyFrame, encodedBuffer, 0, count);
         }
 
+        public int FramesWritten
+        {
+            get { return stream.FramesWritten; }
+        }
+
         void IAviVideoStream.WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
             WriteFrame(frameData, startIndex);

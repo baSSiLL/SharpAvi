@@ -18,6 +18,7 @@ namespace SharpAvi.Output
             Contract.Requires(writeHandler != null);
 
             this.writeHandler = writeHandler;
+            FramesWritten = 0;
         }
 
 
@@ -66,6 +67,13 @@ namespace SharpAvi.Output
         public void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
             writeHandler.WriteVideoFrame(this, isKeyFrame, frameData, startIndex, count);
+            FramesWritten++;
+        }
+
+        public int FramesWritten
+        {
+            get;
+            private set;
         }
         
         #endregion

@@ -289,20 +289,20 @@ namespace SharpAvi.Output
 
         void IAviStreamWriteHandler.WriteStreamHeader(AviAudioStream audioStream)
         {
+            var sampleByteSize = (audioStream.ChannelCount * audioStream.BitsPerSample) / 8;
             // See AVISTREAMHEADER structure
             fileWriter.Write((uint)audioStream.StreamType);
             fileWriter.Write(0U); // no codec
             fileWriter.Write(0U); // StreamHeaderFlags
             fileWriter.Write((ushort)0); // priority
             fileWriter.Write((ushort)0); // language
-            fileWriter.Write(1U); // initial frames
+            fileWriter.Write(0U); // initial frames
             fileWriter.Write(1); // scale (sample rate denominator)
             fileWriter.Write(audioStream.SamplesPerSecond); // rate (sample rate numerator)
             fileWriter.Write(0U); // start
             fileWriter.Write((uint)streamsInfo[audioStream.Index].TotalDataSize); // length
-            fileWriter.Write((uint)streamsInfo[audioStream.Index].MaxChunkDataSize); // suggested buffer size
+            fileWriter.Write((uint)(sampleByteSize * audioStream.SamplesPerSecond / 2)); // suggested buffer size (half-second)
             fileWriter.Write(-1); // quality
-            var sampleByteSize = (audioStream.ChannelCount * audioStream.BitsPerSample) / 8;
             fileWriter.Write((uint)sampleByteSize); // sample size
             fileWriter.SkipBytes(sizeof(short) * 4);
         }
