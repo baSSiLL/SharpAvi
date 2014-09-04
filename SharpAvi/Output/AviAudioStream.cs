@@ -14,16 +14,29 @@ namespace SharpAvi.Output
         private int samplesPerSecond = 44100;
         private int bitsPerSample = 8;
         private short format = AudioFormats.Unknown;
+        private int bytesPerSecond = 44100;
+        private int granularity = 1;
         private byte[] formatData;
 
 
-        public AviAudioStream(int index, IAviStreamWriteHandler writeHandler)
+        public AviAudioStream(int index, IAviStreamWriteHandler writeHandler, 
+            int channelCount, int samplesPerSecond, int bitsPerSample)
             : base(index)
         {
             Contract.Requires(index >= 0);
             Contract.Requires(writeHandler != null);
 
             this.writeHandler = writeHandler;
+
+            this.format = AudioFormats.Pcm;
+            this.formatData = null;
+
+            this.channelCount = channelCount;
+            this.samplesPerSecond = samplesPerSecond;
+            this.bitsPerSample = bitsPerSample;
+            this.granularity = (bitsPerSample * channelCount + 7) / 8;
+            this.bytesPerSecond = granularity * samplesPerSecond;
+
             BlocksWritten = 0;
         }
 
@@ -67,6 +80,26 @@ namespace SharpAvi.Output
             {
                 CheckNotFrozen();
                 format = value;
+            }
+        }
+
+        public int BytesPerSecond 
+        {
+            get { return bytesPerSecond; }
+            set
+            {
+                CheckNotFrozen();
+                bytesPerSecond = value;
+            }
+        }
+
+        public int Granularity 
+        {
+            get { return granularity; }
+            set
+            {
+                CheckNotFrozen();
+                granularity = value;
             }
         }
 

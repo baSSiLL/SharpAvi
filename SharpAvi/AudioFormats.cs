@@ -5,6 +5,9 @@ using System.Text;
 
 namespace SharpAvi
 {
+    /// <summary>
+    /// Contains codes of some popular wave formats.
+    /// </summary>
     public static class AudioFormats
     {
         /// <summary>

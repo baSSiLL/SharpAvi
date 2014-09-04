@@ -23,7 +23,7 @@ namespace SharpAvi.Output
         int SamplesPerSecond { get; set; }
 
         /// <summary>
-        /// Number of bits per sample (usually 8 or 16).
+        /// Number of bits per sample per single channel (usually 8 or 16).
         /// </summary>
         int BitsPerSample { get; set; }
 
@@ -37,8 +37,25 @@ namespace SharpAvi.Output
         short Format { get; set; }
 
         /// <summary>
+        /// Average byte rate of the stream.
+        /// </summary>
+        int BytesPerSecond { get; set; }
+
+        /// <summary>
+        /// Size in bytes of minimum item of data in the stream.
+        /// </summary>
+        /// <remarks>
+        /// Corresponds to <c>nBlockAlign</c> field of <c>WAVEFORMATEX</c> structure.
+        /// </remarks>
+        int Granularity { get; set; }
+
+        /// <summary>
         /// Extra data defined by a specific format which should be added to the stream header.
         /// </summary>
+        /// <remarks>
+        /// Contains data of specific structure like <c>MPEGLAYER3WAVEFORMAT</c> that follow
+        /// common <c>WAVEFORMATEX</c> field.
+        /// </remarks>
         byte[] FormatSpecificData { get; set; }
 
         /// <summary>
@@ -113,6 +130,32 @@ namespace SharpAvi.Output
                 }
                 set
                 {
+                }
+            }
+
+            public int BytesPerSecond
+            {
+                get
+                {
+                    Contract.Ensures(Contract.Result<int>() > 0);
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    Contract.Requires(value > 0);
+                }
+            }
+
+            public int Granularity
+            {
+                get
+                {
+                    Contract.Ensures(Contract.Result<int>() > 0);
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    Contract.Requires(value > 0);
                 }
             }
 

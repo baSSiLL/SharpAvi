@@ -6,18 +6,26 @@ namespace SharpAvi.Output
     internal class AviVideoStream : AviStreamBase, IAviVideoStream
     {
         private readonly IAviStreamWriteHandler writeHandler;
-        private FourCC streamCodec = KnownFourCCs.Codecs.Uncompressed;
+        private FourCC streamCodec;
         private int width;
         private int height;
-        private BitsPerPixel bitsPerPixel = BitsPerPixel.Bpp24;
+        private BitsPerPixel bitsPerPixel;
 
-        public AviVideoStream(int index, IAviStreamWriteHandler writeHandler)
+        public AviVideoStream(int index, IAviStreamWriteHandler writeHandler, 
+            int width, int height, BitsPerPixel bitsPerPixel)
             : base(index)
         {
             Contract.Requires(index >= 0);
             Contract.Requires(writeHandler != null);
+            Contract.Requires(width > 0);
+            Contract.Requires(height > 0);
+            Contract.Requires(Enum.IsDefined(typeof(BitsPerPixel), bitsPerPixel));
 
             this.writeHandler = writeHandler;
+            this.width = width;
+            this.height = height;
+            this.bitsPerPixel = bitsPerPixel;
+            this.streamCodec = KnownFourCCs.Codecs.Uncompressed;
             FramesWritten = 0;
         }
 

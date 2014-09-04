@@ -42,22 +42,19 @@ namespace SharpAvi.Sample
             encoder = CreateEncoder(codec, quality);
 
             // Create video stream, wrapping it for encoding and asynchronous operations
-            videoStream = writer.AddVideoStream().WithEncoder(encoder).Async();
+            videoStream = writer.AddVideoStream(screenWidth, screenHeight).WithEncoder(encoder).Async();
 
-            // Set video stream parameters (BitsPerPixel and Codec are internally set by the encoder used)
+            // BitsPerPixel and Codec are internally set by the encoder used
             videoStream.Name = "Screencast";
-            videoStream.Width = screenWidth;
-            videoStream.Height = screenHeight;
 
             if (audioSourceIndex >= 0)
             {
                 var waveFormat = CreateWaveFormat(audioWaveFormat);
 
-                audioStream = writer.AddAudioStream();
-                audioStream.Format = AudioFormats.Pcm;
-                audioStream.ChannelCount = waveFormat.Channels;
-                audioStream.SamplesPerSecond = waveFormat.SampleRate;
-                audioStream.BitsPerSample = waveFormat.BitsPerSample;
+                audioStream = writer.AddAudioStream(
+                    channelCount: waveFormat.Channels, 
+                    samplesPerSecond: waveFormat.SampleRate, 
+                    bitsPerSample: waveFormat.BitsPerSample);
 
                 audioSource = new WaveInEvent
                 {

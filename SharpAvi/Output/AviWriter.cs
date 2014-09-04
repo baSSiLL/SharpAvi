@@ -51,6 +51,7 @@ namespace SharpAvi.Output
         /// <summary>Frame rate.</summary>
         /// <remarks>
         /// The value of the property is rounded to 3 fractional digits.
+        /// Default value is <c>1</c>.
         /// </remarks>
         public decimal FramesPerSecond
         {
@@ -77,23 +78,40 @@ namespace SharpAvi.Output
         }
 
         /// <summary>Adds new video stream.</summary>
+        /// <param name="width">Frame's width.</param>
+        /// <param name="height">Frame's height.</param>
+        /// <param name="bitsPerPixel">Bits per pixel.</param>
         /// <returns>Newly added video stream.</returns>
-        public IAviVideoStream AddVideoStream()
+        /// <remarks>
+        /// Stream is initialized to be ready for uncompressed video (BGR) with specified parameters.
+        /// All parameters can be changed later, before starting to write to the stream.
+        /// </remarks>
+        public IAviVideoStream AddVideoStream(int width = 1, int height = 1, BitsPerPixel bitsPerPixel = BitsPerPixel.Bpp32)
         {
+            Contract.Requires(width > 0);
+            Contract.Requires(height > 0);
+            Contract.Requires(Enum.IsDefined(typeof(BitsPerPixel), bitsPerPixel));
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
-            return AddStream<IAviVideoStream>(index => new AviVideoStream(index, this));
+            return AddStream<IAviVideoStream>(index => new AviVideoStream(index, this, width, height, bitsPerPixel));
         }
 
         /// <summary>Adds new audio stream.</summary>
         /// <returns>Newly added audio stream.</returns>
-        public IAviAudioStream AddAudioStream()
+        /// <remarks>
+        /// Stream is initialized to be ready for uncompressed audio (PCM) with specified parameters.
+        /// All parameters can be changed later, before starting to write to the stream.
+        /// </remarks>
+        public IAviAudioStream AddAudioStream(int channelCount = 1, int samplesPerSecond = 44100, int bitsPerSample = 16)
         {
+            Contract.Requires(channelCount > 0);
+            Contract.Requires(samplesPerSecond > 0);
+            Contract.Requires(bitsPerSample > 0 && (bitsPerSample % 8) == 0);
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
 
-            return AddStream<IAviAudioStream>(index => new AviAudioStream(index, this));
+            return AddStream<IAviAudioStream>(index => new AviAudioStream(index, this, channelCount, samplesPerSecond, bitsPerSample));
         }
 
         private TStream AddStream<TStream>(Func<int, TStream> streamFactory)
@@ -289,7 +307,6 @@ namespace SharpAvi.Output
 
         void IAviStreamWriteHandler.WriteStreamHeader(AviAudioStream audioStream)
         {
-            var sampleByteSize = (audioStream.ChannelCount * audioStream.BitsPerSample) / 8;
             // See AVISTREAMHEADER structure
             fileWriter.Write((uint)audioStream.StreamType);
             fileWriter.Write(0U); // no codec
@@ -297,13 +314,13 @@ namespace SharpAvi.Output
             fileWriter.Write((ushort)0); // priority
             fileWriter.Write((ushort)0); // language
             fileWriter.Write(0U); // initial frames
-            fileWriter.Write(1); // scale (sample rate denominator)
-            fileWriter.Write(audioStream.SamplesPerSecond); // rate (sample rate numerator)
+            fileWriter.Write((uint)audioStream.Granularity); // scale (sample rate denominator)
+            fileWriter.Write((uint)audioStream.BytesPerSecond); // rate (sample rate numerator)
             fileWriter.Write(0U); // start
             fileWriter.Write((uint)streamsInfo[audioStream.Index].TotalDataSize); // length
-            fileWriter.Write((uint)(sampleByteSize * audioStream.SamplesPerSecond / 2)); // suggested buffer size (half-second)
+            fileWriter.Write((uint)(audioStream.BytesPerSecond / 2)); // suggested buffer size (half-second)
             fileWriter.Write(-1); // quality
-            fileWriter.Write((uint)sampleByteSize); // sample size
+            fileWriter.Write(audioStream.Granularity); // sample size
             fileWriter.SkipBytes(sizeof(short) * 4);
         }
 
@@ -329,20 +346,10 @@ namespace SharpAvi.Output
             // See WAVEFORMATEX structure
             fileWriter.Write(audioStream.Format);
             fileWriter.Write((ushort)audioStream.ChannelCount);
-            fileWriter.Write(audioStream.SamplesPerSecond);
-            if (audioStream.Format == AudioFormats.Pcm)
-            {
-                var sampleByteSize = (audioStream.ChannelCount * audioStream.BitsPerSample) / 8;
-                var byteRate = sampleByteSize * audioStream.SamplesPerSecond;
-                fileWriter.Write((uint)byteRate);
-                fileWriter.Write((ushort)sampleByteSize);
-                fileWriter.Write((ushort)audioStream.BitsPerSample);
-            }
-            else
-            {
-                // TODO: Get block size and byte rate info from format-specific strategy
-                throw new NotImplementedException("Support for audio formats other than PCM is not currently implemented.");
-            }
+            fileWriter.Write((uint)audioStream.SamplesPerSecond);
+            fileWriter.Write((uint)audioStream.BytesPerSecond);
+            fileWriter.Write((ushort)audioStream.Granularity);
+            fileWriter.Write((ushort)audioStream.BitsPerSample);
             if (audioStream.FormatSpecificData != null)
             {
                 fileWriter.Write((ushort)audioStream.FormatSpecificData.Length);

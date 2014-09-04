@@ -51,12 +51,12 @@ namespace SharpAvi.Output
             {
                 get 
                 { 
-                    Contract.Ensures(Contract.Result<int>() >= 0);
+                    Contract.Ensures(Contract.Result<int>() > 0);
                     throw new NotImplementedException();
                 }
                 set
                 {
-                    Contract.Requires(value >= 0);
+                    Contract.Requires(value > 0);
                 }
             }
 
@@ -64,12 +64,12 @@ namespace SharpAvi.Output
             {
                 get
                 {
-                    Contract.Ensures(Contract.Result<int>() >= 0);
+                    Contract.Ensures(Contract.Result<int>() > 0);
                     throw new NotImplementedException();
                 }
                 set
                 {
-                    Contract.Requires(value >= 0);
+                    Contract.Requires(value > 0);
                 }
             }
 
