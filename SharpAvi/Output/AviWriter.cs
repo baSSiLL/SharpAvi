@@ -403,7 +403,7 @@ namespace SharpAvi.Output
             fileWriter.Write(riffAviFrameCount); // total frames (in the first RIFF list containing this header)
             fileWriter.Write(0U); // initial frames
             fileWriter.Write((uint)streams.Count); // stream count
-            fileWriter.Write(streamsInfo.Max(s => s.MaxChunkDataSize)); // suggested buffer size
+            fileWriter.Write(0U); // suggested buffer size
             var firstVideoStream = streams.OfType<IAviVideoStream>().First();
             fileWriter.Write(firstVideoStream.Width); // video width
             fileWriter.Write(firstVideoStream.Height); // video height

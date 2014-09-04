@@ -115,8 +115,10 @@ namespace SharpAvi.Sample
             {
                 case SupportedWaveFormat.WAVE_FORMAT_44M16:
                     return new WaveFormat(44100, 16, 1);
+                case SupportedWaveFormat.WAVE_FORMAT_44S16:
+                    return new WaveFormat(44100, 16, 2);
                 default:
-                    throw new NotSupportedException("Wave formats other than '16-bit Mono 44.1kHz' are not currently supported.");
+                    throw new NotSupportedException("Wave formats other than '16-bit 44.1kHz' are not currently supported.");
             }
         }
 

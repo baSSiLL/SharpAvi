@@ -1,10 +1,11 @@
-﻿using System.Windows;
-using System.Windows.Forms;
-using System;
-using System.Windows.Interop;
+﻿using System;
 using System.Collections.Generic;
-using SharpAvi.Codecs;
+using System.Linq;
+using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Interop;
 using NAudio.Wave;
+using SharpAvi.Codecs;
 
 namespace SharpAvi.Sample
 {
@@ -42,7 +43,7 @@ namespace SharpAvi.Sample
             for (var i = 0; i < WaveInEvent.DeviceCount; i++)
             {
                 var caps = WaveInEvent.GetCapabilities(i);
-                if (caps.SupportsWaveFormat(AudioWaveFormat))
+                if (audioFormats.All(caps.SupportsWaveFormat))
                 {
                     deviceList.Add(i, caps.ProductName);
                 }
@@ -88,10 +89,23 @@ namespace SharpAvi.Sample
             set { SetValue(SelectedAudioSourceIndexProperty, value); }
         }
 
+        public static readonly DependencyProperty UseStereoProperty =
+            DependencyProperty.Register("UseStereo", typeof(bool), typeof(SettingsWindow),
+                                        new PropertyMetadata(false));
+
+        public bool UseStereo
+        {
+            get { return (bool)GetValue(UseStereoProperty); }
+            set { SetValue(UseStereoProperty, value); }
+        }
+
         public SupportedWaveFormat AudioWaveFormat
         {
             // TODO: Make wave format adjustable
-            get { return SupportedWaveFormat.WAVE_FORMAT_44M16; }
+            get 
+            {
+                return UseStereo ? audioFormats[1] : audioFormats[0]; 
+            }
         }
 
         public static readonly DependencyProperty MinimizeOnStartProperty =
@@ -114,6 +128,16 @@ namespace SharpAvi.Sample
             get;
             private set;
         }
+
+        public IEnumerable<SupportedWaveFormat> AvailableAudioWaveFormats
+        {
+            get { return audioFormats; }
+        }
+        private readonly SupportedWaveFormat[] audioFormats = new[] 
+        { 
+            SupportedWaveFormat.WAVE_FORMAT_44M16, 
+            SupportedWaveFormat.WAVE_FORMAT_44S16 
+        };
 
         public bool Is64BitProcess
         {

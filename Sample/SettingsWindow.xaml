@@ -87,6 +87,11 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="7"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
 
                         <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Source</Label>
                         <ComboBox Grid.Row="0" Grid.Column="1"
@@ -94,6 +99,10 @@
                                   DisplayMemberPath="Value"
                                   SelectedValuePath="Key"
                                   SelectedValue="{Binding SelectedAudioSourceIndex, Mode=TwoWay}"/>
+                        
+                        <CheckBox Grid.Row="2" Grid.Column="2"
+                                  Content="Stereo"
+                                  IsChecked="{Binding UseStereo}"/>
                     </Grid>
                 </Expander>
                 <CheckBox Foreground="DarkGray"
