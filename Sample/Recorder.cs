@@ -125,10 +125,6 @@ namespace SharpAvi.Sample
             screenThread.Join();
             if (audioSource != null)
             {
-                while (audioStream.BlocksWritten < videoStream.FramesWritten)
-                {
-                    Thread.Yield();
-                }
                 audioSource.StopRecording();
                 audioSource.DataAvailable -= audioSource_DataAvailable;
             }
