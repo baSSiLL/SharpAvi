@@ -8,6 +8,7 @@ namespace SharpAvi.Output
         private readonly FourCC standardIndexChunkId;
         private readonly List<StandardIndexEntry> standardIndex = new List<StandardIndexEntry>();
         private readonly List<SuperIndexEntry> superIndex = new List<SuperIndexEntry>();
+        private readonly List<Index1Entry> index1 = new List<Index1Entry>();
 
         public StreamInfo(FourCC standardIndexChunkId)
         {
@@ -31,6 +32,11 @@ namespace SharpAvi.Output
         public IList<StandardIndexEntry> StandardIndex 
         {
             get { return standardIndex; }
+        }
+
+        public IList<Index1Entry> Index1
+        {
+            get { return index1; }
         }
 
         public FourCC StandardIndexChunkId

@@ -31,6 +31,9 @@ namespace SharpAvi
             /// <summary>Stream index.</summary>
             public static readonly FourCC StreamIndex = new FourCC("indx");
 
+            /// <summary>Index v1.</summary>
+            public static readonly FourCC Index1 = new FourCC("idx1");
+
             /// <summary>OpenDML header.</summary>
             public static readonly FourCC OpenDmlHeader = new FourCC("dmlh");
 

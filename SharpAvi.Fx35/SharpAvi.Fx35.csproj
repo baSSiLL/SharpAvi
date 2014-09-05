@@ -76,6 +76,9 @@
     <Compile Include="..\SharpAvi\FourCC.cs">
       <Link>FourCC.cs</Link>
     </Compile>
+    <Compile Include="..\SharpAvi\Index1Entry.cs">
+      <Link>Index1Entry.cs</Link>
+    </Compile>
     <Compile Include="..\SharpAvi\IndexType.cs">
       <Link>IndexType.cs</Link>
     </Compile>

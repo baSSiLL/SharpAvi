@@ -129,6 +129,7 @@
     <Compile Include="AudioFormats.cs" />
     <Compile Include="Codecs\CodecInfo.cs" />
     <Compile Include="Codecs\SingleThreadedVideoEncoderWrapper.cs" />
+    <Compile Include="Index1Entry.cs" />
     <Compile Include="IndexType.cs" />
     <Compile Include="AviUtils.cs" />
     <Compile Include="Output\AsyncVideoStreamWrapper.cs" />

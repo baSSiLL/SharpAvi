@@ -1,6 +1,6 @@
 ﻿namespace SharpAvi
 {
-    internal class SuperIndexEntry
+    internal sealed class SuperIndexEntry
     {
         public long ChunkOffset;
         public int ChunkSize;

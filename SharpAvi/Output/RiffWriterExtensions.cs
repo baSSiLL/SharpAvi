@@ -62,12 +62,19 @@ namespace SharpAvi.Output
             }
         }
 
+        private static readonly byte[] cleanBuffer = new byte[1024];
+
         public static void SkipBytes(this BinaryWriter writer, int count)
         {
             Contract.Requires(writer != null);
             Contract.Requires(count >= 0);
 
-            writer.BaseStream.Position += count;
+            while (count > 0)
+            {
+                var toWrite = Math.Min(count, cleanBuffer.Length);
+                writer.Write(cleanBuffer, 0, toWrite);
+                count -= toWrite;
+            }
         }
     }
 }

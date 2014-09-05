@@ -18,7 +18,8 @@ namespace SharpAvi.Output
     {
         private const int MAX_SUPER_INDEX_ENTRIES = 256;
         private const int MAX_INDEX_ENTRIES = 15000;
-        private const int RIFF_AVI_SIZE_TRESHOLD = 8 * 1024 * 1024;
+        private const int INDEX1_ENTRY_SIZE = 4 * sizeof(uint);
+        private const int RIFF_AVI_SIZE_TRESHOLD = 512 * 1024 * 1024;
         private const int RIFF_AVIX_SIZE_TRESHOLD = int.MaxValue - 1024 * 1024;
 
         private readonly BinaryWriter fileWriter;
@@ -26,11 +27,13 @@ namespace SharpAvi.Output
         private bool startedWriting = false;
         private readonly object syncWrite = new object();
 
+        private bool isFirstRiff = true;
         private RiffItem currentRiff;
         private RiffItem currentMovie;
         private RiffItem header;
         private int riffSizeTreshold;
         private int riffAviFrameCount = -1;
+        private int index1Count = 0;
 
         private readonly List<IAviStream> streams = new List<IAviStream>();
         private readonly ReadOnlyCollection<IAviStream> streamsRO;
@@ -70,6 +73,28 @@ namespace SharpAvi.Output
         private decimal framesPerSecond = 1;
         private uint frameRateNumerator;
         private uint frameRateDenominator;
+
+        /// <summary>
+        /// Whether to emit index used in AVI v1 format.
+        /// </summary>
+        /// <remarks>
+        /// By default, only index conformant to OpenDML AVI extensions (AVI v2) is emitted. 
+        /// Presence of v1 index may improve the compatibility of generated AVI files with certain software, 
+        /// especially when there are multiple streams.
+        /// </remarks>
+        public bool EmitIndex1
+        {
+            get { return emitIndex1; }
+            set
+            {
+                lock (syncWrite)
+                {
+                    CheckNotStartedWriting();
+                    emitIndex1 = value;
+                }
+            }
+        }
+        private bool emitIndex1;
 
         /// <summary>AVI streams that have been added so far.</summary>
         public ReadOnlyCollection<IAviStream> Streams
@@ -201,7 +226,12 @@ namespace SharpAvi.Output
 
         private void CreateNewRiffIfNeeded(int approximateSizeOfNextChunk)
         {
-            if (fileWriter.BaseStream.Position + approximateSizeOfNextChunk - currentRiff.ItemStart > riffSizeTreshold)
+            var estimatedSize = fileWriter.BaseStream.Position + approximateSizeOfNextChunk - currentRiff.ItemStart;
+            if (isFirstRiff && emitIndex1)
+            {
+                estimatedSize += RiffItem.ITEM_HEADER_SIZE + index1Count * INDEX1_ENTRY_SIZE;
+            }
+            if (estimatedSize > riffSizeTreshold)
             {
                 CloseCurrentRiff();
 
@@ -213,14 +243,20 @@ namespace SharpAvi.Output
         private void CloseCurrentRiff()
         {
             fileWriter.CloseItem(currentMovie);
-            fileWriter.CloseItem(currentRiff);
 
             // Several special actions for the first RIFF (AVI)
-            if (currentRiff.ItemStart == 0)
+            if (isFirstRiff)
             {
-                riffAviFrameCount = streamsInfo.Max(si => si.FrameCount);
+                riffAviFrameCount = streams.OfType<IAviVideoStream>().Max(s => streamsInfo[s.Index].FrameCount);
+                if (emitIndex1)
+                {
+                    WriteIndex1();
+                }
                 riffSizeTreshold = RIFF_AVIX_SIZE_TRESHOLD;
             }
+
+            fileWriter.CloseItem(currentRiff);
+            isFirstRiff = false;
         }
 
 
@@ -233,7 +269,7 @@ namespace SharpAvi.Output
 
         void IAviStreamWriteHandler.WriteAudioBlock(AviAudioStream stream, byte[] blockData, int startIndex, int count)
         {
-            WriteStreamFrame(stream, false, blockData, startIndex, count);
+            WriteStreamFrame(stream, true, blockData, startIndex, count);
         }
 
         private void WriteStreamFrame(AviStreamBase stream, bool isKeyFrame, byte[] frameData, int startIndex, int count)
@@ -258,7 +294,9 @@ namespace SharpAvi.Output
                     FlushStreamIndex(stream);
                 }
 
-                CreateNewRiffIfNeeded(count);
+                var shouldCreateIndex1Entry = emitIndex1 && isFirstRiff;
+
+                CreateNewRiffIfNeeded(count + (shouldCreateIndex1Entry ? INDEX1_ENTRY_SIZE : 0));
 
                 var chunk = fileWriter.OpenChunk(stream.ChunkId, count);
                 fileWriter.Write(frameData, startIndex, count);
@@ -278,6 +316,18 @@ namespace SharpAvi.Output
                     DataSize = dataSize
                 };
                 si.StandardIndex.Add(newEntry);
+
+                if (shouldCreateIndex1Entry)
+                {
+                    var index1Entry = new Index1Entry
+                    {
+                        IsKeyFrame = isKeyFrame,
+                        DataOffset = (uint)(chunk.ItemStart - currentMovie.DataStart),
+                        DataSize = dataSize
+                    };
+                    si.Index1.Add(index1Entry);
+                    index1Count++;
+                }
             }
         }
 
@@ -399,7 +449,12 @@ namespace SharpAvi.Output
             // TODO: More correct computation of byterate
             fileWriter.Write((uint)Decimal.Truncate(FramesPerSecond * streamsInfo.Sum(s => s.MaxChunkDataSize))); // max bytes per second
             fileWriter.Write(0U); // padding granularity
-            fileWriter.Write((uint)(MainHeaderFlags.IsInterleaved | MainHeaderFlags.TrustChunkType)); // MainHeaderFlags
+            var flags = MainHeaderFlags.IsInterleaved | MainHeaderFlags.TrustChunkType;
+            if (emitIndex1)
+            {
+                flags |= MainHeaderFlags.HasIndex;
+            }
+            fileWriter.Write((uint)flags); // MainHeaderFlags
             fileWriter.Write(riffAviFrameCount); // total frames (in the first RIFF list containing this header)
             fileWriter.Write(0U); // initial frames
             fileWriter.Write((uint)streams.Count); // stream count
@@ -415,7 +470,7 @@ namespace SharpAvi.Output
         {
             var list = fileWriter.OpenList(KnownFourCCs.Lists.OpenDml);
             var chunk = fileWriter.OpenChunk(KnownFourCCs.Chunks.OpenDmlHeader);
-            fileWriter.Write(streamsInfo.Max(s => s.FrameCount)); // total frames in file
+            fileWriter.Write(streams.OfType<IAviVideoStream>().Max(s => streamsInfo[s.Index].FrameCount)); // total frames in file
             fileWriter.SkipBytes(61 * sizeof(uint)); // reserved
             fileWriter.CloseItem(chunk);
             fileWriter.CloseItem(list);
@@ -485,6 +540,45 @@ namespace SharpAvi.Output
 
 
         #region Index
+
+        private void WriteIndex1()
+        {
+            var chunk = fileWriter.OpenChunk(KnownFourCCs.Chunks.Index1);
+
+            var indices = streamsInfo.Select((si, i) => new {si.Index1, ChunkId = (uint)((IAviStreamInternal)streams[i]).ChunkId}).
+                Where(a => a.Index1.Count > 0)
+                .ToList();
+            while (index1Count > 0)
+            {
+                var minOffset = indices[0].Index1[0].DataOffset;
+                var minIndex = 0;
+                for (var i = 1; i < indices.Count; i++)
+                {
+                    var offset = indices[i].Index1[0].DataOffset;
+                    if (offset < minOffset)
+                    {
+                        minOffset = offset;
+                        minIndex = i;
+                    }
+                }
+
+                var index = indices[minIndex];
+                fileWriter.Write(index.ChunkId);
+                fileWriter.Write(index.Index1[0].IsKeyFrame ? 0x00000010U : 0);
+                fileWriter.Write(index.Index1[0].DataOffset);
+                fileWriter.Write(index.Index1[0].DataSize);
+
+                index.Index1.RemoveAt(0);
+                if (index.Index1.Count == 0)
+                {
+                    indices.RemoveAt(minIndex);
+                }
+
+                index1Count--;
+            }
+
+            fileWriter.CloseItem(chunk);
+        }
 
         private bool ShouldFlushStreamIndex(IList<StandardIndexEntry> index)
         {
