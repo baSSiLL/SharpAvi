@@ -128,6 +128,7 @@
   <ItemGroup>
     <Compile Include="AudioFormats.cs" />
     <Compile Include="Codecs\CodecInfo.cs" />
+    <Compile Include="Codecs\IAudioEncoder.cs" />
     <Compile Include="Codecs\SingleThreadedVideoEncoderWrapper.cs" />
     <Compile Include="Index1Entry.cs" />
     <Compile Include="IndexType.cs" />
@@ -142,6 +143,7 @@
     <Compile Include="Codecs\MotionJpegVideoEncoderWpf.cs" />
     <Compile Include="Codecs\Mpeg4VideoEncoder.cs" />
     <Compile Include="Codecs\VfwApi.cs" />
+    <Compile Include="Output\EncodingAudioStreamWrapper.cs" />
     <Compile Include="Output\EncodingVideoStreamWrapper.cs" />
     <Compile Include="Output\IAviAudioStream.cs" />
     <Compile Include="Output\IAviStreamInternal.cs" />
