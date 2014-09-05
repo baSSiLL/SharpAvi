@@ -139,6 +139,7 @@ namespace SharpAvi.Sample
                 Encoder = encoder,
                 Quality = encodingQuality,
                 SelectedAudioSourceIndex = audioSourceIndex,
+                AudioWaveFormat = audioWaveFormat,
                 MinimizeOnStart = minimizeOnStart
             };
             

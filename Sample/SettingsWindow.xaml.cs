@@ -101,10 +101,14 @@ namespace SharpAvi.Sample
 
         public SupportedWaveFormat AudioWaveFormat
         {
-            // TODO: Make wave format adjustable
+            // TODO: Make wave format more adjustable
             get 
             {
                 return UseStereo ? audioFormats[1] : audioFormats[0]; 
+            }
+            set
+            {
+                UseStereo = (value == audioFormats[1]);
             }
         }
 

@@ -22,8 +22,8 @@ namespace SharpAvi.Sample
         private readonly WaveInEvent audioSource;
         private readonly Thread screenThread;
         private readonly ManualResetEvent stopThread = new ManualResetEvent(false);
-        private readonly AutoResetEvent videoFrameReady = new AutoResetEvent(false);
-        private readonly AutoResetEvent audioBlockReady = new AutoResetEvent(false);
+        private readonly AutoResetEvent videoFrameWritten = new AutoResetEvent(false);
+        private readonly AutoResetEvent audioBlockWritten = new AutoResetEvent(false);
 
         public Recorder(string fileName, 
             FourCC codec, int quality, 
@@ -35,7 +35,8 @@ namespace SharpAvi.Sample
             // Create AVI writer and specify FPS
             writer = new AviWriter(fileName)
             {
-                FramesPerSecond = 10
+                FramesPerSecond = 10,
+                EmitIndex1 = true,
             };
 
             // Create video encoder
@@ -73,15 +74,11 @@ namespace SharpAvi.Sample
                 IsBackground = true
             };
 
-            videoFrameReady.Reset();
             if (audioSource != null)
             {
-                audioBlockReady.Reset();
+                videoFrameWritten.Set();
+                audioBlockWritten.Reset();
                 audioSource.StartRecording();
-            }
-            else
-            {
-                audioBlockReady.Set();
             }
             screenThread.Start();
         }
@@ -149,9 +146,6 @@ namespace SharpAvi.Sample
 
         private void RecordScreen()
         {
-            // Wait for the first audio block
-            audioBlockReady.WaitOne();
-
             var frameInterval = TimeSpan.FromSeconds(1 / (double)writer.FramesPerSecond);
             var buffer = new byte[screenWidth * screenHeight * 4];
             var isFirstFrame = true;
@@ -161,12 +155,19 @@ namespace SharpAvi.Sample
                 var timestamp = DateTime.Now;
 
                 GetScreenshot(buffer);
-                videoFrameReady.Set();
 
                 // Wait for the previous frame is written
                 if (!isFirstFrame)
                 {
                     videoStream.EndWriteFrame();
+                    videoFrameWritten.Set();
+                }
+
+                if (audioStream != null)
+                {
+                    var signalled = WaitHandle.WaitAny(new WaitHandle[] {audioBlockWritten, stopThread});
+                    if (signalled == 1)
+                        break;
                 }
 
                 // Start asynchronous (encoding and) writing of the new frame
@@ -203,11 +204,11 @@ namespace SharpAvi.Sample
 
         private void audioSource_DataAvailable(object sender, WaveInEventArgs e)
         {
-            audioBlockReady.Set();
-            var finishing = stopThread.WaitOne(0) && videoStream.FramesWritten > audioStream.BlocksWritten;
-            if (finishing || videoFrameReady.WaitOne(TimeSpan.FromSeconds(0.5 / (double)writer.FramesPerSecond)))
+            var signalled = WaitHandle.WaitAny(new WaitHandle[] { videoFrameWritten, stopThread });
+            if (signalled == 0)
             {
                 audioStream.WriteBlock(e.Buffer, 0, e.BytesRecorded);
+                audioBlockWritten.Set();
             }
         }
     }
