@@ -120,6 +120,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Xaml" />
@@ -131,7 +132,7 @@
     <Compile Include="Codecs\IAudioEncoder.cs" />
     <Compile Include="Codecs\LameMp3AudioEncoder.cs" />
     <Compile Include="Codecs\LameMp3AudioEncoder.ILameFacade.cs" />
-    <Compile Include="Codecs\LameFacadeImpl.cs" />
+    <EmbeddedResource Include="Codecs\LameFacadeImpl.cs" />
     <Compile Include="Codecs\SingleThreadedVideoEncoderWrapper.cs" />
     <Compile Include="Index1Entry.cs" />
     <Compile Include="IndexType.cs" />

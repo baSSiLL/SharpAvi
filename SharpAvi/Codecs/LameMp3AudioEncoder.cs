@@ -3,9 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SharpAvi;
@@ -30,6 +33,87 @@ namespace SharpAvi.Codecs
         /// </remarks>
         public static readonly int[] SupportedBitRates = new[] { 64, 96, 128, 160, 192, 320 };
 
+
+        #region Loading LAME DLL
+
+        private static Type lameFacadeType;
+
+        /// <summary>
+        /// Sets the location of LAME DLL for using by this class.
+        /// </summary>
+        /// <remarks>
+        /// This method may be called before creating any instances of this class.
+        /// The LAME DLL should have the appropriate bitness (32/64), depending on the current process.
+        /// If it is not already loaded into the process, the method loads it automatically.
+        /// </remarks>
+        public static void SetLameDllLocation(string lameDllPath)
+        {
+            Contract.Requires(!string.IsNullOrEmpty(lameDllPath));
+
+            var libraryName = Path.GetFileName(lameDllPath);
+            if (!IsLibraryLoaded(libraryName))
+            {
+                var loadResult = LoadLibrary(lameDllPath);
+                if (loadResult == IntPtr.Zero)
+                {
+                    throw new DllNotFoundException(string.Format("Library '{0}' could not be loaded.", lameDllPath));
+                }
+            }
+
+            var facadeAsm = GenerateLameFacadeAssembly(libraryName);
+            lameFacadeType = facadeAsm.GetType(typeof(LameMp3AudioEncoder).Namespace + ".Runtime.LameFacadeImpl");
+        }
+
+        private static Assembly GenerateLameFacadeAssembly(string lameDllName)
+        {
+            var thisAsm = typeof(LameMp3AudioEncoder).Assembly;
+            var compiler = new Microsoft.CSharp.CSharpCodeProvider();
+            var compilerOptions = new System.CodeDom.Compiler.CompilerParameters()
+            {
+                 GenerateInMemory = true,
+                 GenerateExecutable = false,
+                 IncludeDebugInformation = false,
+                 CompilerOptions = "/optimize",
+                 ReferencedAssemblies = {"mscorlib.dll", thisAsm.Location}
+            };
+            var source = GetLameFacadeAssemblySource(lameDllName, thisAsm);
+            var compilerResult = compiler.CompileAssemblyFromSource(compilerOptions, source);
+            if (compilerResult.Errors.HasErrors)
+            {
+                throw new Exception("Could not generate LAME facade assembly.");
+            }
+            return compilerResult.CompiledAssembly;
+        }
+
+        private static string GetLameFacadeAssemblySource(string lameDllName, Assembly resourceAsm)
+        {
+            string source;
+            using (var sourceStream = resourceAsm.GetManifestResourceStream("SharpAvi.Codecs.LameFacadeImpl.cs"))
+            using (var sourceReader = new StreamReader(sourceStream))
+            {
+                source = sourceReader.ReadToEnd();
+                sourceReader.Close();
+            }
+
+            var lameDllNameLiteral = string.Format("\"{0}\"", lameDllName);
+            source = source.Replace("\"lame_enc.dll\"", lameDllNameLiteral);
+
+            return source;
+        }
+
+        private static bool IsLibraryLoaded(string libraryName)
+        {
+            var process = Process.GetCurrentProcess();
+            return process.Modules.Cast<ProcessModule>().
+                Any(m => string.Compare(m.ModuleName, libraryName, StringComparison.InvariantCultureIgnoreCase) == 0);
+        }
+
+        [DllImport("kernel32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto)]
+        private static extern IntPtr LoadLibrary(string fileName);
+
+        #endregion
+
+
         private const int SAMPLE_BYTE_SIZE = 2;
 
         private readonly ILameFacade lame;
@@ -51,8 +135,12 @@ namespace SharpAvi.Codecs
             Contract.Requires(sampleRate > 0);
             Contract.Requires(SupportedBitRates.Contains(outputBitRateKbps));
 
-            // TODO: Compile implementation in runtime to allow arbitrary name for LAME DLL
-            lame = new Runtime.LameFacadeImpl();
+            if (lameFacadeType == null)
+            {
+                throw new InvalidOperationException("LAME DLL is not loaded. Call SetLameDllLocation first.");
+            }
+
+            lame = (ILameFacade)Activator.CreateInstance(lameFacadeType);
             lame.ChannelCount = channelCount;
             lame.InputSampleRate = sampleRate;
             lame.OutputBitRate = outputBitRateKbps;
@@ -110,7 +198,6 @@ namespace SharpAvi.Codecs
 
         public void Dispose()
         {
-            // TODO: Write cached LAME output to the stream (lame_encode_flush)
             var lameDisposable = lame as IDisposable;
             if (lameDisposable != null)
             {
