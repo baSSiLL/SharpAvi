@@ -33,6 +33,7 @@ namespace SharpAvi.Codecs
         private const int SAMPLE_BYTE_SIZE = 2;
 
         private readonly ILameFacade lame;
+        private readonly byte[] finalBuffer = new byte[7200];
 
         /// <summary>
         /// Creates a new instance of <see cref="LameMp3AudioEncoder"/>.
@@ -91,6 +92,20 @@ namespace SharpAvi.Codecs
                 writer.Write((ushort)lame.EncoderDelay);
             }
             stream.FormatSpecificData = mp3Data.ToArray();
+        }
+
+        /// <summary>
+        /// Writes final data to the stream.
+        /// </summary>
+        /// <remarks>
+        /// Should be called before <see cref="AviWriter.Close"/>.
+        /// </remarks>
+        public void FinalizeStream(SharpAvi.Output.IAviAudioStream stream)
+        {
+            Contract.Requires(stream != null);
+
+            var length = lame.FinishEncoding(finalBuffer, 0);
+            stream.WriteBlock(finalBuffer, 0, length);
         }
 
         public void Dispose()

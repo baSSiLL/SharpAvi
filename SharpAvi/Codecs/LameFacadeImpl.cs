@@ -15,10 +15,7 @@ namespace SharpAvi.Codecs.Runtime
         public LameFacadeImpl()
         {
             context = lame_init();
-            if (context == IntPtr.Zero)
-            {
-                throw new ExternalException("lame_init failed");
-            }
+            CheckResult(context != IntPtr.Zero, "lame_init");
         }
 
         ~LameFacadeImpl()
@@ -96,10 +93,8 @@ namespace SharpAvi.Codecs.Runtime
             lame_set_decode_only(context, 0);
 
             // Finally, initialize encoding process
-            if (lame_init_params(context) != 0)
-            {
-                throw new ExternalException("lame_init_params failed");
-            }
+            var result = lame_init_params(context);
+            CheckResult(result == 0, "lame_init_params");
         }
 
         public int Encode(byte[] source, int sourceIndex, int sampleCount, byte[] dest, int destIndex)
@@ -125,11 +120,7 @@ namespace SharpAvi.Codecs.Runtime
                         break;
                 }
 
-                if (result < 0)
-                {
-                    throw new ExternalException("lame_encode_buffer failed");
-                }
-
+                CheckResult(result >= 0, "lame_encode_buffer");
                 return result;
             }
             finally
@@ -139,6 +130,31 @@ namespace SharpAvi.Codecs.Runtime
             }
         }
 
+        public int FinishEncoding(byte[] dest, int destIndex)
+        {
+            var destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
+            try
+            {
+                var destPtr = destHandle.AddrOfPinnedObject() + destIndex;
+                var destLength = dest.Length - destIndex;
+                var result = lame_encode_flush(context, destPtr, destLength);
+                CheckResult(result >= 0, "lame_encode_flush");
+                return result;
+            }
+            finally
+            {
+                destHandle.Free();
+            }
+        }
+
+
+        private static void CheckResult(bool passCondition, string routineName)
+        {
+            if (!passCondition)
+            {
+                throw new ExternalException(string.Format("{0} failed", routineName));
+            }
+        }
 
         private static void ThrowInvalidChannelCount()
         {
@@ -246,6 +262,9 @@ namespace SharpAvi.Codecs.Runtime
         private static extern int lame_encode_buffer_interleaved(IntPtr context,
             IntPtr buffer, int nsamples,
             IntPtr mp3buf, int mp3buf_size);
+
+        [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int lame_encode_flush(IntPtr context, IntPtr mp3buf, int mp3buf_size);
 
         #endregion
     }

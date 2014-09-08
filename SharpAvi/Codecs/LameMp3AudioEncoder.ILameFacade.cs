@@ -17,15 +17,50 @@ namespace SharpAvi.Codecs
         /// </remarks>
         public interface ILameFacade
         {
+            /// <summary>
+            /// Number of audio channels.
+            /// </summary>
             int ChannelCount { get; set; }
+
+            /// <summary>
+            /// Sample rate of source audio data.
+            /// </summary>
             int InputSampleRate { get; set; }
+
+            /// <summary>
+            /// Bit rate of encoded data.
+            /// </summary>
             int OutputBitRate { get; set; }
+
+            /// <summary>
+            /// Sample rate of encoded data.
+            /// </summary>
             int OutputSampleRate { get; }
+
+            /// <summary>
+            /// Frame size of encoded data.
+            /// </summary>
             int FrameSize { get; }
+
+            /// <summary>
+            /// Encoder delay.
+            /// </summary>
             int EncoderDelay { get; }
 
+            /// <summary>
+            /// Initializes the encoding process.
+            /// </summary>
             void PrepareEncoding();
+
+            /// <summary>
+            /// Encodes a chunk of audio data.
+            /// </summary>
             int Encode(byte[] source, int sourceIndex, int sampleCount, byte[] dest, int destIndex);
+
+            /// <summary>
+            /// Finalizes the encoding process.
+            /// </summary>
+            int FinishEncoding(byte[] dest, int destIndex);
         }
     }
 }

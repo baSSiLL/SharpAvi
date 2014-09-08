@@ -31,7 +31,8 @@ namespace SharpAvi.Codecs
         /// <param name="stream">A stream to initialize.</param>
         /// <remarks>
         /// An encoder should set correct values for properties of the stream used in
-        /// headers of AVI file.
+        /// headers of AVI file. 
+        /// It SHOULD NOT write any data to the stream.
         /// </remarks>
         void InitializeStream(IAviAudioStream stream);
     }
