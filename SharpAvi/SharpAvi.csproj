@@ -129,6 +129,9 @@
     <Compile Include="AudioFormats.cs" />
     <Compile Include="Codecs\CodecInfo.cs" />
     <Compile Include="Codecs\IAudioEncoder.cs" />
+    <Compile Include="Codecs\LameMp3AudioEncoder.cs" />
+    <Compile Include="Codecs\LameMp3AudioEncoder.ILameFacade.cs" />
+    <Compile Include="Codecs\LameFacadeImpl.cs" />
     <Compile Include="Codecs\SingleThreadedVideoEncoderWrapper.cs" />
     <Compile Include="Index1Entry.cs" />
     <Compile Include="IndexType.cs" />
