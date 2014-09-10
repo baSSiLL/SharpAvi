@@ -5,11 +5,10 @@ using SharpAvi.Codecs;
 namespace SharpAvi.Output
 {
     /// <summary>
-    /// Wrapper on the <see cref="IAviVideoStream"/> object to provide encoding.
+    /// Wrapper on the <see cref="IAviVideoStreamInternal"/> object to provide encoding.
     /// </summary>
-    internal class EncodingVideoStreamWrapper : IAviVideoStream, IDisposable
+    internal class EncodingVideoStreamWrapper : VideoStreamWrapperBase
     {
-        private readonly IAviVideoStream stream;
         private readonly IVideoEncoder encoder;
         private readonly bool ownsEncoder;
         private readonly byte[] encodedBuffer;
@@ -17,24 +16,24 @@ namespace SharpAvi.Output
         /// <summary>
         /// Creates a new instance of <see cref="EncodingVideoStreamWrapper"/>.
         /// </summary>
-        /// <param name="stream">Video stream to be wrapped.</param>
+        /// <param name="baseStream">Video stream to be wrapped.</param>
         /// <param name="encoder">Encoder to be used.</param>
         /// <param name="ownsEncoder">Whether to dispose the encoder.</param>
-        public EncodingVideoStreamWrapper(IAviVideoStream stream, IVideoEncoder encoder, bool ownsEncoder)
+        public EncodingVideoStreamWrapper(IAviVideoStreamInternal baseStream, IVideoEncoder encoder, bool ownsEncoder)
+            : base(baseStream)
         {
-            Contract.Requires(stream != null);
+            Contract.Requires(baseStream != null);
             Contract.Requires(encoder != null);
 
-            this.stream = stream;
             this.encoder = encoder;
             this.ownsEncoder = ownsEncoder;
             encodedBuffer = new byte[encoder.MaxEncodedSize];
 
-            stream.Codec = encoder.Codec;
-            stream.BitsPerPixel = encoder.BitsPerPixel;
+            baseStream.Codec = encoder.Codec;
+            baseStream.BitsPerPixel = encoder.BitsPerPixel;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             if (ownsEncoder)
             {
@@ -44,74 +43,25 @@ namespace SharpAvi.Output
                     encoderDisposable.Dispose();
                 }
             }
+
+            base.Dispose();
         }
 
-
-        /// <summary>
-        /// Sequential number of the stream.
-        /// </summary>
-        public int Index
-        {
-            get { return stream.Index; }
-        }
-
-        /// <summary>
-        /// Name of the stream.
-        /// </summary>
-        public string Name
-        {
-            get { return stream.Name; }
-            set { stream.Name = value; }
-        }
 
         /// <summary> Video codec. </summary>
-        /// <remarks>
-        /// The value of this property is defined by the <see cref="IVideoEncoder.BitsPerPixel"/> property of the encoder.
-        /// When accessing the corresponding property of the <see cref="IAviVideoStream"/> interface, its setter
-        /// throws a <see cref="NotSupportedException"/>.
-        /// </remarks>
-        public FourCC Codec
+        public override FourCC Codec
         {
             get { return encoder.Codec; }
-        }
-
-        FourCC IAviVideoStream.Codec
-        {
-            get { return Codec; }
             set
             {
                 ThrowPropertyDefinedByEncoder();
             }
         }
 
-        /// <summary>Frame width.</summary>
-        public int Width
-        {
-            get { return stream.Width; }
-            set { stream.Width = value; }
-        }
-
-        /// <summary>Frame height.</summary>
-        public int Height
-        {
-            get { return stream.Height; }
-            set { stream.Height = value; }
-        }
-
         /// <summary> Bits per pixel. </summary>
-        /// <remarks>
-        /// The value of this property is defined by the <see cref="IVideoEncoder.BitsPerPixel"/> property of the encoder.
-        /// When accessing the corresponding property of the <see cref="IAviVideoStream"/> interface, its setter
-        /// throws a <see cref="NotSupportedException"/>.
-        /// </remarks>
-        public BitsPerPixel BitsPerPixel
+        public override BitsPerPixel BitsPerPixel
         {
             get { return encoder.BitsPerPixel; }
-        }
-
-        BitsPerPixel IAviVideoStream.BitsPerPixel
-        {
-            get { return BitsPerPixel; }
             set
             {
                 ThrowPropertyDefinedByEncoder();
@@ -119,26 +69,10 @@ namespace SharpAvi.Output
         }
 
         /// <summary>Encodes and writes a frame.</summary>
-        /// <remarks>
-        /// When invoking the corresponding method of the <see cref="IAviVideoStream"/> interface, 
-        /// the values of its parameters <c>isKeyFrame</c> and <c>count</c> are ignored.
-        /// </remarks>
-        /// <seealso cref="IAviVideoStream.WriteFrame"/>
-        public void WriteFrame(byte[] frameData, int startIndex)
+        public override void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
-            bool isKeyFrame;
-            var count = encoder.EncodeFrame(frameData, startIndex, encodedBuffer, 0, out isKeyFrame);
-            stream.WriteFrame(isKeyFrame, encodedBuffer, 0, count);
-        }
-
-        public int FramesWritten
-        {
-            get { return stream.FramesWritten; }
-        }
-
-        void IAviVideoStream.WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
-        {
-            WriteFrame(frameData, startIndex);
+                count = encoder.EncodeFrame(frameData, startIndex, encodedBuffer, 0, out isKeyFrame);
+                base.WriteFrame(isKeyFrame, encodedBuffer, 0, count);
         }
 
 

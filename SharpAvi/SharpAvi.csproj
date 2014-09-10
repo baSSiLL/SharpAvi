@@ -139,13 +139,16 @@
     <Compile Include="IndexType.cs" />
     <Compile Include="AviUtils.cs" />
     <Compile Include="Output\AsyncVideoStreamWrapper.cs" />
+    <Compile Include="Output\AudioStreamWrapperBase.cs" />
+    <Compile Include="Output\IAviAudioStreamInternal.cs" />
+    <Compile Include="Output\IAviVideoStreamInternal.cs" />
     <Compile Include="Output\AviAudioStream.cs" />
     <Compile Include="Output\AviStreamBase.cs" />
     <Compile Include="Output\AviVideoStream.cs" />
     <Compile Include="Codecs\BitmapUtils.cs" />
     <Compile Include="Codecs\IVideoEncoder.cs" />
     <Compile Include="Codecs\MotionJpegVideoEncoderWpf.cs" />
-    <Compile Include="Codecs\Mpeg4VideoEncoder.cs" />
+    <Compile Include="Codecs\Mpeg4VideoEncoderVcm.cs" />
     <Compile Include="Codecs\VfwApi.cs" />
     <Compile Include="Output\EncodingAudioStreamWrapper.cs" />
     <Compile Include="Output\EncodingVideoStreamWrapper.cs" />
@@ -159,6 +162,7 @@
     <Compile Include="FourCC.cs" />
     <Compile Include="Output\IAviStream.cs" />
     <Compile Include="BitsPerPixel.cs" />
+    <Compile Include="Output\VideoStreamWrapperBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Codecs\UncompressedVideoEncoder.cs" />
     <Compile Include="Output\RiffItem.cs" />

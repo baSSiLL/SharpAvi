@@ -2,7 +2,7 @@
 
 namespace SharpAvi.Output
 {
-    internal interface IAviStreamInternal
+    internal interface IAviStreamInternal : IAviStream
     {
         FourCC StreamType { get; }
         FourCC ChunkId { get; }

@@ -3,7 +3,7 @@ using System.Diagnostics.Contracts;
 
 namespace SharpAvi.Output
 {
-    internal class AviVideoStream : AviStreamBase, IAviVideoStream
+    internal class AviVideoStream : AviStreamBase, IAviVideoStreamInternal
     {
         private readonly IAviStreamWriteHandler writeHandler;
         private FourCC streamCodec;
@@ -29,8 +29,6 @@ namespace SharpAvi.Output
             FramesWritten = 0;
         }
 
-
-        #region IAviVideoStream implementation
 
         public int Width
         {
@@ -83,8 +81,6 @@ namespace SharpAvi.Output
             get;
             private set;
         }
-        
-        #endregion
 
 
         public override FourCC StreamType

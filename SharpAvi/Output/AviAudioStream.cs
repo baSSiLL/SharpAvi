@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SharpAvi.Output
 {
-    internal class AviAudioStream : AviStreamBase, IAviAudioStream
+    internal class AviAudioStream : AviStreamBase, IAviAudioStreamInternal
     {
         private readonly IAviStreamWriteHandler writeHandler;
         private int channelCount = 1;
@@ -41,8 +41,6 @@ namespace SharpAvi.Output
         }
 
         
-        #region IAviAudioStream implementation
-
         public int ChannelCount
         {
             get { return channelCount; }
@@ -124,8 +122,6 @@ namespace SharpAvi.Output
             get;
             private set;
         }
-
-        #endregion
 
 
         public override FourCC StreamType

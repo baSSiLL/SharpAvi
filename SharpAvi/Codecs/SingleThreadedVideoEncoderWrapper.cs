@@ -14,7 +14,7 @@ namespace SharpAvi.Codecs
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Especially useful for unmanaged encoders like <see cref="Mpeg4VideoEncoder"/> in multi-threaded scenarios
+    /// Especially useful for unmanaged encoders like <see cref="Mpeg4VideoEncoderVcm"/> in multi-threaded scenarios
     /// like asynchronous encoding.
     /// </para>
     /// <para>

@@ -36,8 +36,7 @@ namespace SharpAvi.Output
         private int riffAviFrameCount = -1;
         private int index1Count = 0;
 
-        private readonly List<IAviStream> streams = new List<IAviStream>();
-        private readonly ReadOnlyCollection<IAviStream> streamsRO;
+        private readonly List<IAviStreamInternal> streams = new List<IAviStreamInternal>();
         private StreamInfo[] streamsInfo;
 
         /// <summary>
@@ -46,8 +45,6 @@ namespace SharpAvi.Output
         /// <param name="fileName">Path to an AVI file being written.</param>
         public AviWriter(string fileName)
         {
-            streamsRO = streams.AsReadOnly();
-
             var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
             fileWriter = new BinaryWriter(fileStream);
         }
@@ -98,9 +95,9 @@ namespace SharpAvi.Output
         private bool emitIndex1;
 
         /// <summary>AVI streams that have been added so far.</summary>
-        public ReadOnlyCollection<IAviStream> Streams
+        public IReadOnlyList<IAviStream> Streams
         {
-            get { return streamsRO; }
+            get { return streams; }
         }
 
         /// <summary>Adds new video stream.</summary>
@@ -121,7 +118,7 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
-            return AddStream<IAviVideoStream>(index => new AviVideoStream(index, this, width, height, bitsPerPixel));
+            return AddStream<IAviVideoStreamInternal>(index => new AviVideoStream(index, this, width, height, bitsPerPixel));
         }
 
         /// <summary>Adds new encoding video stream.</summary>
@@ -136,6 +133,8 @@ namespace SharpAvi.Output
         /// Method <see cref="IAviVideoStream.Write"/> expects data in the same format as encoders,
         /// that is top-down BGR32 bitmap. It is passed to the encoder and the encoded result is written
         /// to the stream.
+        /// Parameters <c>isKeyFrame</c> and <c>count</c> are ignored by encoding streams,
+        /// as encoders determine on their own which frames are keys, and the size of input bitmaps is fixed.
         /// </para>
         /// <para>
         /// Properties <see cref="IAviVideoStream.Codec"/> and <see cref="IAviVideoStream.BitsPerPixel"/> 
@@ -148,7 +147,7 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
-            return AddStream<IAviVideoStream>(index => 
+            return AddStream<IAviVideoStreamInternal>(index => 
                 new EncodingVideoStreamWrapper(new AviVideoStream(index, this, width, height, BitsPerPixel.Bpp32), encoder, ownsEncoder));
         }
 
@@ -170,7 +169,7 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
 
-            return AddStream<IAviAudioStream>(index => new AviAudioStream(index, this, channelCount, samplesPerSecond, bitsPerSample));
+            return AddStream<IAviAudioStreamInternal>(index => new AviAudioStream(index, this, channelCount, samplesPerSecond, bitsPerSample));
         }
 
         /// <summary>Adds new encoding audio stream.</summary>
@@ -194,12 +193,12 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
 
-            return AddStream<IAviAudioStream>(
+            return AddStream<IAviAudioStreamInternal>(
                 index => new EncodingAudioStreamWrapper(new AviAudioStream(index, this, 1, 44100, 16), encoder, ownsEncoder));
         }
 
         private TStream AddStream<TStream>(Func<int, TStream> streamFactory)
-            where TStream : IAviStream
+            where TStream : IAviStreamInternal
         {
             Contract.Requires(streamFactory != null);
             Contract.Requires(Streams.Count < 100);
@@ -540,11 +539,11 @@ namespace SharpAvi.Output
             fileWriter.CloseItem(list);
         }
 
-        private void WriteStreamList(IAviStream stream)
+        private void WriteStreamList(IAviStreamInternal stream)
         {
             var list = fileWriter.OpenList(KnownFourCCs.Lists.Stream);
-            WriteStreamHeader((IAviStreamInternal)stream);
-            WriteStreamFormat((IAviStreamInternal)stream);
+            WriteStreamHeader(stream);
+            WriteStreamFormat(stream);
             WriteStreamName(stream);
             WriteStreamSuperIndex(stream);
             fileWriter.CloseItem(list);
@@ -609,7 +608,7 @@ namespace SharpAvi.Output
         {
             var chunk = fileWriter.OpenChunk(KnownFourCCs.Chunks.Index1);
 
-            var indices = streamsInfo.Select((si, i) => new {si.Index1, ChunkId = (uint)((IAviStreamInternal)streams[i]).ChunkId}).
+            var indices = streamsInfo.Select((si, i) => new {si.Index1, ChunkId = (uint)streams[i].ChunkId}).
                 Where(a => a.Index1.Count > 0)
                 .ToList();
             while (index1Count > 0)
@@ -657,7 +656,7 @@ namespace SharpAvi.Output
             return false;
         }
 
-        private void FlushStreamIndex(IAviStream stream)
+        private void FlushStreamIndex(IAviStreamInternal stream)
         {
             var si = streamsInfo[stream.Index];
             var index = si.StandardIndex;
@@ -676,7 +675,7 @@ namespace SharpAvi.Output
             fileWriter.Write((byte)0); // index sub-type
             fileWriter.Write((byte)IndexType.Chunks); // index type
             fileWriter.Write((uint)entriesCount); // entries count
-            fileWriter.Write((uint)((IAviStreamInternal)stream).ChunkId); // chunk ID of the stream
+            fileWriter.Write((uint)stream.ChunkId); // chunk ID of the stream
             fileWriter.Write((ulong)baseOffset); // base offset for entries
             fileWriter.SkipBytes(sizeof(uint)); // reserved
 

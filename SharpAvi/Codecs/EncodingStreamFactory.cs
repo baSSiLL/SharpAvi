@@ -47,11 +47,18 @@ namespace SharpAvi.Codecs
         }
 
         /// <summary>
-        /// Adds new video stream with <see cref="Mpeg4VideoEncoder"/>.
+        /// Adds new video stream with <see cref="Mpeg4VideoEncoderVcm"/>.
         /// </summary>
+        /// <param name="forceSingleThreadedAccess">
+        /// When <c>true</c>, the created <see cref="Mpeg4VideoEncoderVcm"/> instance is wrapped into
+        /// <see cref="SingleThreadedVideoEncoderWrapper"/>.
+        /// </param>
         /// <seealso cref="IAviWriter.AddEncodingVideoStream"/>
-        /// <seealso cref="Mpeg4VideoEncoder"/>
-        public static IAviVideoStream AddMpeg4VideoStream(this AviWriter writer, int width, int height, double fps, int frameCount = 0, int quality = 70, FourCC? codec = null, bool singleThreaded = false)
+        /// <seealso cref="Mpeg4VideoEncoderVcm"/>
+        /// <seealso cref="SingleThreadedVideoEncoderWrapper"/>
+        public static IAviVideoStream AddMpeg4VideoStream(this AviWriter writer, int width, int height, 
+            double fps, int frameCount = 0, int quality = 70, FourCC? codec = null, 
+            bool forceSingleThreadedAccess = false)
         {
             Contract.Requires(writer != null);
             Contract.Requires(width > 0);
@@ -62,9 +69,9 @@ namespace SharpAvi.Codecs
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
             var encoderFactory = codec.HasValue
-                ? new Func<IVideoEncoder>(() => new Mpeg4VideoEncoder(width, height, fps, frameCount, quality, codec.Value))
-                : new Func<IVideoEncoder>(() => new Mpeg4VideoEncoder(width, height, fps, frameCount, quality));
-            var encoder = singleThreaded
+                ? new Func<IVideoEncoder>(() => new Mpeg4VideoEncoderVcm(width, height, fps, frameCount, quality, codec.Value))
+                : new Func<IVideoEncoder>(() => new Mpeg4VideoEncoderVcm(width, height, fps, frameCount, quality));
+            var encoder = forceSingleThreadedAccess
                 ? new SingleThreadedVideoEncoderWrapper(encoderFactory)
                 : encoderFactory.Invoke();
             return writer.AddEncodingVideoStream(encoder, true, width, height);

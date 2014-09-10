@@ -26,7 +26,7 @@ namespace SharpAvi.Codecs
     /// <see cref="SingleThreadedVideoEncoderWrapper"/> for the stable work.
     /// </para>
     /// </remarks>
-    public class Mpeg4VideoEncoder : IVideoEncoder, IDisposable
+    public class Mpeg4VideoEncoderVcm : IVideoEncoder, IDisposable
     {
         /// <summary>
         /// Default preferred order of the supported codecs.
@@ -130,7 +130,7 @@ namespace SharpAvi.Codecs
         private bool needEnd;
 
         /// <summary>
-        /// Creates a new instance of <see cref="Mpeg4VideoEncoder"/>.
+        /// Creates a new instance of <see cref="Mpeg4VideoEncoderVcm"/>.
         /// </summary>
         /// <param name="width">Frame width.</param>
         /// <param name="height">Frame height.</param>
@@ -160,7 +160,7 @@ namespace SharpAvi.Codecs
         /// the encoder is not guaranteed to work properly.
         /// </para>
         /// </remarks>
-        public Mpeg4VideoEncoder(int width, int height, double fps, int frameCount, int quality, params FourCC[] codecPreference)
+        public Mpeg4VideoEncoderVcm(int width, int height, double fps, int frameCount, int quality, params FourCC[] codecPreference)
         {
             Contract.Requires(width > 0);
             Contract.Requires(height > 0);
@@ -219,7 +219,7 @@ namespace SharpAvi.Codecs
         /// <summary>
         /// Performs any necessary cleanup before this instance is garbage-collected.
         /// </summary>
-        ~Mpeg4VideoEncoder()
+        ~Mpeg4VideoEncoderVcm()
         {
             Dispose();
         }

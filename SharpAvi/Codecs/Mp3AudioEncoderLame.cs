@@ -21,8 +21,8 @@ namespace SharpAvi.Codecs
     /// </summary>
     /// <remarks>
     /// The encoder defines the following properties of the stream (they should not be modified manually):
-    /// <see cref="IAviAudioEncoder.ChannelCount"/>, <see cref="IAviAudioEncoder.SampleRate"/>,
-    /// <see cref="IAviAudioEncoder.SampleBitRate"/>, <see cref="IAviAudioEncoder.ByteRate"/>,
+    /// <see cref="IAviAudioEncoder.ChannelCount"/>, <see cref="IAviAudioEncoder.SamplesPerSecond"/>,
+    /// <see cref="IAviAudioEncoder.BitsPerSample"/>, <see cref="IAviAudioEncoder.BytesPerSecond"/>,
     /// <see cref="IAviAudioEncoder.Granularity"/>, <see cref="IAviAudioEncoder.Format"/>,
     /// <see cref="IAviAudioEncoder.FormatSpecificData"/>.
     /// The class is designed for using only a single instance at a time.
