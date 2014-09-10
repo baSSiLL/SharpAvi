@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
+using SharpAvi.Codecs;
 
 namespace SharpAvi.Output
 {
@@ -108,8 +109,9 @@ namespace SharpAvi.Output
         /// <param name="bitsPerPixel">Bits per pixel.</param>
         /// <returns>Newly added video stream.</returns>
         /// <remarks>
-        /// Stream is initialized to be ready for uncompressed video (BGR) with specified parameters.
-        /// All parameters can be changed later, before starting to write to the stream.
+        /// Stream is initialized to be ready for uncompressed video (bottom-up BGR) with specified parameters.
+        /// However, properties (such as <see cref="IAviVideoStream.Codec"/>) can be changed later if the stream is
+        /// to be fed with pre-compressed data.
         /// </remarks>
         public IAviVideoStream AddVideoStream(int width = 1, int height = 1, BitsPerPixel bitsPerPixel = BitsPerPixel.Bpp32)
         {
@@ -122,11 +124,43 @@ namespace SharpAvi.Output
             return AddStream<IAviVideoStream>(index => new AviVideoStream(index, this, width, height, bitsPerPixel));
         }
 
+        /// <summary>Adds new encoding video stream.</summary>
+        /// <param name="encoder">Encoder to be used.</param>
+        /// <param name="ownsEncoder">Whether encoder should be disposed with the writer.</param>
+        /// <param name="width">Frame's width.</param>
+        /// <param name="height">Frame's height.</param>
+        /// <returns>Newly added video stream.</returns>
+        /// <remarks>
+        /// <para>
+        /// Stream is initialized to be to be encoded with the specified encoder.
+        /// Method <see cref="IAviVideoStream.Write"/> expects data in the same format as encoders,
+        /// that is top-down BGR32 bitmap. It is passed to the encoder and the encoded result is written
+        /// to the stream.
+        /// </para>
+        /// <para>
+        /// Properties <see cref="IAviVideoStream.Codec"/> and <see cref="IAviVideoStream.BitsPerPixel"/> 
+        /// are defined by the encoder, and cannot be modified.
+        /// </para>
+        /// </remarks>
+        public IAviVideoStream AddEncodingVideoStream(IVideoEncoder encoder, bool ownsEncoder = true, int width = 1, int height = 1)
+        {
+            Contract.Requires(encoder != null);
+            Contract.Requires(Streams.Count < 100);
+            Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
+
+            return AddStream<IAviVideoStream>(index => 
+                new EncodingVideoStreamWrapper(new AviVideoStream(index, this, width, height, BitsPerPixel.Bpp32), encoder, ownsEncoder));
+        }
+
         /// <summary>Adds new audio stream.</summary>
+        /// <param name="channelCount">Number of channels.</param>
+        /// <param name="samplesPerSecond">Sample rate.</param>
+        /// <param name="bitsPerSample">Bits per sample (per single channel).</param>
         /// <returns>Newly added audio stream.</returns>
         /// <remarks>
         /// Stream is initialized to be ready for uncompressed audio (PCM) with specified parameters.
-        /// All parameters can be changed later, before starting to write to the stream.
+        /// However, properties (such as <see cref="IAviAudioStream.Format"/>) can be changed later if the stream is
+        /// to be fed with pre-compressed data.
         /// </remarks>
         public IAviAudioStream AddAudioStream(int channelCount = 1, int samplesPerSecond = 44100, int bitsPerSample = 16)
         {
@@ -137,6 +171,31 @@ namespace SharpAvi.Output
             Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
 
             return AddStream<IAviAudioStream>(index => new AviAudioStream(index, this, channelCount, samplesPerSecond, bitsPerSample));
+        }
+
+        /// <summary>Adds new encoding audio stream.</summary>
+        /// <param name="encoder">Encoder to be used.</param>
+        /// <param name="ownsEncoder">Whether encoder should be disposed with the writer.</param>
+        /// <returns>Newly added audio stream.</returns>
+        /// <remarks>
+        /// <para>
+        /// Stream is initialized to be to be encoded with the specified encoder.
+        /// Method <see cref="IAviAudioStream.Write"/> expects data in the same format as encoder (see encoder's docs). 
+        /// The data is passed to the encoder and the encoded result is written to the stream.
+        /// </para>
+        /// <para>
+        /// Some properties of the stream are defined by the encoder, other may be set before writing.
+        /// Consult documentation for specific encoders.
+        /// </para>
+        /// </remarks>
+        public IAviAudioStream AddEncodingAudioStream(IAudioEncoder encoder, bool ownsEncoder)
+        {
+            Contract.Requires(encoder != null);
+            Contract.Requires(Streams.Count < 100);
+            Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
+
+            return AddStream<IAviAudioStream>(
+                index => new EncodingAudioStreamWrapper(new AviAudioStream(index, this, 1, 44100, 16), encoder, ownsEncoder));
         }
 
         private TStream AddStream<TStream>(Func<int, TStream> streamFactory)
@@ -165,6 +224,11 @@ namespace SharpAvi.Output
             {
                 lock (syncWrite)
                 {
+                    foreach (var disposableStream in streams.OfType<IDisposable>())
+                    {
+                        disposableStream.Dispose();
+                    }
+
                     if (startedWriting)
                     {
                         foreach (var stream in streams)

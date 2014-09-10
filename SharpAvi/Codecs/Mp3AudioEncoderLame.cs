@@ -20,16 +20,21 @@ namespace SharpAvi.Codecs
     /// Mpeg Layer 3 (MP3) audio encoder using the LAME codec in external DLL.
     /// </summary>
     /// <remarks>
+    /// The encoder defines the following properties of the stream (they should not be modified manually):
+    /// <see cref="IAviAudioEncoder.ChannelCount"/>, <see cref="IAviAudioEncoder.SampleRate"/>,
+    /// <see cref="IAviAudioEncoder.SampleBitRate"/>, <see cref="IAviAudioEncoder.ByteRate"/>,
+    /// <see cref="IAviAudioEncoder.Granularity"/>, <see cref="IAviAudioEncoder.Format"/>,
+    /// <see cref="IAviAudioEncoder.FormatSpecificData"/>.
     /// The class is designed for using only a single instance at a time.
     /// Find information about and downloads of the LAME project at http://lame.sourceforge.net/
     /// </remarks>
-    public partial class LameMp3AudioEncoder : IAudioEncoder, IDisposable
+    public partial class Mp3AudioEncoderLame : IAudioEncoder, IDisposable
     {
         /// <summary>
         /// Supported output bit rates (in kilobits per second).
         /// </summary>
         /// <remarks>
-        /// Currently supported are 64, 96, 128, 192 and 320 kbps.
+        /// Currently supported are 64, 96, 128, 160, 192 and 320 kbps.
         /// </remarks>
         public static readonly int[] SupportedBitRates = new[] { 64, 96, 128, 160, 192, 320 };
 
@@ -61,12 +66,12 @@ namespace SharpAvi.Codecs
             }
 
             var facadeAsm = GenerateLameFacadeAssembly(libraryName);
-            lameFacadeType = facadeAsm.GetType(typeof(LameMp3AudioEncoder).Namespace + ".Runtime.LameFacadeImpl");
+            lameFacadeType = facadeAsm.GetType(typeof(Mp3AudioEncoderLame).Namespace + ".Runtime.LameFacadeImpl");
         }
 
         private static Assembly GenerateLameFacadeAssembly(string lameDllName)
         {
-            var thisAsm = typeof(LameMp3AudioEncoder).Assembly;
+            var thisAsm = typeof(Mp3AudioEncoderLame).Assembly;
             var compiler = new Microsoft.CSharp.CSharpCodeProvider();
             var compilerOptions = new System.CodeDom.Compiler.CompilerParameters()
             {
@@ -120,7 +125,7 @@ namespace SharpAvi.Codecs
         private readonly byte[] finalBuffer = new byte[7200];
 
         /// <summary>
-        /// Creates a new instance of <see cref="LameMp3AudioEncoder"/>.
+        /// Creates a new instance of <see cref="Mp3AudioEncoderLame"/>.
         /// </summary>
         /// <param name="channelCount">Channel count.</param>
         /// <param name="sampleRate">Sample rate (in samples per second).</param>
@@ -129,7 +134,7 @@ namespace SharpAvi.Codecs
         /// Encoder expects audio data in 16-bit samples.
         /// Stereo data should be interleaved: left sample first, right sample second.
         /// </remarks>
-        public LameMp3AudioEncoder(int channelCount, int sampleRate, int outputBitRateKbps)
+        public Mp3AudioEncoderLame(int channelCount, int sampleRate, int outputBitRateKbps)
         {
             Contract.Requires(channelCount == 1 || channelCount == 2);
             Contract.Requires(sampleRate > 0);

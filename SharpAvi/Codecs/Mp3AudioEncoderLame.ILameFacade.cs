@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace SharpAvi.Codecs
 {
-    partial class LameMp3AudioEncoder
+    partial class Mp3AudioEncoderLame
     {
         /// <summary>
         /// Interface is used to access the API of the LAME DLL.
         /// </summary>
         /// <remarks>
-        /// Clients of <see cref="LameMp3AudioEncoder"/> class need not to work with
+        /// Clients of <see cref="Mp3AudioEncoderLame"/> class need not to work with
         /// this interface directly.
         /// </remarks>
         public interface ILameFacade

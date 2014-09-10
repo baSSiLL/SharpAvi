@@ -7,21 +7,41 @@ using SharpAvi.Codecs;
 
 namespace SharpAvi.Output
 {
-    public class EncodingAudioStreamWrapper : IAviAudioStream
+    /// <summary>
+    /// Wrapper on the <see cref="IAviAudioStream"/> object to provide encoding.
+    /// </summary>
+    internal class EncodingAudioStreamWrapper : IAviAudioStream, IAviStreamInternal, IDisposable
     {
         private readonly IAviAudioStream baseStream;
+        private readonly IAviStreamInternal baseStreamInternal;
         private readonly IAudioEncoder encoder;
+        private readonly bool ownsEncoder;
         private byte[] encodedBuffer;
 
-        public EncodingAudioStreamWrapper(IAviAudioStream baseStream, IAudioEncoder encoder)
+        public EncodingAudioStreamWrapper(IAviAudioStream baseStream, IAudioEncoder encoder, bool ownsEncoder)
         {
             Contract.Requires(baseStream != null);
+            Contract.Requires(baseStream is IAviStreamInternal);
             Contract.Requires(encoder != null);
 
             this.baseStream = baseStream;
+            this.baseStreamInternal = (IAviStreamInternal)baseStream;
             this.encoder = encoder;
+            this.ownsEncoder = ownsEncoder;
 
             encoder.InitializeStream(baseStream);
+        }
+
+        public void Dispose()
+        {
+            if (ownsEncoder)
+            {
+                var encoderDisposable = encoder as IDisposable;
+                if (encoderDisposable != null)
+                {
+                    encoderDisposable.Dispose();
+                }
+            }
         }
 
         /// <summary>
@@ -213,6 +233,31 @@ namespace SharpAvi.Output
         private void ThrowPropertyDefinedByEncoder()
         {
             throw new NotSupportedException("The value of the property is defined by the encoder.");
+        }
+
+        public FourCC StreamType
+        {
+            get { return baseStreamInternal.StreamType; }
+        }
+
+        public FourCC ChunkId
+        {
+            get { return baseStreamInternal.ChunkId; }
+        }
+
+        public void Freeze()
+        {
+            baseStreamInternal.Freeze();
+        }
+
+        public void WriteHeader()
+        {
+            baseStreamInternal.WriteHeader();
+        }
+
+        public void WriteFormat()
+        {
+            baseStreamInternal.WriteFormat();
         }
     }
 }

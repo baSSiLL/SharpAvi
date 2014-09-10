@@ -5,18 +5,22 @@ namespace SharpAvi.Codecs
     /// <summary>
     /// Encodes frames in BGR24 format without compression.
     /// </summary>
-    public class RgbVideoEncoder : IVideoEncoder
+    /// <remarks>
+    /// The main purpose of this encoder is to flip bitmap vertically (from top-down to bottom-up)
+    /// and to convert pixel format to 24 bits.
+    /// </remarks>
+    public class UncompressedVideoEncoder : IVideoEncoder
     {
         private readonly int width;
         private readonly int height;
         private readonly byte[] sourceBuffer;
 
         /// <summary>
-        /// Creates a new instance of <see cref="RgbVideoEncoder"/>.
+        /// Creates a new instance of <see cref="UncompressedVideoEncoder"/>.
         /// </summary>
         /// <param name="width">Frame width.</param>
         /// <param name="height">Frame height.</param>
-        public RgbVideoEncoder(int width, int height)
+        public UncompressedVideoEncoder(int width, int height)
         {
             Contract.Requires(width > 0);
             Contract.Requires(height > 0);

@@ -4,14 +4,14 @@ using SharpAvi.Codecs;
 
 namespace SharpAvi.Output
 {
-    // TODO: Support IDisposable to dispose the encoder?
     /// <summary>
     /// Wrapper on the <see cref="IAviVideoStream"/> object to provide encoding.
     /// </summary>
-    public class EncodingVideoStreamWrapper : IAviVideoStream
+    internal class EncodingVideoStreamWrapper : IAviVideoStream, IDisposable
     {
         private readonly IAviVideoStream stream;
         private readonly IVideoEncoder encoder;
+        private readonly bool ownsEncoder;
         private readonly byte[] encodedBuffer;
 
         /// <summary>
@@ -19,17 +19,31 @@ namespace SharpAvi.Output
         /// </summary>
         /// <param name="stream">Video stream to be wrapped.</param>
         /// <param name="encoder">Encoder to be used.</param>
-        public EncodingVideoStreamWrapper(IAviVideoStream stream, IVideoEncoder encoder)
+        /// <param name="ownsEncoder">Whether to dispose the encoder.</param>
+        public EncodingVideoStreamWrapper(IAviVideoStream stream, IVideoEncoder encoder, bool ownsEncoder)
         {
             Contract.Requires(stream != null);
             Contract.Requires(encoder != null);
 
             this.stream = stream;
             this.encoder = encoder;
+            this.ownsEncoder = ownsEncoder;
             encodedBuffer = new byte[encoder.MaxEncodedSize];
 
             stream.Codec = encoder.Codec;
             stream.BitsPerPixel = encoder.BitsPerPixel;
+        }
+
+        public void Dispose()
+        {
+            if (ownsEncoder)
+            {
+                var encoderDisposable = encoder as IDisposable;
+                if (encoderDisposable != null)
+                {
+                    encoderDisposable.Dispose();
+                }
+            }
         }
 
 
