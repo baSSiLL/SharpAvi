@@ -91,7 +91,12 @@ namespace SharpAvi.Sample
             }
             else if (codec == KnownFourCCs.Codecs.MotionJpeg)
             {
-                return writer.AddMotionJpegVideoStream(screenWidth, screenHeight, quality);
+                return writer.AddMotionJpegVideoStream(screenWidth, screenHeight, quality
+#if !FX45
+                    // Implementation of this encoder for .NET 3.5 requires single-threaded access
+                    , forceSingleThreadedAccess: true
+#endif
+                    );
             }
             else
             {
