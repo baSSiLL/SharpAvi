@@ -15,6 +15,7 @@ namespace SharpAvi.Output
         private readonly IAudioEncoder encoder;
         private readonly bool ownsEncoder;
         private byte[] encodedBuffer;
+        private readonly object syncBuffer = new object();
 
         public EncodingAudioStreamWrapper(IAviAudioStreamInternal baseStream, IAudioEncoder encoder, bool ownsEncoder)
             : base(baseStream)
@@ -103,9 +104,13 @@ namespace SharpAvi.Output
         /// </summary>
         public override void WriteBlock(byte[] data, int startIndex, int length)
         {
+            // Prevent accessing encoded buffer by multiple threads simultaneously
+            lock (syncBuffer)
+            {
                 EnsureBufferIsSufficient(length);
                 var encodedLength = encoder.EncodeBlock(data, startIndex, length, encodedBuffer, 0);
                 base.WriteBlock(encodedBuffer, 0, encodedLength);
+            }
         }
 
 

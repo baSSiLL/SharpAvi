@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -10,6 +11,7 @@ namespace SharpAvi.Output
         private int width;
         private int height;
         private BitsPerPixel bitsPerPixel;
+        private int framesWritten;
 
         public AviVideoStream(int index, IAviStreamWriteHandler writeHandler, 
             int width, int height, BitsPerPixel bitsPerPixel)
@@ -26,7 +28,6 @@ namespace SharpAvi.Output
             this.height = height;
             this.bitsPerPixel = bitsPerPixel;
             this.streamCodec = KnownFourCCs.Codecs.Uncompressed;
-            FramesWritten = 0;
         }
 
 
@@ -73,13 +74,17 @@ namespace SharpAvi.Output
         public void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
             writeHandler.WriteVideoFrame(this, isKeyFrame, frameData, startIndex, count);
-            FramesWritten++;
+            System.Threading.Interlocked.Increment(ref framesWritten);
+        }
+
+        public Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int count)
+        {
+            throw new NotSupportedException("Asynchronous writes are not supported.");
         }
 
         public int FramesWritten
         {
-            get;
-            private set;
+            get { return framesWritten; }
         }
 
 

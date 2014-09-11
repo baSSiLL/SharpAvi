@@ -138,10 +138,12 @@
     <Compile Include="Index1Entry.cs" />
     <Compile Include="IndexType.cs" />
     <Compile Include="AviUtils.cs" />
+    <Compile Include="Output\AsyncAudioStreamWrapper.cs" />
     <Compile Include="Output\AsyncVideoStreamWrapper.cs" />
     <Compile Include="Output\AudioStreamWrapperBase.cs" />
     <Compile Include="Output\IAviAudioStreamInternal.cs" />
     <Compile Include="Output\IAviVideoStreamInternal.cs" />
+    <Compile Include="Output\SequentialInvoker.cs" />
     <Compile Include="Output\AviAudioStream.cs" />
     <Compile Include="Output\AviStreamBase.cs" />
     <Compile Include="Output\AviVideoStream.cs" />

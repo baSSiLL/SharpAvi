@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -61,15 +62,31 @@ namespace SharpAvi.Output
         /// <summary>
         /// Writes a block of audio data.
         /// </summary>
+        /// <param name="data">Data buffer.</param>
+        /// <param name="startIndex">Start index of data.</param>
+        /// <param name="length">Length of data.</param>
         /// <remarks>
         /// Division of audio data into blocks may be arbitrary.
         /// However, it is reasonable to write blocks of approximately the same duration
         /// as a single video frame.
         /// </remarks>
+        void WriteBlock(byte[] data, int startIndex, int length);
+
+        /// <summary>
+        /// Asynchronously writes a block of audio data.
+        /// </summary>
         /// <param name="data">Data buffer.</param>
         /// <param name="startIndex">Start index of data.</param>
         /// <param name="length">Length of data.</param>
-        void WriteBlock(byte[] data, int startIndex, int length);
+        /// <returns>
+        /// A task representing the asynchronous write operation.
+        /// </returns>
+        /// <remarks>
+        /// Division of audio data into blocks may be arbitrary.
+        /// However, it is reasonable to write blocks of approximately the same duration
+        /// as a single video frame.
+        /// </remarks>
+        Task WriteBlockAsync(byte[] data, int startIndex, int length);
 
         /// <summary>
         /// Number of blocks written.
@@ -176,6 +193,16 @@ namespace SharpAvi.Output
                 Contract.Requires(startIndex >= 0);
                 Contract.Requires(length >= 0);
                 Contract.Requires(startIndex + length <= data.Length);
+            }
+
+            public Task WriteBlockAsync(byte[] data, int startIndex, int length)
+            {
+                Contract.Requires(data != null);
+                Contract.Requires(startIndex >= 0);
+                Contract.Requires(length >= 0);
+                Contract.Requires(startIndex + length <= data.Length);
+                Contract.Ensures(Contract.Result<Task>() != null);
+                throw new NotImplementedException();
             }
 
             public int BlocksWritten

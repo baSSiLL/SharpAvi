@@ -17,6 +17,7 @@ namespace SharpAvi.Output
         private int bytesPerSecond = 44100;
         private int granularity = 1;
         private byte[] formatData;
+        private int blocksWritten;
 
 
         public AviAudioStream(int index, IAviStreamWriteHandler writeHandler, 
@@ -36,8 +37,6 @@ namespace SharpAvi.Output
             this.bitsPerSample = bitsPerSample;
             this.granularity = (bitsPerSample * channelCount + 7) / 8;
             this.bytesPerSecond = granularity * samplesPerSecond;
-
-            BlocksWritten = 0;
         }
 
         
@@ -114,13 +113,17 @@ namespace SharpAvi.Output
         public void WriteBlock(byte[] buffer, int startIndex, int count)
         {
             writeHandler.WriteAudioBlock(this, buffer, startIndex, count);
-            BlocksWritten++;
+            System.Threading.Interlocked.Increment(ref blocksWritten);
+        }
+
+        public System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
+        {
+            throw new NotSupportedException("Asynchronous writes are not supported.");
         }
 
         public int BlocksWritten
         {
-            get;
-            private set;
+            get { return blocksWritten; }
         }
 
 

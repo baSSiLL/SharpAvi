@@ -84,6 +84,11 @@ namespace SharpAvi.Output
             baseStream.WriteBlock(data, startIndex, length);
         }
 
+        public virtual Task WriteBlockAsync(byte[] data, int startIndex, int length)
+        {
+            return baseStream.WriteBlockAsync(data, startIndex, length);
+        }
+
         public int BlocksWritten
         {
             get { return baseStream.BlocksWritten; }

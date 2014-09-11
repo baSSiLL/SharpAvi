@@ -12,6 +12,7 @@ namespace SharpAvi.Output
         private readonly IVideoEncoder encoder;
         private readonly bool ownsEncoder;
         private readonly byte[] encodedBuffer;
+        private readonly object syncBuffer = new object();
 
         /// <summary>
         /// Creates a new instance of <see cref="EncodingVideoStreamWrapper"/>.
@@ -71,8 +72,12 @@ namespace SharpAvi.Output
         /// <summary>Encodes and writes a frame.</summary>
         public override void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
+            // Prevent accessing encoded buffer by multiple threads simultaneously
+            lock (syncBuffer)
+            {
                 count = encoder.EncodeFrame(frameData, startIndex, encodedBuffer, 0, out isKeyFrame);
                 base.WriteFrame(isKeyFrame, encodedBuffer, 0, count);
+            }
         }
 
 

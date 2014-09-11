@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace SharpAvi.Codecs.Runtime
 {
-    public class LameFacadeImpl : LameMp3AudioEncoder.ILameFacade, IDisposable
+    public class LameFacadeImpl : Mp3AudioEncoderLame.ILameFacade, IDisposable
     {
         private readonly IntPtr context;
         private bool closed;

@@ -118,7 +118,12 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
-            return AddStream<IAviVideoStreamInternal>(index => new AviVideoStream(index, this, width, height, bitsPerPixel));
+            return AddStream<IAviVideoStreamInternal>(index => 
+                {
+                    var stream = new AviVideoStream(index, this, width, height, bitsPerPixel);
+                    var asyncStream = new AsyncVideoStreamWrapper(stream);
+                    return asyncStream;
+                });
         }
 
         /// <summary>Adds new encoding video stream.</summary>
@@ -133,7 +138,7 @@ namespace SharpAvi.Output
         /// Method <see cref="IAviVideoStream.Write"/> expects data in the same format as encoders,
         /// that is top-down BGR32 bitmap. It is passed to the encoder and the encoded result is written
         /// to the stream.
-        /// Parameters <c>isKeyFrame</c> and <c>count</c> are ignored by encoding streams,
+        /// Parameters <c>isKeyFrame</c> and <c>length</c> are ignored by encoding streams,
         /// as encoders determine on their own which frames are keys, and the size of input bitmaps is fixed.
         /// </para>
         /// <para>
@@ -148,7 +153,12 @@ namespace SharpAvi.Output
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
             return AddStream<IAviVideoStreamInternal>(index => 
-                new EncodingVideoStreamWrapper(new AviVideoStream(index, this, width, height, BitsPerPixel.Bpp32), encoder, ownsEncoder));
+                {
+                    var stream = new AviVideoStream(index, this, width, height, BitsPerPixel.Bpp32);
+                    var encodingStream = new EncodingVideoStreamWrapper(stream, encoder, ownsEncoder);
+                    var asyncStream = new AsyncVideoStreamWrapper(encodingStream);
+                    return asyncStream;
+                });
         }
 
         /// <summary>Adds new audio stream.</summary>
@@ -169,7 +179,12 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
 
-            return AddStream<IAviAudioStreamInternal>(index => new AviAudioStream(index, this, channelCount, samplesPerSecond, bitsPerSample));
+            return AddStream<IAviAudioStreamInternal>(index => 
+                {
+                    var stream = new AviAudioStream(index, this, channelCount, samplesPerSecond, bitsPerSample);
+                    var asyncStream = new AsyncAudioStreamWrapper(stream);
+                    return asyncStream;
+                });
         }
 
         /// <summary>Adds new encoding audio stream.</summary>
@@ -187,14 +202,19 @@ namespace SharpAvi.Output
         /// Consult documentation for specific encoders.
         /// </para>
         /// </remarks>
-        public IAviAudioStream AddEncodingAudioStream(IAudioEncoder encoder, bool ownsEncoder)
+        public IAviAudioStream AddEncodingAudioStream(IAudioEncoder encoder, bool ownsEncoder = true)
         {
             Contract.Requires(encoder != null);
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
 
-            return AddStream<IAviAudioStreamInternal>(
-                index => new EncodingAudioStreamWrapper(new AviAudioStream(index, this, 1, 44100, 16), encoder, ownsEncoder));
+            return AddStream<IAviAudioStreamInternal>(index => 
+                {
+                    var stream = new AviAudioStream(index, this, 1, 44100, 16);
+                    var encodingStream = new EncodingAudioStreamWrapper(stream, encoder, ownsEncoder);
+                    var asyncStream = new AsyncAudioStreamWrapper(encodingStream);
+                    return asyncStream;
+                });
         }
 
         private TStream AddStream<TStream>(Func<int, TStream> streamFactory)
@@ -223,6 +243,7 @@ namespace SharpAvi.Output
             {
                 lock (syncWrite)
                 {
+#warning Add Closing notification to streams to allow finalizing by encoders
                     foreach (var disposableStream in streams.OfType<IDisposable>())
                     {
                         disposableStream.Dispose();

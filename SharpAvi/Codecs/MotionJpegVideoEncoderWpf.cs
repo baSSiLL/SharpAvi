@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System;
+using System.Threading;
 
 namespace SharpAvi.Codecs
 {
@@ -27,7 +28,7 @@ namespace SharpAvi.Codecs
     {
         private readonly Int32Rect rect;
         private readonly int quality;
-        private WriteableBitmap bitmap;
+        private readonly ThreadLocal<WriteableBitmap> bitmap;
 
         /// <summary>
         /// Creates a new instance of <see cref="MotionJpegVideoEncoderWpf"/>.
@@ -46,6 +47,10 @@ namespace SharpAvi.Codecs
 
             rect = new Int32Rect(0, 0, width, height);
             this.quality = quality;
+
+            bitmap = new ThreadLocal<WriteableBitmap>(
+                () => new WriteableBitmap(rect.Width, rect.Height, 96, 96, PixelFormats.Bgr32, null),
+                false);
         }
 
 
@@ -84,17 +89,13 @@ namespace SharpAvi.Codecs
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
             // Creating bitmap here (not in constructor) to allow encoding on a separate thread
-            if (bitmap == null)
-            {
-                bitmap = new WriteableBitmap(rect.Width, rect.Height, 96, 96, PixelFormats.Bgr32, null);
-            }
-            bitmap.WritePixels(rect, source, rect.Width * 4, srcOffset);
+            bitmap.Value.WritePixels(rect, source, rect.Width * 4, srcOffset);
 
             var encoderImpl = new JpegBitmapEncoder
             {
                 QualityLevel = quality
             };
-            encoderImpl.Frames.Add(BitmapFrame.Create(bitmap));
+            encoderImpl.Frames.Add(BitmapFrame.Create(bitmap.Value));
 
             using (var stream = new MemoryStream(destination))
             {
