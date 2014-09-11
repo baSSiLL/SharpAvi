@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using NAudio.Wave;
+using SharpAvi.Codecs;
 
 namespace SharpAvi.Sample
 {
@@ -78,7 +80,10 @@ namespace SharpAvi.Sample
             recordingTimer.Change(1000, 1000);
 
             lastFileName = System.IO.Path.Combine(outputFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".avi");
-            recorder = new Recorder(lastFileName, encoder, encodingQuality, audioSourceIndex, audioWaveFormat);
+            var bitRate = Mp3AudioEncoderLame.SupportedBitRates.OrderBy(br => br).ElementAt(audioQuality);
+            recorder = new Recorder(lastFileName, 
+                encoder, encodingQuality, 
+                audioSourceIndex, audioWaveFormat, encodeAudio, bitRate);
         }
 
         private void StopRecording()
@@ -114,6 +119,8 @@ namespace SharpAvi.Sample
         private int encodingQuality;
         private int audioSourceIndex;
         private SupportedWaveFormat audioWaveFormat;
+        private bool encodeAudio;
+        private int audioQuality;
         private bool minimizeOnStart;
 
         private void InitDefaultSettings()
@@ -126,6 +133,8 @@ namespace SharpAvi.Sample
 
             audioSourceIndex = -1;
             audioWaveFormat = SupportedWaveFormat.WAVE_FORMAT_44M16;
+            encodeAudio = true;
+            audioQuality = (Mp3AudioEncoderLame.SupportedBitRates.Length + 1) / 2;
 
             minimizeOnStart = true;
         }
@@ -140,6 +149,8 @@ namespace SharpAvi.Sample
                 Quality = encodingQuality,
                 SelectedAudioSourceIndex = audioSourceIndex,
                 AudioWaveFormat = audioWaveFormat,
+                EncodeAudio = encodeAudio,
+                AudioQuality = audioQuality,
                 MinimizeOnStart = minimizeOnStart
             };
             
@@ -150,6 +161,8 @@ namespace SharpAvi.Sample
                 encodingQuality = dlg.Quality;
                 audioSourceIndex = dlg.SelectedAudioSourceIndex;
                 audioWaveFormat = dlg.AudioWaveFormat;
+                encodeAudio = dlg.EncodeAudio;
+                audioQuality = dlg.AudioQuality;
                 minimizeOnStart = dlg.MinimizeOnStart;
             }
         }

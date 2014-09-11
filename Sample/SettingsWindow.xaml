@@ -91,6 +91,8 @@
                             <RowDefinition/>
                             <RowDefinition Height="7"/>
                             <RowDefinition/>
+                            <RowDefinition Height="7"/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
 
                         <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Source</Label>
@@ -103,6 +105,24 @@
                         <CheckBox Grid.Row="2" Grid.Column="2"
                                   Content="Stereo"
                                   IsChecked="{Binding UseStereo}"/>
+                        
+                        <Label Grid.Row="4" Grid.Column="0">
+                            MP3 Encoding
+                        </Label>
+                        <StackPanel Grid.Row="4" Grid.Column="1"
+                                    Orientation="Horizontal">
+                            <CheckBox Name="EncodeAudioBox"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding EncodeAudio, Mode=TwoWay}"/>
+                            <Slider IsEnabled="{Binding ElementName=EncodeAudioBox, Path=IsChecked, Mode=OneWay}"
+                                    IsSnapToTickEnabled="True" TickFrequency="1"
+                                    SmallChange="1" LargeChange="1"
+                                    AutoToolTipPlacement="None"
+                                    Minimum="0"
+                                    Maximum="{Binding MaximumAudioQuality}"
+                                    Value="{Binding AudioQuality}"
+                                    Width="100" Margin="7,0"/>
+                        </StackPanel>
                     </Grid>
                 </Expander>
                 <CheckBox Foreground="DarkGray"

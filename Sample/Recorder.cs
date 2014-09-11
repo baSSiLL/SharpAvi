@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using NAudio.Wave;
 using SharpAvi.Codecs;
@@ -16,8 +17,8 @@ namespace SharpAvi.Sample
         private readonly int screenWidth;
         private readonly int screenHeight;
         private readonly AviWriter writer;
-        private readonly IVideoEncoder encoder;
-        private readonly AsyncVideoStreamWrapper videoStream;
+        private readonly IVideoEncoder videoEncoder;
+        private readonly IAviVideoStream videoStream;
         private readonly IAviAudioStream audioStream;
         private readonly WaveInEvent audioSource;
         private readonly Thread screenThread;
@@ -27,7 +28,7 @@ namespace SharpAvi.Sample
 
         public Recorder(string fileName, 
             FourCC codec, int quality, 
-            int audioSourceIndex, SupportedWaveFormat audioWaveFormat)
+            int audioSourceIndex, SupportedWaveFormat audioWaveFormat, bool encodeAudio, int audioBitRate)
         {
             screenWidth = (int)SystemParameters.PrimaryScreenWidth;
             screenHeight = (int)SystemParameters.PrimaryScreenHeight;
@@ -39,23 +40,20 @@ namespace SharpAvi.Sample
                 EmitIndex1 = true,
             };
 
-            // Create video encoder
-            encoder = CreateEncoder(codec, quality);
-
-            // Create video stream, wrapping it for encoding and asynchronous operations
-            videoStream = writer.AddVideoStream(screenWidth, screenHeight).WithEncoder(encoder).Async();
-
-            // BitsPerPixel and Codec are internally set by the encoder used
+            // Create video stream
+            videoStream = CreateVideoStream(codec, quality);
+            // Set only name. Other properties were when creating stream, 
+            // either explicitly by arguments or implicitly by the encoder used
             videoStream.Name = "Screencast";
 
             if (audioSourceIndex >= 0)
             {
-                var waveFormat = CreateWaveFormat(audioWaveFormat);
+                var waveFormat = ToWaveFormat(audioWaveFormat);
 
-                audioStream = writer.AddAudioStream(
-                    channelCount: waveFormat.Channels, 
-                    samplesPerSecond: waveFormat.SampleRate, 
-                    bitsPerSample: waveFormat.BitsPerSample);
+                audioStream = CreateAudioStream(waveFormat, encodeAudio, audioBitRate);
+                // Set only name. Other properties were when creating stream, 
+                // either explicitly by arguments or implicitly by the encoder used
+                audioStream.Name = "Voice";
 
                 audioSource = new WaveInEvent
                 {
@@ -83,30 +81,48 @@ namespace SharpAvi.Sample
             screenThread.Start();
         }
 
-        private IVideoEncoder CreateEncoder(FourCC codec, int quality)
+        private IAviVideoStream CreateVideoStream(FourCC codec, int quality)
         {
             // Select encoder type based on FOURCC of codec
             if (codec == KnownFourCCs.Codecs.Uncompressed)
             {
-                return new RgbVideoEncoder(screenWidth, screenHeight);
+                return writer.AddUncompressedVideoStream(screenWidth, screenHeight);
             }
             else if (codec == KnownFourCCs.Codecs.MotionJpeg)
             {
-                return new MotionJpegVideoEncoderWpf(screenWidth, screenHeight, quality);
+                return writer.AddMotionJpegVideoStream(screenWidth, screenHeight, quality);
             }
             else
             {
-                // It seems that all tested MPEG-4 VfW codecs ignore the quality affecting parameters passed through VfW API
-                // They only respect the settings from their own configuration dialogs, and Mpeg4VideoEncoder currently has no support for this
-                
-                // Most of VfW codecs expect single-threaded use, so we wrap this encoder to special wrapper
-                // Thus all calls to the encoder (including its instantiation) will be invoked on a single thread although encoding (and writing) is performed asynchronously
-                return new SingleThreadedVideoEncoderWrapper(
-                    () => new Mpeg4VideoEncoder(screenWidth, screenHeight, (double)writer.FramesPerSecond, 0, quality, codec));
+                return writer.AddMpeg4VideoStream(screenWidth, screenHeight, (double)writer.FramesPerSecond,
+                    // It seems that all tested MPEG-4 VfW codecs ignore the quality affecting parameters passed through VfW API
+                    // They only respect the settings from their own configuration dialogs, and Mpeg4VideoEncoder currently has no support for this
+                    quality: quality,
+                    codec: codec,
+                    // Most of VfW codecs expect single-threaded use, so we wrap this encoder to special wrapper
+                    // Thus all calls to the encoder (including its instantiation) will be invoked on a single thread although encoding (and writing) is performed asynchronously
+                    forceSingleThreadedAccess: true);
             }
         }
 
-        private static WaveFormat CreateWaveFormat(SupportedWaveFormat waveFormat)
+        private IAviAudioStream CreateAudioStream(WaveFormat waveFormat, bool encode, int bitRate)
+        {
+            // Create encoding or simple stream based on settings
+            if (encode)
+            {
+                // LAME DLL path is set in App.OnStartup()
+                return writer.AddMp3AudioStream(waveFormat.Channels, waveFormat.SampleRate, bitRate);
+            }
+            else
+            {
+                return writer.AddAudioStream(
+                    channelCount: waveFormat.Channels,
+                    samplesPerSecond: waveFormat.SampleRate,
+                    bitsPerSample: waveFormat.BitsPerSample);
+            }
+        }
+
+        private static WaveFormat ToWaveFormat(SupportedWaveFormat waveFormat)
         {
             switch (waveFormat)
             {
@@ -133,7 +149,7 @@ namespace SharpAvi.Sample
             writer.Close();
 
             stopThread.Close();
-            var encoderDisposable = encoder as IDisposable;
+            var encoderDisposable = videoEncoder as IDisposable;
             if (encoderDisposable != null)
             {
                 encoderDisposable.Dispose();
@@ -144,6 +160,7 @@ namespace SharpAvi.Sample
         {
             var frameInterval = TimeSpan.FromSeconds(1 / (double)writer.FramesPerSecond);
             var buffer = new byte[screenWidth * screenHeight * 4];
+            Task videoWriteTask = null;
             var isFirstFrame = true;
             var timeTillNextFrame = TimeSpan.Zero;
             while (!stopThread.WaitOne(timeTillNextFrame))
@@ -155,7 +172,7 @@ namespace SharpAvi.Sample
                 // Wait for the previous frame is written
                 if (!isFirstFrame)
                 {
-                    videoStream.EndWriteFrame();
+                    videoWriteTask.Wait();
                     videoFrameWritten.Set();
                 }
 
@@ -167,7 +184,7 @@ namespace SharpAvi.Sample
                 }
 
                 // Start asynchronous (encoding and) writing of the new frame
-                videoStream.BeginWriteFrame(true, buffer, 0, buffer.Length);
+                videoWriteTask = videoStream.WriteFrameAsync(true, buffer, 0, buffer.Length);
 
                 timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
                 if (timeTillNextFrame < TimeSpan.Zero)
@@ -179,7 +196,7 @@ namespace SharpAvi.Sample
             // Wait for the last frame is written
             if (!isFirstFrame)
             {
-                videoStream.EndWriteFrame();
+                videoWriteTask.Wait();
             }
         }
 

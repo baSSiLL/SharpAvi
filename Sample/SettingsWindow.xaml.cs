@@ -22,6 +22,8 @@ namespace SharpAvi.Sample
 
             InitAvailableAudioSources();
 
+            AudioQuality = (MaximumAudioQuality + 1) / 2;
+
             DataContext = this;
 
             WindowMoveBehavior.Attach(this);
@@ -32,7 +34,7 @@ namespace SharpAvi.Sample
             var codecs = new List<CodecInfo>();
             codecs.Add(new CodecInfo(KnownFourCCs.Codecs.Uncompressed, "(none)"));
             codecs.Add(new CodecInfo(KnownFourCCs.Codecs.MotionJpeg, "Motion JPEG"));
-            codecs.AddRange(Mpeg4VideoEncoder.GetAvailableCodecs());
+            codecs.AddRange(Mpeg4VideoEncoderVcm.GetAvailableCodecs());
             AvailableCodecs = codecs;
         }
 
@@ -112,6 +114,25 @@ namespace SharpAvi.Sample
             }
         }
 
+        public static readonly DependencyProperty EncodeAudioProperty =
+            DependencyProperty.Register("EncodeAudio", typeof(bool), typeof(SettingsWindow),
+                                        new PropertyMetadata(true));
+
+        public bool EncodeAudio
+        {
+            get { return (bool)GetValue(EncodeAudioProperty); }
+            set { SetValue(EncodeAudioProperty, value); }
+        }
+
+        public static readonly DependencyProperty AudioQualityProperty =
+            DependencyProperty.Register("AudioQuality", typeof(int), typeof(SettingsWindow));
+
+        public int AudioQuality
+        {
+            get { return (int)GetValue(AudioQualityProperty); }
+            set { SetValue(AudioQualityProperty, value); }
+        }
+
         public static readonly DependencyProperty MinimizeOnStartProperty =
             DependencyProperty.Register("MinimizeOnStart", typeof(bool), typeof(SettingsWindow));
 
@@ -142,6 +163,11 @@ namespace SharpAvi.Sample
             SupportedWaveFormat.WAVE_FORMAT_44M16, 
             SupportedWaveFormat.WAVE_FORMAT_44S16 
         };
+
+        public int MaximumAudioQuality
+        {
+            get { return Mp3AudioEncoderLame.SupportedBitRates.Length - 1; }
+        }
 
         public bool Is64BitProcess
         {
