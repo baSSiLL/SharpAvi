@@ -137,25 +137,25 @@ namespace SharpAvi.Codecs
 
         private const string VFW_DLL = "msvfw32.dll";
 
-        [DllImport(VFW_DLL)]
+        [DllImport(VFW_DLL, CallingConvention = CallingConvention.Winapi)]
         public static extern IntPtr ICOpen(uint fccType, uint fccHandler, int mode);
 
-        [DllImport(VFW_DLL)]
+        [DllImport(VFW_DLL, CallingConvention = CallingConvention.Winapi)]
         public static extern int ICClose(IntPtr handle);
 
-        [DllImport(VFW_DLL)]
+        [DllImport(VFW_DLL, CallingConvention = CallingConvention.Winapi)]
         public static extern int ICSendMessage(IntPtr handle, int message, IntPtr param1, IntPtr param2);
 
-        [DllImport(VFW_DLL)]
+        [DllImport(VFW_DLL, CallingConvention = CallingConvention.Winapi)]
         public static extern int ICSendMessage(IntPtr handle, int message, ref BitmapInfoHeader inHeader, ref BitmapInfoHeader outHeader);
 
-        [DllImport(VFW_DLL)]
+        [DllImport(VFW_DLL, CallingConvention = CallingConvention.Winapi)]
         public static extern int ICSendMessage(IntPtr handle, int message, ref CompressFramesInfo info, int sizeOfInfo);
 
-        [DllImport(VFW_DLL)]
+        [DllImport(VFW_DLL, CallingConvention = CallingConvention.Winapi)]
         public static extern int ICGetInfo(IntPtr handle, out CompressorInfo info, int infoSize);
 
-        [DllImport(VFW_DLL)]
+        [DllImport(VFW_DLL, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ICCompress(IntPtr handle, int inFlags,
                                              ref BitmapInfoHeader outHeader, IntPtr encodedData,
                                              ref BitmapInfoHeader inHeader, IntPtr frameData,

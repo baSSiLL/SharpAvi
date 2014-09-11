@@ -12,12 +12,13 @@ namespace SharpAvi.Codecs
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Supported codecs include Microsoft MPEG-4 V3 and V2, Xvid, DivX and x264.
+    /// Supported codecs include Microsoft MPEG-4 V3 and V2, Xvid, DivX and x264vfw.
     /// The codec to be used is selected from the ones installed on the system.
     /// The encoder can be forced to use MPEG-4 codecs that are not explicitly supported. However, in this case
     /// it is not guaranteed to work properly.
     /// </para>
     /// <para>
+    /// For <c>x264vfw</c> codec, it is recommended to enable <c>Zero Latency</c> option in its settings.
     /// 64-bit support is limited, as there are no 64-bit versions of Microsoft and DivX codecs, 
     /// and Xvid can produce some errors.
     /// </para>
@@ -306,6 +307,8 @@ namespace SharpAvi.Codecs
                 int chunkID;
                 var flags = framesFromLastKey >= keyFrameRate ? VfwApi.ICCOMPRESS_KEYFRAME : 0;
 
+                System.Diagnostics.Trace.WriteLine(Environment.Is64BitProcess);
+                System.Diagnostics.Trace.WriteLine(IntPtr.Size);
                 var result = VfwApi.ICCompress(compressorHandle, flags,
                     ref outInfo, encodedHandle.AddrOfPinnedObject(), ref inInfo, sourceHandle.AddrOfPinnedObject(),
                     out chunkID, out outFlags, frameIndex,
