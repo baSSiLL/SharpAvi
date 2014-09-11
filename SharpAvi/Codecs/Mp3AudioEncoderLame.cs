@@ -20,11 +20,6 @@ namespace SharpAvi.Codecs
     /// Mpeg Layer 3 (MP3) audio encoder using the LAME codec in external DLL.
     /// </summary>
     /// <remarks>
-    /// The encoder defines the following properties of the stream (they should not be modified manually):
-    /// <see cref="IAviAudioEncoder.ChannelCount"/>, <see cref="IAviAudioEncoder.SamplesPerSecond"/>,
-    /// <see cref="IAviAudioEncoder.BitsPerSample"/>, <see cref="IAviAudioEncoder.BytesPerSecond"/>,
-    /// <see cref="IAviAudioEncoder.Granularity"/>, <see cref="IAviAudioEncoder.Format"/>,
-    /// <see cref="IAviAudioEncoder.FormatSpecificData"/>.
     /// The class is designed for using only a single instance at a time.
     /// Find information about and downloads of the LAME project at http://lame.sourceforge.net/
     /// </remarks>
@@ -122,7 +117,7 @@ namespace SharpAvi.Codecs
         private const int SAMPLE_BYTE_SIZE = 2;
 
         private readonly ILameFacade lame;
-        private readonly byte[] finalBuffer = new byte[7200];
+        private readonly byte[] formatData;
 
         /// <summary>
         /// Creates a new instance of <see cref="Mp3AudioEncoderLame"/>.
@@ -151,11 +146,27 @@ namespace SharpAvi.Codecs
             lame.OutputBitRate = outputBitRateKbps;
 
             lame.PrepareEncoding();
+
+            formatData = FillFormatData();
+        }
+
+        public void Dispose()
+        {
+            var lameDisposable = lame as IDisposable;
+            if (lameDisposable != null)
+            {
+                lameDisposable.Dispose();
+            }
         }
 
         public int EncodeBlock(byte[] source, int sourceOffset, int sourceCount, byte[] destination, int destinationOffset)
         {
             return lame.Encode(source, sourceOffset, sourceCount / SAMPLE_BYTE_SIZE, destination, destinationOffset);
+        }
+
+        public int Flush(byte[] destination, int destinationOffset)
+        {
+            return lame.FinishEncoding(destination, destinationOffset);
         }
 
         public int GetMaxEncodedLength(int sourceCount)
@@ -165,15 +176,45 @@ namespace SharpAvi.Codecs
             return (int)Math.Ceiling(1.25 * numberOfSamples + 7200);
         }
 
-        public void InitializeStream(SharpAvi.Output.IAviAudioStream stream)
-        {
-            stream.Format = AudioFormats.Mp3;
-            stream.ChannelCount = lame.ChannelCount;
-            stream.SamplesPerSecond = lame.OutputSampleRate;
-            stream.BitsPerSample = 16;
-            stream.BytesPerSecond = lame.OutputBitRate * 1000 / 8;
-            stream.Granularity = 1;
 
+        public int ChannelCount
+        {
+            get { return lame.ChannelCount; }
+        }
+
+        public int SamplesPerSecond
+        {
+            get { return lame.OutputSampleRate; }
+        }
+
+        public int BitsPerSample
+        {
+            get { return SAMPLE_BYTE_SIZE * 8; }
+        }
+
+        public short Format
+        {
+            get { return AudioFormats.Mp3; }
+        }
+
+        public int BytesPerSecond
+        {
+            get { return lame.OutputBitRate * 1000 / 8; }
+        }
+
+        public int Granularity
+        {
+            get { return 1; }
+        }
+
+        public byte[] FormatSpecificData
+        {
+            get { return formatData; }
+        }
+
+
+        private byte[] FillFormatData()
+        {
             // See MPEGLAYER3WAVEFORMAT structure
             var mp3Data = new MemoryStream(4 * sizeof(ushort) + sizeof(uint));
             using (var writer = new BinaryWriter(mp3Data))
@@ -184,30 +225,7 @@ namespace SharpAvi.Codecs
                 writer.Write((ushort)1); // nFramesPerBlock
                 writer.Write((ushort)lame.EncoderDelay);
             }
-            stream.FormatSpecificData = mp3Data.ToArray();
-        }
-
-        /// <summary>
-        /// Writes final data to the stream.
-        /// </summary>
-        /// <remarks>
-        /// Should be called before <see cref="AviWriter.Close"/>.
-        /// </remarks>
-        public void FinalizeStream(SharpAvi.Output.IAviAudioStream stream)
-        {
-            Contract.Requires(stream != null);
-
-            var length = lame.FinishEncoding(finalBuffer, 0);
-            stream.WriteBlock(finalBuffer, 0, length);
-        }
-
-        public void Dispose()
-        {
-            var lameDisposable = lame as IDisposable;
-            if (lameDisposable != null)
-            {
-                lameDisposable.Dispose();
-            }
+            return mp3Data.ToArray();
         }
     }
 }

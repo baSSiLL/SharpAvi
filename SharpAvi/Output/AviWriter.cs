@@ -198,8 +198,12 @@ namespace SharpAvi.Output
         /// The data is passed to the encoder and the encoded result is written to the stream.
         /// </para>
         /// <para>
-        /// Some properties of the stream are defined by the encoder, other may be set before writing.
-        /// Consult documentation for specific encoders.
+        /// The encoder defines the following properties of the stream:
+        /// <see cref="IAviAudioStream.ChannelCount"/>, <see cref="IAviAudioStream.SamplesPerSecond"/>,
+        /// <see cref="IAviAudioStream.BitsPerSample"/>, <see cref="IAviAudioStream.BytesPerSecond"/>,
+        /// <see cref="IAviAudioStream.Granularity"/>, <see cref="IAviAudioStream.Format"/>,
+        /// <see cref="IAviAudioStream.FormatSpecificData"/>.
+        /// These properties cannot be modified.
         /// </para>
         /// </remarks>
         public IAviAudioStream AddEncodingAudioStream(IAudioEncoder encoder, bool ownsEncoder = true)
@@ -241,14 +245,23 @@ namespace SharpAvi.Output
         {
             if (!isClosed)
             {
+                bool finishWriting;
                 lock (syncWrite)
                 {
-#warning Add Closing notification to streams to allow finalizing by encoders
-                    foreach (var disposableStream in streams.OfType<IDisposable>())
+                    finishWriting = startedWriting;
+                }
+                // Call FinishWriting without holding the lock
+                // because additional writes may be performed inside
+                if (finishWriting)
+                {
+                    foreach (var stream in streams)
                     {
-                        disposableStream.Dispose();
+                        stream.FinishWriting();
                     }
+                }
 
+                lock (syncWrite)
+                {
                     if (startedWriting)
                     {
                         foreach (var stream in streams)
@@ -265,6 +278,11 @@ namespace SharpAvi.Output
 
                     fileWriter.Close();
                     isClosed = true;
+                }
+
+                foreach (var disposableStream in streams.OfType<IDisposable>())
+                {
+                    disposableStream.Dispose();
                 }
             }
         }
@@ -293,9 +311,9 @@ namespace SharpAvi.Output
         private void PrepareForWriting()
         {
             startedWriting = true;
-            foreach (var stream in streams.Cast<IAviStreamInternal>())
+            foreach (var stream in streams)
             {
-                stream.Freeze();
+                stream.PrepareForWriting();
             }
             AviUtils.SplitFrameRate(FramesPerSecond, out frameRateNumerator, out frameRateDenominator);
 

@@ -25,8 +25,6 @@ namespace SharpAvi.Output
 
             this.encoder = encoder;
             this.ownsEncoder = ownsEncoder;
-
-            encoder.InitializeStream(baseStream);
         }
 
         public override void Dispose()
@@ -48,6 +46,7 @@ namespace SharpAvi.Output
         /// </summary>
         public override int ChannelCount
         {
+            get { return encoder.ChannelCount; }
             set { ThrowPropertyDefinedByEncoder(); }
         }
 
@@ -56,6 +55,7 @@ namespace SharpAvi.Output
         /// </summary>
         public override int SamplesPerSecond
         {
+            get { return encoder.SamplesPerSecond; }
             set { ThrowPropertyDefinedByEncoder(); }
         }
 
@@ -64,6 +64,7 @@ namespace SharpAvi.Output
         /// </summary>
         public override int BitsPerSample
         {
+            get { return encoder.BitsPerSample; }
             set { ThrowPropertyDefinedByEncoder(); }
         }
 
@@ -72,6 +73,7 @@ namespace SharpAvi.Output
         /// </summary>
         public override short Format
         {
+            get { return encoder.Format; }
             set { ThrowPropertyDefinedByEncoder(); }
         }
 
@@ -80,6 +82,7 @@ namespace SharpAvi.Output
         /// </summary>
         public override int BytesPerSecond
         {
+            get { return encoder.BytesPerSecond; }
             set { ThrowPropertyDefinedByEncoder(); }
         }
 
@@ -88,6 +91,7 @@ namespace SharpAvi.Output
         /// </summary>
         public override int Granularity
         {
+            get { return encoder.Granularity; }
             set { ThrowPropertyDefinedByEncoder(); }
         }
 
@@ -96,6 +100,7 @@ namespace SharpAvi.Output
         /// </summary>
         public override byte[] FormatSpecificData
         {
+            get { return encoder.FormatSpecificData; }
             set { ThrowPropertyDefinedByEncoder(); }
         }
 
@@ -109,8 +114,47 @@ namespace SharpAvi.Output
             {
                 EnsureBufferIsSufficient(length);
                 var encodedLength = encoder.EncodeBlock(data, startIndex, length, encodedBuffer, 0);
-                base.WriteBlock(encodedBuffer, 0, encodedLength);
+                if (encodedLength > 0)
+                {
+                    base.WriteBlock(encodedBuffer, 0, encodedLength);
+                }
             }
+        }
+
+        public override System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
+        {
+            throw new NotSupportedException("Asynchronous writes are not supported.");
+        }
+
+        public override void PrepareForWriting()
+        {
+            // Set properties of the base stream
+            BaseStream.ChannelCount = ChannelCount;
+            BaseStream.SamplesPerSecond = SamplesPerSecond;
+            BaseStream.BitsPerSample = BitsPerSample;
+            BaseStream.Format = Format;
+            BaseStream.FormatSpecificData = FormatSpecificData;
+            BaseStream.BytesPerSecond = BytesPerSecond;
+            BaseStream.Granularity = Granularity;
+
+            base.PrepareForWriting();
+        }
+
+        public override void FinishWriting()
+        {
+            // Prevent accessing encoded buffer by multiple threads simultaneously
+            lock (syncBuffer)
+            {
+                // Flush the encoder
+                EnsureBufferIsSufficient(0);
+                var encodedLength = encoder.Flush(encodedBuffer, 0);
+                if (encodedLength > 0)
+                {
+                    base.WriteBlock(encodedBuffer, 0, encodedLength);
+                }
+            }
+
+            base.FinishWriting();
         }
 
 

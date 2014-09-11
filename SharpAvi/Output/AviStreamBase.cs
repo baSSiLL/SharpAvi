@@ -55,7 +55,13 @@ namespace SharpAvi.Output
 
         public abstract void WriteFormat();
 
-        public void Freeze()
+        /// <summary>
+        /// Prepares the stream for writing.
+        /// </summary>
+        /// <remarks>
+        /// Default implementation freezes properties of the stream (further modifications are not allowed).
+        /// </remarks>
+        public virtual void PrepareForWriting()
         {
             if (!isFrozen)
             {
@@ -63,6 +69,16 @@ namespace SharpAvi.Output
 
                 chunkId = GenerateChunkId();
             }
+        }
+
+        /// <summary>
+        /// Performs actions before closing the stream.
+        /// </summary>
+        /// <remarks>
+        /// Default implementation does nothing.
+        /// </remarks>
+        public virtual void FinishWriting()
+        {
         }
 
 

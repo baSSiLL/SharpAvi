@@ -115,9 +115,14 @@ namespace SharpAvi.Output
             get { return baseStream.ChunkId; }
         }
 
-        public virtual void Freeze()
+        public virtual void PrepareForWriting()
         {
-            baseStream.Freeze();
+            baseStream.PrepareForWriting();
+        }
+
+        public virtual void FinishWriting()
+        {
+            baseStream.FinishWriting();
         }
 
         public void WriteHeader()

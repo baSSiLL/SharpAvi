@@ -29,5 +29,14 @@ namespace SharpAvi.Output
         {
             return writeInvoker.InvokeAsync(() => base.WriteFrame(isKeyFrame, frameData, startIndex, length));
         }
+
+        public override void FinishWriting()
+        {
+            // Perform all pending writes and then let the base stream to finish
+            // (possibly writing some more data synchronously)
+            writeInvoker.WaitForPendingInvocations();
+
+            base.FinishWriting();
+        }
     }
 }

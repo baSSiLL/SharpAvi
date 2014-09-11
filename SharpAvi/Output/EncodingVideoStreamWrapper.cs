@@ -29,9 +29,6 @@ namespace SharpAvi.Output
             this.encoder = encoder;
             this.ownsEncoder = ownsEncoder;
             encodedBuffer = new byte[encoder.MaxEncodedSize];
-
-            baseStream.Codec = encoder.Codec;
-            baseStream.BitsPerPixel = encoder.BitsPerPixel;
         }
 
         public override void Dispose()
@@ -78,6 +75,20 @@ namespace SharpAvi.Output
                 count = encoder.EncodeFrame(frameData, startIndex, encodedBuffer, 0, out isKeyFrame);
                 base.WriteFrame(isKeyFrame, encodedBuffer, 0, count);
             }
+        }
+
+        public override System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
+        {
+            throw new NotSupportedException("Asynchronous writes are not supported.");
+        }
+
+        public override void PrepareForWriting()
+        {
+            // Set properties of the base stream
+            BaseStream.Codec = encoder.Codec;
+            BaseStream.BitsPerPixel = encoder.BitsPerPixel;
+
+            base.PrepareForWriting();
         }
 
 
