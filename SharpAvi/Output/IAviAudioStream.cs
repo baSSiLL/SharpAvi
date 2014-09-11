@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
+#if FX45
 using System.Threading.Tasks;
+#endif
 
 namespace SharpAvi.Output
 {
@@ -72,6 +74,7 @@ namespace SharpAvi.Output
         /// </remarks>
         void WriteBlock(byte[] data, int startIndex, int length);
 
+#if FX45
         /// <summary>
         /// Asynchronously writes a block of audio data.
         /// </summary>
@@ -85,8 +88,32 @@ namespace SharpAvi.Output
         /// Division of audio data into blocks may be arbitrary.
         /// However, it is reasonable to write blocks of approximately the same duration
         /// as a single video frame.
+        /// The contents of <paramref name="data"/> should not be modified until this write operation ends.
         /// </remarks>
         Task WriteBlockAsync(byte[] data, int startIndex, int length);
+#else
+        /// <summary>
+        /// Asynchronously writes a block to the stream.
+        /// </summary>
+        /// <param name="data">Data buffer.</param>
+        /// <param name="startIndex">Start index of data.</param>
+        /// <param name="length">Length of data.</param>
+        /// <returns><see cref="IAsyncResult"/> object representing this asynchronous operation.</returns>
+        /// <remarks>
+        /// Division of audio data into blocks may be arbitrary.
+        /// However, it is reasonable to write blocks of approximately the same duration
+        /// as a single video frame.
+        /// The contents of <paramref name="data"/> should not be modified until this write operation ends.
+        /// </remarks>
+        /// <seealso cref="EndWriteFrame"/>
+        IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject);
+
+        /// <summary>
+        /// Waits for asynchronous write operation to complete.
+        /// </summary>
+        /// <seealso cref="BeginWriteBlock"/>
+        void EndWriteBlock(IAsyncResult asyncResult);
+#endif
 
         /// <summary>
         /// Number of blocks written.
@@ -195,6 +222,7 @@ namespace SharpAvi.Output
                 Contract.Requires(startIndex + length <= data.Length);
             }
 
+#if FX45
             public Task WriteBlockAsync(byte[] data, int startIndex, int length)
             {
                 Contract.Requires(data != null);
@@ -204,6 +232,23 @@ namespace SharpAvi.Output
                 Contract.Ensures(Contract.Result<Task>() != null);
                 throw new NotImplementedException();
             }
+#else
+            public IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
+            {
+                Contract.Requires(data != null);
+                Contract.Requires(startIndex >= 0);
+                Contract.Requires(length >= 0);
+                Contract.Requires(startIndex + length <= data.Length);
+                Contract.Ensures(Contract.Result<IAsyncResult>() != null);
+                throw new NotImplementedException();
+            }
+
+            public void EndWriteBlock(IAsyncResult asyncResult)
+            {
+                Contract.Requires(asyncResult != null);
+                throw new NotImplementedException();
+            }
+#endif
 
             public int BlocksWritten
             {

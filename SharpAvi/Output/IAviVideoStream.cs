@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
+#if FX45
 using System.Threading.Tasks;
+#endif
 
 namespace SharpAvi.Output
 {
@@ -36,13 +38,38 @@ namespace SharpAvi.Output
         /// <param name="length">Length of the frame data.</param>
         void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length);
 
+#if FX45
         /// <summary>Asynchronously writes a frame to the stream.</summary>
         /// <param name="isKeyFrame">Is this frame a key frame?</param>
         /// <param name="frameData">Array containing the frame data.</param>
         /// <param name="startIndex">Index of the first byte of the frame data.</param>
         /// <param name="length">Length of the frame data.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
+        /// <remarks>
+        /// The contents of <paramref name="frameData"/> should not be modified until this write operation ends.
+        /// </remarks>
         Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length);
+#else
+        /// <summary>
+        /// Asynchronously writes a frame to the stream.
+        /// </summary>
+        /// <param name="isKeyFrame">Is this frame a key frame?</param>
+        /// <param name="frameData">Array containing the frame data.</param>
+        /// <param name="startIndex">Index of the first byte of the frame data.</param>
+        /// <param name="length">Length of the frame data.</param>
+        /// <returns><see cref="IAsyncResult"/> object representing this asynchronous operation.</returns>
+        /// <remarks>
+        /// The contents of <paramref name="frameData"/> should not be modified until this write operation ends.
+        /// </remarks>
+        /// <seealso cref="EndWriteFrame"/>
+        IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length, AsyncCallback userCallback, object stateObject);
+
+        /// <summary>
+        /// Waits for asynchronous write operation to complete.
+        /// </summary>
+        /// <seealso cref="BeginWriteFrame"/>
+        void EndWriteFrame(IAsyncResult asyncResult);
+#endif
 
         /// <summary>
         /// Number of frames written.
@@ -113,6 +140,7 @@ namespace SharpAvi.Output
                 Contract.Requires(startIndex + length <= frameData.Length);
             }
 
+#if FX45
             public Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
             {
                 Contract.Requires(frameData != null);
@@ -122,6 +150,22 @@ namespace SharpAvi.Output
                 Contract.Ensures(Contract.Result<Task>() != null);
                 throw new NotImplementedException();
             }
+#else
+            public IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length, AsyncCallback userCallback, object stateObject)
+            {
+                Contract.Requires(frameData != null);
+                Contract.Requires(startIndex >= 0);
+                Contract.Requires(length >= 0);
+                Contract.Requires(startIndex + length <= frameData.Length);
+                Contract.Ensures(Contract.Result<IAsyncResult>() != null);
+                throw new NotImplementedException();
+            }
+
+            public void EndWriteFrame(IAsyncResult asyncResult)
+            {
+                Contract.Requires(asyncResult != null);
+            }
+#endif
 
             public int FramesWritten
             {

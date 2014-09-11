@@ -89,19 +89,19 @@ namespace SharpAvi.Codecs.Runtime
             lame_set_decode_only(context, 0);
 
             // Finally, initialize encoding process
-            var result = lame_init_params(context);
+            int result = lame_init_params(context);
             CheckResult(result == 0, "lame_init_params");
         }
 
         public int Encode(byte[] source, int sourceIndex, int sampleCount, byte[] dest, int destIndex)
         {
-            var sourceHandle = GCHandle.Alloc(source, GCHandleType.Pinned);
-            var destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
+            GCHandle sourceHandle = GCHandle.Alloc(source, GCHandleType.Pinned);
+            GCHandle destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
             try
             {
-                var sourcePtr = sourceHandle.AddrOfPinnedObject() + sourceIndex;
-                var destPtr = destHandle.AddrOfPinnedObject() + destIndex;
-                var outputSize = dest.Length - destIndex;
+                IntPtr sourcePtr = new IntPtr(sourceHandle.AddrOfPinnedObject().ToInt64() + sourceIndex);
+                IntPtr destPtr = new IntPtr(destHandle.AddrOfPinnedObject().ToInt64() + destIndex);
+                int outputSize = dest.Length - destIndex;
                 int result = -1;
                 switch (ChannelCount)
                 {
@@ -128,12 +128,12 @@ namespace SharpAvi.Codecs.Runtime
 
         public int FinishEncoding(byte[] dest, int destIndex)
         {
-            var destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
+            GCHandle destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
             try
             {
-                var destPtr = destHandle.AddrOfPinnedObject() + destIndex;
-                var destLength = dest.Length - destIndex;
-                var result = lame_encode_flush(context, destPtr, destLength);
+                IntPtr destPtr = new IntPtr(destHandle.AddrOfPinnedObject().ToInt64() + destIndex);
+                int destLength = dest.Length - destIndex;
+                int result = lame_encode_flush(context, destPtr, destLength);
                 CheckResult(result >= 0, "lame_encode_flush");
                 return result;
             }

@@ -36,7 +36,16 @@ namespace SharpAvi.Output
         private int riffAviFrameCount = -1;
         private int index1Count = 0;
 
+#if FX45
         private readonly List<IAviStreamInternal> streams = new List<IAviStreamInternal>();
+#else
+        private readonly List<IAviStream> streamsList = new List<IAviStream>();
+        private IEnumerable<IAviStreamInternal> streams
+        {
+            get { return streamsList.Cast<IAviStreamInternal>(); }
+        }
+        private readonly ReadOnlyCollection<IAviStream> streamsRO;
+#endif
         private StreamInfo[] streamsInfo;
 
         /// <summary>
@@ -45,6 +54,10 @@ namespace SharpAvi.Output
         /// <param name="fileName">Path to an AVI file being written.</param>
         public AviWriter(string fileName)
         {
+#if !FX45
+            streamsRO = new ReadOnlyCollection<IAviStream>(streamsList);
+#endif
+
             var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
             fileWriter = new BinaryWriter(fileStream);
         }
@@ -95,10 +108,17 @@ namespace SharpAvi.Output
         private bool emitIndex1;
 
         /// <summary>AVI streams that have been added so far.</summary>
+#if FX45
         public IReadOnlyList<IAviStream> Streams
         {
             get { return streams; }
         }
+#else
+        public ReadOnlyCollection<IAviStream> Streams
+        {
+            get { return streamsRO; }
+        }
+#endif
 
         /// <summary>Adds new video stream.</summary>
         /// <param name="width">Frame's width.</param>
@@ -232,8 +252,12 @@ namespace SharpAvi.Output
                 CheckNotClosed();
                 CheckNotStartedWriting();
 
-                var stream = streamFactory.Invoke(streams.Count);
+                var stream = streamFactory.Invoke(Streams.Count);
+#if FX45
                 streams.Add(stream);
+#else
+                streamsList.Add(stream);
+#endif
                 return stream;
             }
         }
@@ -559,7 +583,7 @@ namespace SharpAvi.Output
             fileWriter.Write((uint)flags); // MainHeaderFlags
             fileWriter.Write(riffAviFrameCount); // total frames (in the first RIFF list containing this header)
             fileWriter.Write(0U); // initial frames
-            fileWriter.Write((uint)streams.Count); // stream count
+            fileWriter.Write((uint)Streams.Count); // stream count
             fileWriter.Write(0U); // suggested buffer size
             var firstVideoStream = streams.OfType<IAviVideoStream>().First();
             fileWriter.Write(firstVideoStream.Width); // video width
@@ -647,7 +671,7 @@ namespace SharpAvi.Output
         {
             var chunk = fileWriter.OpenChunk(KnownFourCCs.Chunks.Index1);
 
-            var indices = streamsInfo.Select((si, i) => new {si.Index1, ChunkId = (uint)streams[i].ChunkId}).
+            var indices = streamsInfo.Select((si, i) => new {si.Index1, ChunkId = (uint)streams.ElementAt(i).ChunkId}).
                 Where(a => a.Index1.Count > 0)
                 .ToList();
             while (index1Count > 0)

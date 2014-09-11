@@ -4,7 +4,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Threading;
+#if FX45
 using System.Threading.Tasks;
+#endif
 using System.Windows;
 using NAudio.Wave;
 using SharpAvi.Codecs;
@@ -17,7 +19,6 @@ namespace SharpAvi.Sample
         private readonly int screenWidth;
         private readonly int screenHeight;
         private readonly AviWriter writer;
-        private readonly IVideoEncoder videoEncoder;
         private readonly IAviVideoStream videoStream;
         private readonly IAviAudioStream audioStream;
         private readonly WaveInEvent audioSource;
@@ -149,18 +150,17 @@ namespace SharpAvi.Sample
             writer.Close();
 
             stopThread.Close();
-            var encoderDisposable = videoEncoder as IDisposable;
-            if (encoderDisposable != null)
-            {
-                encoderDisposable.Dispose();
-            }
         }
 
         private void RecordScreen()
         {
             var frameInterval = TimeSpan.FromSeconds(1 / (double)writer.FramesPerSecond);
             var buffer = new byte[screenWidth * screenHeight * 4];
+#if FX45
             Task videoWriteTask = null;
+#else
+            IAsyncResult videoWriteResult = null;
+#endif
             var isFirstFrame = true;
             var timeTillNextFrame = TimeSpan.Zero;
             while (!stopThread.WaitOne(timeTillNextFrame))
@@ -172,7 +172,11 @@ namespace SharpAvi.Sample
                 // Wait for the previous frame is written
                 if (!isFirstFrame)
                 {
+#if FX45
                     videoWriteTask.Wait();
+#else
+                    videoStream.EndWriteFrame(videoWriteResult);
+#endif
                     videoFrameWritten.Set();
                 }
 
@@ -184,7 +188,11 @@ namespace SharpAvi.Sample
                 }
 
                 // Start asynchronous (encoding and) writing of the new frame
+#if FX45
                 videoWriteTask = videoStream.WriteFrameAsync(true, buffer, 0, buffer.Length);
+#else
+                videoWriteResult = videoStream.BeginWriteFrame(true, buffer, 0, buffer.Length, null, null);
+#endif
 
                 timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
                 if (timeTillNextFrame < TimeSpan.Zero)
@@ -196,7 +204,11 @@ namespace SharpAvi.Sample
             // Wait for the last frame is written
             if (!isFirstFrame)
             {
+#if FX45
                 videoWriteTask.Wait();
+#else
+                videoStream.EndWriteFrame(videoWriteResult);
+#endif
             }
         }
 

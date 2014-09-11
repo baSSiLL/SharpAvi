@@ -307,8 +307,6 @@ namespace SharpAvi.Codecs
                 int chunkID;
                 var flags = framesFromLastKey >= keyFrameRate ? VfwApi.ICCOMPRESS_KEYFRAME : 0;
 
-                System.Diagnostics.Trace.WriteLine(Environment.Is64BitProcess);
-                System.Diagnostics.Trace.WriteLine(IntPtr.Size);
                 var result = VfwApi.ICCompress(compressorHandle, flags,
                     ref outInfo, encodedHandle.AddrOfPinnedObject(), ref inInfo, sourceHandle.AddrOfPinnedObject(),
                     out chunkID, out outFlags, frameIndex,

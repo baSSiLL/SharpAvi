@@ -151,7 +151,7 @@ namespace SharpAvi.Codecs
 
             public int EncodeBlock(byte[] source, int sourceOffset, int sourceCount, byte[] destination, int destinationOffset)
             {
-                Contract.Requires(sourceCount != null);
+                Contract.Requires(source != null);
                 Contract.Requires(sourceOffset >= 0);
                 Contract.Requires(sourceCount >= 0);
                 Contract.Requires(sourceOffset + sourceCount <= source.Length);

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using SharpAvi.Output;
 
 namespace SharpAvi.Codecs
@@ -34,7 +33,11 @@ namespace SharpAvi.Codecs
         /// </summary>
         /// <seealso cref="IAviWriter.AddEncodingVideoStream"/>
         /// <seealso cref="MotionJpegVideoEncoderWpf"/>
-        public static IAviVideoStream AddMotionJpegVideoStream(this AviWriter writer, int width, int height, int quality = 70)
+        public static IAviVideoStream AddMotionJpegVideoStream(this AviWriter writer, int width, int height, int quality = 70
+#if !FX45
+            , bool forceSingleThreadedAccess = false
+#endif
+            )
         {
             Contract.Requires(writer != null);
             Contract.Requires(width > 0);
@@ -42,7 +45,14 @@ namespace SharpAvi.Codecs
             Contract.Requires(1 <= quality && quality <= 100);
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
+#if FX45
             var encoder = new MotionJpegVideoEncoderWpf(width, height, quality);
+#else
+            var encoderFactory = new Func<IVideoEncoder>(() => new MotionJpegVideoEncoderWpf(width, height, quality));
+            var encoder = forceSingleThreadedAccess
+                ? new SingleThreadedVideoEncoderWrapper(encoderFactory)
+                : encoderFactory.Invoke();
+#endif
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
 
