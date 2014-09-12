@@ -101,6 +101,8 @@ namespace SharpAvi.Output
         /// <param name="data">Data buffer.</param>
         /// <param name="startIndex">Start index of data.</param>
         /// <param name="length">Length of data.</param>
+        /// <param name="userCallback">Callback to be invoked after asynchronous operation ends.</param>
+        /// <param name="stateObject">User object that will be passed to <paramref name="userCallback"/>.</param>
         /// <returns><see cref="IAsyncResult"/> object representing this asynchronous operation.</returns>
         /// <remarks>
         /// Division of audio data into blocks may be arbitrary.
@@ -108,7 +110,7 @@ namespace SharpAvi.Output
         /// as a single video frame.
         /// The contents of <paramref name="data"/> should not be modified until this write operation ends.
         /// </remarks>
-        /// <seealso cref="EndWriteFrame"/>
+        /// <seealso cref="EndWriteBlock"/>
         IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject);
 
         /// <summary>

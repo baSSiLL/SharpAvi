@@ -57,6 +57,8 @@ namespace SharpAvi.Output
         /// <param name="frameData">Array containing the frame data.</param>
         /// <param name="startIndex">Index of the first byte of the frame data.</param>
         /// <param name="length">Length of the frame data.</param>
+        /// <param name="userCallback">Callback to be invoked after asynchronous operation ends.</param>
+        /// <param name="stateObject">User object that will be passed to <paramref name="userCallback"/>.</param>
         /// <returns><see cref="IAsyncResult"/> object representing this asynchronous operation.</returns>
         /// <remarks>
         /// The contents of <paramref name="frameData"/> should not be modified until this write operation ends.
