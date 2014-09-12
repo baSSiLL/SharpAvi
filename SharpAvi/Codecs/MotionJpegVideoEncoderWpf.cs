@@ -15,10 +15,11 @@ namespace SharpAvi.Codecs
     /// <remarks>
     /// <para>
     /// The implementation relies on <see cref="JpegBitmapEncoder"/>.
-#if !FX45
+    /// </para>
+    /// <para>
+    /// Note for .NET 3.5:
     /// This encoder is designed for single-threaded use. If you use it in multi-threaded scenarios 
     /// (like asynchronous calls), then consider wrapping it in <see cref="SingleThreadedVideoEncoderWrapper"/>.
-#endif
     /// </para>
     /// <para>
     /// This encoder is not fully conformant to the Motion JPEG standard, as each encoded frame is a full JPEG picture 

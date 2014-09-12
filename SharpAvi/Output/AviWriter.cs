@@ -155,7 +155,7 @@ namespace SharpAvi.Output
         /// <remarks>
         /// <para>
         /// Stream is initialized to be to be encoded with the specified encoder.
-        /// Method <see cref="IAviVideoStream.Write"/> expects data in the same format as encoders,
+        /// Method <see cref="IAviVideoStream.WriteFrame"/> expects data in the same format as encoders,
         /// that is top-down BGR32 bitmap. It is passed to the encoder and the encoded result is written
         /// to the stream.
         /// Parameters <c>isKeyFrame</c> and <c>length</c> are ignored by encoding streams,
@@ -214,7 +214,7 @@ namespace SharpAvi.Output
         /// <remarks>
         /// <para>
         /// Stream is initialized to be to be encoded with the specified encoder.
-        /// Method <see cref="IAviAudioStream.Write"/> expects data in the same format as encoder (see encoder's docs). 
+        /// Method <see cref="IAviAudioStream.WriteBlock"/> expects data in the same format as encoder (see encoder's docs). 
         /// The data is passed to the encoder and the encoded result is written to the stream.
         /// </para>
         /// <para>

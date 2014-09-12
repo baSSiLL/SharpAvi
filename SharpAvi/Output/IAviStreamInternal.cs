@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace SharpAvi.Output
 {
@@ -39,13 +40,13 @@ namespace SharpAvi.Output
 
         /// <summary>
         /// Called to delegate writing of the stream header to a proper overload
-        /// of <see cref="IAviStreamWriteHandler.WriteStreamHeader"/>.
+        /// of <c>IAviStreamWriteHandler.WriteStreamHeader</c>.
         /// </summary>
         void WriteHeader();
 
         /// <summary>
         /// Called to delegate writing of the stream format to a proper overload
-        /// of <see cref="IAviStreamWriteHandler.WriteStreamFormat"/>.
+        /// of <c>IAviStreamWriteHandler.WriteStreamFormat</c>.
         /// </summary>
         void WriteFormat();
     }

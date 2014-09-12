@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
+    /// <summary>
+    /// Audio stream of AVI file.
+    /// </summary>
     [ContractClass(typeof(Contracts.AviAudioStreamContract))]
     public interface IAviAudioStream : IAviStream
     {

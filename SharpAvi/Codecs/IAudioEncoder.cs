@@ -7,6 +7,9 @@ using SharpAvi.Output;
 
 namespace SharpAvi.Codecs
 {
+    /// <summary>
+    /// Encoder of audio streams.
+    /// </summary>
     [ContractClass(typeof(Contracts.AudioEncoderContract))]
     public interface IAudioEncoder
     {

@@ -149,6 +149,9 @@ namespace SharpAvi.Codecs
             formatData = FillFormatData();
         }
 
+        /// <summary>
+        /// Releases resources.
+        /// </summary>
         public void Dispose()
         {
             var lameDisposable = lame as IDisposable;
@@ -158,16 +161,25 @@ namespace SharpAvi.Codecs
             }
         }
 
+        /// <summary>
+        /// Encodes block of audio data.
+        /// </summary>
         public int EncodeBlock(byte[] source, int sourceOffset, int sourceCount, byte[] destination, int destinationOffset)
         {
             return lame.Encode(source, sourceOffset, sourceCount / SAMPLE_BYTE_SIZE, destination, destinationOffset);
         }
 
+        /// <summary>
+        /// Flushes internal encoder's buffers.
+        /// </summary>
         public int Flush(byte[] destination, int destinationOffset)
         {
             return lame.FinishEncoding(destination, destinationOffset);
         }
 
+        /// <summary>
+        /// Gets maximum length of encoded data.
+        /// </summary>
         public int GetMaxEncodedLength(int sourceCount)
         {
             // Estimate taken from the description of 'lame_encode_buffer' method in 'lame.h'
@@ -176,36 +188,57 @@ namespace SharpAvi.Codecs
         }
 
 
+        /// <summary>
+        /// Number of audio channels.
+        /// </summary>
         public int ChannelCount
         {
             get { return lame.ChannelCount; }
         }
 
+        /// <summary>
+        /// Sample rate.
+        /// </summary>
         public int SamplesPerSecond
         {
             get { return lame.OutputSampleRate; }
         }
 
+        /// <summary>
+        /// Bits per sample per single channel.
+        /// </summary>
         public int BitsPerSample
         {
             get { return SAMPLE_BYTE_SIZE * 8; }
         }
 
+        /// <summary>
+        /// Audio format.
+        /// </summary>
         public short Format
         {
             get { return AudioFormats.Mp3; }
         }
 
+        /// <summary>
+        /// Byte rate of the stream.
+        /// </summary>
         public int BytesPerSecond
         {
             get { return lame.OutputBitRate * 1000 / 8; }
         }
 
+        /// <summary>
+        /// Minimum amount of data.
+        /// </summary>
         public int Granularity
         {
             get { return 1; }
         }
 
+        /// <summary>
+        /// Format-specific data.
+        /// </summary>
         public byte[] FormatSpecificData
         {
             get { return formatData; }
