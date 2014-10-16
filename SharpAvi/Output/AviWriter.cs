@@ -138,7 +138,7 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
-            return AddStream<IAviVideoStreamInternal>(index => 
+            return AddStream<IAviVideoStreamInternal>(index =>
                 {
                     var stream = new AviVideoStream(index, this, width, height, bitsPerPixel);
                     var asyncStream = new AsyncVideoStreamWrapper(stream);
@@ -172,7 +172,7 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
-            return AddStream<IAviVideoStreamInternal>(index => 
+            return AddStream<IAviVideoStreamInternal>(index =>
                 {
                     var stream = new AviVideoStream(index, this, width, height, BitsPerPixel.Bpp32);
                     var encodingStream = new EncodingVideoStreamWrapper(stream, encoder, ownsEncoder);
@@ -199,7 +199,7 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
 
-            return AddStream<IAviAudioStreamInternal>(index => 
+            return AddStream<IAviAudioStreamInternal>(index =>
                 {
                     var stream = new AviAudioStream(index, this, channelCount, samplesPerSecond, bitsPerSample);
                     var asyncStream = new AsyncAudioStreamWrapper(stream);
@@ -232,7 +232,7 @@ namespace SharpAvi.Output
             Contract.Requires(Streams.Count < 100);
             Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
 
-            return AddStream<IAviAudioStreamInternal>(index => 
+            return AddStream<IAviAudioStreamInternal>(index =>
                 {
                     var stream = new AviAudioStream(index, this, 1, 44100, 16);
                     var encodingStream = new EncodingAudioStreamWrapper(stream, encoder, ownsEncoder);
@@ -513,8 +513,18 @@ namespace SharpAvi.Output
             fileWriter.Write((uint)sizeInBytes); // image size in bytes
             fileWriter.Write(0); // X pixels per meter
             fileWriter.Write(0); // Y pixels per meter
-            fileWriter.Write(0U); // palette colors used
-            fileWriter.Write(0U); // palette colors important
+
+            // Force a greyscale palette for 8-bits greyscale avi
+            uint definedPaletteColors = videoStream.BitsPerPixel == BitsPerPixel.Bpp8 ? 256U : 0U;
+
+            fileWriter.Write(definedPaletteColors); // palette colors used
+            fileWriter.Write(definedPaletteColors); // palette colors important
+            for (var i = 0U; i < definedPaletteColors; i++)
+            {
+                fileWriter.Write(i);
+                fileWriter.Write(i);
+                fileWriter.Write(i);
+            }
         }
 
         void IAviStreamWriteHandler.WriteStreamFormat(AviAudioStream audioStream)
@@ -650,7 +660,7 @@ namespace SharpAvi.Output
             fileWriter.Write((uint)superIndex.Count); // entries count
             fileWriter.Write((uint)((IAviStreamInternal)stream).ChunkId); // chunk ID of the stream
             fileWriter.SkipBytes(3 * sizeof(uint)); // reserved
-            
+
             // entries
             foreach (var entry in superIndex)
             {
@@ -671,7 +681,7 @@ namespace SharpAvi.Output
         {
             var chunk = fileWriter.OpenChunk(KnownFourCCs.Chunks.Index1);
 
-            var indices = streamsInfo.Select((si, i) => new {si.Index1, ChunkId = (uint)streams.ElementAt(i).ChunkId}).
+            var indices = streamsInfo.Select((si, i) => new { si.Index1, ChunkId = (uint)streams.ElementAt(i).ChunkId }).
                 Where(a => a.Index1.Count > 0)
                 .ToList();
             while (index1Count > 0)
