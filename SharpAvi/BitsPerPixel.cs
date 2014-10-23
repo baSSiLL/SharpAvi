@@ -4,6 +4,10 @@
     public enum BitsPerPixel
     {
         /// <summary>8 bits per pixel.</summary>
+        /// <remarks>
+        /// When used with uncompressed video streams,
+        /// a grayscale palette is implied.
+        /// </remarks>
         Bpp8 = 8,
         /// <summary>16 bits per pixel.</summary>
         Bpp16 = 16,

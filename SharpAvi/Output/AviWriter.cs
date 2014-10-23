@@ -513,8 +513,26 @@ namespace SharpAvi.Output
             fileWriter.Write((uint)sizeInBytes); // image size in bytes
             fileWriter.Write(0); // X pixels per meter
             fileWriter.Write(0); // Y pixels per meter
-            fileWriter.Write(0U); // palette colors used
-            fileWriter.Write(0U); // palette colors important
+
+            // Writing grayscale palette for 8-bit uncompressed stream
+            // Otherwise, no palette
+            if (videoStream.BitsPerPixel == BitsPerPixel.Bpp8 && videoStream.Codec == KnownFourCCs.Codecs.Uncompressed)
+            {
+                fileWriter.Write(256U); // palette colors used
+                fileWriter.Write(0U); // palette colors important
+                for (int i = 0; i < 256; i++)
+                {
+                    fileWriter.Write((byte)i);
+                    fileWriter.Write((byte)i);
+                    fileWriter.Write((byte)i);
+                    fileWriter.Write((byte)0);
+                }
+            }
+            else
+            {
+                fileWriter.Write(0U); // palette colors used
+                fileWriter.Write(0U); // palette colors important
+            }
         }
 
         void IAviStreamWriteHandler.WriteStreamFormat(AviAudioStream audioStream)
