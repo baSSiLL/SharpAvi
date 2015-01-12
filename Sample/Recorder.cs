@@ -11,6 +11,7 @@ using System.Windows;
 using NAudio.Wave;
 using SharpAvi.Codecs;
 using SharpAvi.Output;
+using System.Windows.Interop;
 
 namespace SharpAvi.Sample
 {
@@ -31,8 +32,14 @@ namespace SharpAvi.Sample
             FourCC codec, int quality, 
             int audioSourceIndex, SupportedWaveFormat audioWaveFormat, bool encodeAudio, int audioBitRate)
         {
-            screenWidth = (int)SystemParameters.PrimaryScreenWidth;
-            screenHeight = (int)SystemParameters.PrimaryScreenHeight;
+            System.Windows.Media.Matrix toDevice;
+            using (var source = new HwndSource(new HwndSourceParameters()))
+            {
+                toDevice = source.CompositionTarget.TransformToDevice;
+            }
+
+            screenWidth = (int)Math.Round(SystemParameters.PrimaryScreenWidth * toDevice.M11);
+            screenHeight = (int)Math.Round(SystemParameters.PrimaryScreenHeight * toDevice.M22);
 
             // Create AVI writer and specify FPS
             writer = new AviWriter(fileName)
