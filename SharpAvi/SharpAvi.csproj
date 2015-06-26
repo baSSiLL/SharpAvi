@@ -140,6 +140,7 @@
     <Compile Include="AudioFormats.cs" />
     <Compile Include="Codecs\CodecInfo.cs" />
     <Compile Include="Codecs\EncodingStreamFactory.cs" />
+    <Compile Include="Codecs\FlipUncompressedVideoEncoder.cs" />
     <Compile Include="Codecs\IAudioEncoder.cs" />
     <Compile Include="Codecs\Mp3AudioEncoderLame.cs" />
     <Compile Include="Codecs\Mp3AudioEncoderLame.ILameFacade.cs" />
