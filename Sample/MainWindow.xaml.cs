@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using NAudio.Wave;
 using SharpAvi.Codecs;
 
@@ -18,7 +19,8 @@ namespace SharpAvi.Sample
         {
             InitializeComponent();
 
-            recordingTimer = new Timer(recordingTimer_Tick);
+            recordingTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            recordingTimer.Tick += recordingTimer_Tick;
             DataContext = this;
 
             InitDefaultSettings();
@@ -29,8 +31,8 @@ namespace SharpAvi.Sample
 
         #region Recording
 
-        private readonly Timer recordingTimer;
-        private DateTime recordingStartTime;
+        private readonly DispatcherTimer recordingTimer;
+        private readonly Stopwatch recordingStopwatch = new Stopwatch();
         private Recorder recorder;
         private string lastFileName;
 
@@ -76,14 +78,16 @@ namespace SharpAvi.Sample
             HasLastScreencast = false;
             IsRecording = true;
 
-            recordingStartTime = DateTime.Now;
-            recordingTimer.Change(1000, 1000);
+            recordingStopwatch.Reset();
+            recordingTimer.Start();
 
             lastFileName = System.IO.Path.Combine(outputFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".avi");
             var bitRate = Mp3AudioEncoderLame.SupportedBitRates.OrderBy(br => br).ElementAt(audioQuality);
             recorder = new Recorder(lastFileName, 
                 encoder, encodingQuality, 
                 audioSourceIndex, audioWaveFormat, encodeAudio, bitRate);
+
+            recordingStopwatch.Start();
         }
 
         private void StopRecording()
@@ -94,7 +98,8 @@ namespace SharpAvi.Sample
             recorder.Dispose();
             recorder = null;
 
-            recordingTimer.Change(0, 0);
+            recordingTimer.Stop();
+            recordingStopwatch.Stop();
 
             IsRecording = false;
             HasLastScreencast = true;
@@ -102,11 +107,13 @@ namespace SharpAvi.Sample
             WindowState = WindowState.Normal;
         }
 
-        private void recordingTimer_Tick(object state)
+        private void recordingTimer_Tick(object sender, EventArgs e)
         {
-            var elapsed = DateTime.Now - recordingStartTime;
-            var elapsedString = string.Format("{0:00}:{1:00}", Math.Floor(elapsed.TotalMinutes), elapsed.Seconds);
-            Dispatcher.BeginInvoke(new Action(() => { Elapsed = elapsedString; }));
+            var elapsed = recordingStopwatch.Elapsed;
+            Elapsed = string.Format(
+                "{0:00}:{1:00}", 
+                Math.Floor(elapsed.TotalMinutes), 
+                elapsed.Seconds);
         }
 
         #endregion

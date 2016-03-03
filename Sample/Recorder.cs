@@ -12,6 +12,7 @@ using NAudio.Wave;
 using SharpAvi.Codecs;
 using SharpAvi.Output;
 using System.Windows.Interop;
+using System.Diagnostics;
 
 namespace SharpAvi.Sample
 {
@@ -166,7 +167,7 @@ namespace SharpAvi.Sample
 
         private void RecordScreen()
         {
-            var frameInterval = TimeSpan.FromSeconds(1 / (double)writer.FramesPerSecond);
+            var stopwatch = new Stopwatch();
             var buffer = new byte[screenWidth * screenHeight * 4];
 #if FX45
             Task videoWriteTask = null;
@@ -174,12 +175,14 @@ namespace SharpAvi.Sample
             IAsyncResult videoWriteResult = null;
 #endif
             var isFirstFrame = true;
+            var shotsTaken = 0;
             var timeTillNextFrame = TimeSpan.Zero;
+            stopwatch.Start();
+
             while (!stopThread.WaitOne(timeTillNextFrame))
             {
-                var timestamp = DateTime.Now;
-
                 GetScreenshot(buffer);
+                shotsTaken++;
 
                 // Wait for the previous frame is written
                 if (!isFirstFrame)
@@ -206,12 +209,14 @@ namespace SharpAvi.Sample
                 videoWriteResult = videoStream.BeginWriteFrame(true, buffer, 0, buffer.Length, null, null);
 #endif
 
-                timeTillNextFrame = timestamp + frameInterval - DateTime.Now;
+                timeTillNextFrame = TimeSpan.FromSeconds(shotsTaken / (double)writer.FramesPerSecond - stopwatch.Elapsed.TotalSeconds);
                 if (timeTillNextFrame < TimeSpan.Zero)
                     timeTillNextFrame = TimeSpan.Zero;
 
                 isFirstFrame = false;
             }
+
+            stopwatch.Stop();
 
             // Wait for the last frame is written
             if (!isFirstFrame)
