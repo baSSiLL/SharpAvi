@@ -61,6 +61,20 @@ namespace SharpAvi.Output
             var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
             fileWriter = new BinaryWriter(fileStream);
         }
+        
+        /// <summary>
+        /// Creates a new instance of <see cref="AviWriter"/>.
+        /// </summary>
+        /// <param name="memStream">A MemoryStream that can be used outside of SharpAvi without writing a file to disk</param>
+        public AviWriter(MemoryStream memStream)
+        {
+#if !FX45
+            streamsRO = new ReadOnlyCollection<IAviStream>(streamsList);
+#endif
+
+            fileWriter = new BinaryWriter(memStream);
+        }
+
 
         /// <summary>Frame rate.</summary>
         /// <remarks>
@@ -299,8 +313,12 @@ namespace SharpAvi.Output
                         fileWriter.BaseStream.Position = header.ItemStart;
                         WriteHeader();
                     }
-
-                    fileWriter.Close();
+                    
+                    // Keep the MemoryStream usable outside of SharpAvi by not closing the BinaryWriter
+                    if (fileWriter.BaseStream is MemoryStream)
+                        fileWriter.Flush();
+                    else
+                        fileWriter.Close();
                     isClosed = true;
                 }
 
