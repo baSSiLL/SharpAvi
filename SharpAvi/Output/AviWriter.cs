@@ -24,6 +24,9 @@ namespace SharpAvi.Output
         private const int RIFF_AVIX_SIZE_TRESHOLD = int.MaxValue - 1024 * 1024;
 
         private readonly BinaryWriter fileWriter;
+#if !FX45
+        private readonly bool closeWriter;
+#endif
         private bool isClosed = false;
         private bool startedWriting = false;
         private readonly object syncWrite = new object();
@@ -49,17 +52,39 @@ namespace SharpAvi.Output
         private StreamInfo[] streamsInfo;
 
         /// <summary>
-        /// Creates a new instance of <see cref="AviWriter"/>.
+        /// Creates a new instance of <see cref="AviWriter"/> for writing to a file.
         /// </summary>
         /// <param name="fileName">Path to an AVI file being written.</param>
         public AviWriter(string fileName)
         {
+            Contract.Requires(!string.IsNullOrEmpty(fileName));
+
 #if !FX45
             streamsRO = new ReadOnlyCollection<IAviStream>(streamsList);
 #endif
 
             var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
             fileWriter = new BinaryWriter(fileStream);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="AviWriter"/> for writing to a stream.
+        /// </summary>
+        /// <param name="stream">Stream being written to.</param>
+        /// <param name="leaveOpen">Whether to leave the stream open when closing <see cref="AviWriter"/>.</param>
+        public AviWriter(Stream stream, bool leaveOpen = false)
+        {
+            Contract.Requires(stream.CanWrite);
+            Contract.Requires(stream.CanSeek);
+
+#if FX45
+            fileWriter = new BinaryWriter(stream, Encoding.Default, leaveOpen);
+#else
+            fileWriter = new BinaryWriter(stream);
+            closeWriter = !leaveOpen;
+            streamsRO = new ReadOnlyCollection<IAviStream>(streamsList);
+#endif
+
         }
 
         /// <summary>Frame rate.</summary>
@@ -300,7 +325,18 @@ namespace SharpAvi.Output
                         WriteHeader();
                     }
 
+#if FX45
                     fileWriter.Close();
+#else
+                    if (closeWriter)
+                    {
+                        fileWriter.Close();
+                    }
+                    else
+                    {
+                        fileWriter.Flush();
+                    }
+#endif
                     isClosed = true;
                 }
 
