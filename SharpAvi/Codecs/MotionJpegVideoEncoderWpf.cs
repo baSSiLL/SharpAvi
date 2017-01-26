@@ -99,7 +99,7 @@ namespace SharpAvi.Codecs
         }
 
         /// <summary>
-        /// Wether to vertically flip the frame before writing
+        /// Whether to vertically flip the frame before writing
         /// </summary>
         public bool FlipVertical
         {

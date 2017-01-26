@@ -23,7 +23,7 @@ namespace SharpAvi.Codecs
         int MaxEncodedSize { get; }
 
         /// <summary>
-        /// Wether the vertically flip the frame before writing
+        /// Wether to vertically flip the frame before writing
         /// </summary>
         bool FlipVertical { get; set; }
 
