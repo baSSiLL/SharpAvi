@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics.Contracts;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Threading;
-using System.Diagnostics.Contracts;
 
 namespace SharpAvi.Codecs
 {
@@ -39,17 +37,17 @@ namespace SharpAvi.Codecs
             Contract.Requires(encoderFactory != null);
 
             this.thread = new Thread(RunDispatcher)
-                {
-                    IsBackground = true,
-                    Name = typeof(SingleThreadedVideoEncoderWrapper).Name
-                };
+            {
+                IsBackground = true,
+                Name = typeof(SingleThreadedVideoEncoderWrapper).Name
+            };
             var dispatcherCreated = new AutoResetEvent(false);
             thread.Start(dispatcherCreated);
             dispatcherCreated.WaitOne();
             this.dispatcher = Dispatcher.FromThread(thread);
 
             // TODO: Create encoder on the first frame
-            this.encoder = (IVideoEncoder)dispatcher.Invoke(encoderFactory);
+            this.encoder = DispatcherInvokeAndPropagateException(encoderFactory);
             if (encoder == null)
                 throw new InvalidOperationException("Encoder factory has created no instance.");
         }
@@ -64,7 +62,7 @@ namespace SharpAvi.Codecs
                 var encoderDisposable = encoder as IDisposable;
                 if (encoderDisposable != null)
                 {
-                    dispatcher.Invoke(new Action(encoderDisposable.Dispose));
+                    DispatcherInvokeAndPropagateException(encoderDisposable.Dispose);
                 }
 
                 dispatcher.InvokeShutdown();
@@ -77,7 +75,7 @@ namespace SharpAvi.Codecs
         {
             get
             {
-                return (FourCC)dispatcher.Invoke(new Func<FourCC>(() => encoder.Codec));
+                return DispatcherInvokeAndPropagateException(() => encoder.Codec);
             }
         }
 
@@ -88,7 +86,7 @@ namespace SharpAvi.Codecs
         {
             get
             {
-                return (BitsPerPixel)dispatcher.Invoke(new Func<BitsPerPixel>(() => encoder.BitsPerPixel));
+                return DispatcherInvokeAndPropagateException(() => encoder.BitsPerPixel);
             }
         }
 
@@ -99,7 +97,7 @@ namespace SharpAvi.Codecs
         {
             get
             {
-                return (int)dispatcher.Invoke(new Func<int>(() => encoder.MaxEncodedSize));
+                return DispatcherInvokeAndPropagateException(() => encoder.MaxEncodedSize);
             }
         }
 
@@ -108,9 +106,8 @@ namespace SharpAvi.Codecs
         /// </summary>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
-            var result = (EncodeResult)dispatcher.Invoke(
-                new Func<byte[], int, byte[], int, EncodeResult>(EncodeFrame), 
-                source, srcOffset, destination, destOffset);
+            var result = DispatcherInvokeAndPropagateException(
+                () => EncodeFrame(source, srcOffset, destination, destOffset));
             isKeyFrame = result.IsKeyFrame;
             return result.EncodedLength;
         }
@@ -120,10 +117,10 @@ namespace SharpAvi.Codecs
             bool isKeyFrame;
             var result = encoder.EncodeFrame(source, srcOffset, destination, destOffset, out isKeyFrame);
             return new EncodeResult
-                {
-                    EncodedLength = result,
-                    IsKeyFrame = isKeyFrame
-                };
+            {
+                EncodedLength = result,
+                IsKeyFrame = isKeyFrame
+            };
         }
 
         private struct EncodeResult
@@ -132,6 +129,56 @@ namespace SharpAvi.Codecs
             public bool IsKeyFrame;
         }
 
+
+        private void DispatcherInvokeAndPropagateException(Action action)
+        {
+            Exception exOnDispatcherThread = null;
+            dispatcher.Invoke(new Action(() =>
+            {
+                try
+                {
+                    action.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    exOnDispatcherThread = ex;
+                }
+            }));
+
+            if (exOnDispatcherThread != null)
+            {
+                WrapAndRethrowException(exOnDispatcherThread);
+            }
+        }
+
+        private TResult DispatcherInvokeAndPropagateException<TResult>(Func<TResult> func)
+        {
+            Exception exOnDispatcherThread = null;
+            var result = (TResult)dispatcher.Invoke(new Func<TResult>(() =>
+            {
+                try
+                {
+                    return func.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    exOnDispatcherThread = ex;
+                    return default(TResult);
+                }
+            }));
+
+            if (exOnDispatcherThread != null)
+            {
+                WrapAndRethrowException(exOnDispatcherThread);
+            }
+
+            return result;
+        }
+
+        private static void WrapAndRethrowException(Exception wrappedException)
+        {
+            throw new TargetInvocationException("Error calling wrapped encoder.", wrappedException);
+        }
 
         private void RunDispatcher(object parameter)
         {

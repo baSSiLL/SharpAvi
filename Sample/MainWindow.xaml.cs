@@ -179,12 +179,26 @@ namespace SharpAvi.Sample
 
         private void StartRecording_Click(object sender, RoutedEventArgs e)
         {
-            StartRecording();
+            try
+            {
+                StartRecording();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error starting recording\r\n" + ex.Message);
+            }
         }
 
         private void StopRecording_Click(object sender, RoutedEventArgs e)
         {
-            StopRecording();
+            try
+            {
+                StopRecording();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error stopping recording\r\n" + ex.Message);
+            }
         }
 
         private void GoToLastScreencast_Click(object sender, RoutedEventArgs e)
