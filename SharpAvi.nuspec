@@ -4,8 +4,8 @@
         <id>SharpAvi</id>
         <version>2.1.0</version>
         <authors>Vasili Maslov</authors>
-        <licenseUrl>https://sharpavi.codeplex.com/license</licenseUrl>
-        <projectUrl>https://sharpavi.codeplex.com/</projectUrl>
+        <licenseUrl>https://github.com/baSSiLL/SharpAvi/blob/master/LICENSE.md</licenseUrl>
+        <projectUrl>https://github.com/baSSiLL/SharpAvi</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>If you want to render some video sequence, and do not want to touch DirectShow or depend on command-line utilities - SharpAvi may be what you need.
 
@@ -13,17 +13,15 @@ Writing uncompressed AVI does not require any external dependencies, it's pure .
 
 Video is created by supplying individual in-memory bitmaps (byte arrays) and audio samples. Included are implementations of encoders for Motion JPEG (requires WPF), MPEG-4 (requires external VfW codecs) and MP3 (requires LAME binaries). Asynchronous writing/encoding is supported.</description>
         <summary>A simple library for creating video files in AVI format.</summary>
-        <releaseNotes>Added support for 8-bit grayscale video.</releaseNotes>
+        <releaseNotes>SingleThreadedVideoEncoderWrapper propagates errors from wrapped encoder onto a calling thread.</releaseNotes>
         <tags>AVI video authoring encoding OpenDML</tags>
         <references>
             <reference file="SharpAvi.dll" />
         </references>
     </metadata>
     <files>
-        <file src="SharpAvi\bin\35\Release\CodeContracts\SharpAvi.Contracts.dll" target="lib\net35-client\CodeContracts\SharpAvi.Contracts.dll" />
         <file src="SharpAvi\bin\35\Release\SharpAvi.dll" target="lib\net35-client\SharpAvi.dll" />
         <file src="SharpAvi\bin\35\Release\SharpAvi.XML" target="lib\net35-client\SharpAvi.XML" />
-        <file src="SharpAvi\bin\Release\CodeContracts\SharpAvi.Contracts.dll" target="lib\net45\CodeContracts\SharpAvi.Contracts.dll" />
         <file src="SharpAvi\bin\Release\SharpAvi.dll" target="lib\net45\SharpAvi.dll" />
         <file src="SharpAvi\bin\Release\SharpAvi.XML" target="lib\net45\SharpAvi.XML" />
     </files>
