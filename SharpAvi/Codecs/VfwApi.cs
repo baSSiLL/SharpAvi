@@ -17,6 +17,28 @@ namespace SharpAvi.Codecs
     {
         public const int ICERR_OK = 0;
 
+        public static string GetErrorDescription(int error)
+        {
+            switch (error)
+            {
+                case 0: return "OK";
+                case -1: return "Unsupported";
+                case -2: return "Bad format";
+                case -3: return "Memory";
+                case -4: return "Internal";
+                case -5: return "Bad flags";
+                case -6: return "Bad parameter";
+                case -7: return "Bad size";
+                case -8: return "Bad handle";
+                case -9: return "Can't update";
+                case -10: return "Abort";
+                case -100: return "Error";
+                case -200: return "Bad bit depth";
+                case -201: return "Bad image size";
+                default: return null;
+            }
+        }
+
         public const short ICMODE_COMPRESS = 1;
 
         public const int ICCOMPRESS_KEYFRAME = 0x00000001;

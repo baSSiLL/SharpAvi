@@ -363,7 +363,13 @@ namespace SharpAvi.Codecs
         private void CheckICResult(int result)
         {
             if (result != VfwApi.ICERR_OK)
-                throw new InvalidOperationException(string.Format("Encoder operation returned an error: {0}.", result));
+            {
+                var errorDesc = VfwApi.GetErrorDescription(result);
+                var resultStr = errorDesc == null
+                    ? result.ToString()
+                    : string.Format("{0} ({1})", result, errorDesc);
+                throw new InvalidOperationException(string.Format("Encoder operation returned an error: {0}.", resultStr));
+            }
         }
     }
 }

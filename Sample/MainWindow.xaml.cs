@@ -95,16 +95,24 @@ namespace SharpAvi.Sample
             if (!IsRecording)
                 throw new InvalidOperationException("Not recording.");
 
-            recorder.Dispose();
-            recorder = null;
+            try
+            {
+                if (recorder != null)
+                {
+                    recorder.Dispose();
+                    recorder = null;
+                }
+            }
+            finally
+            {
+                recordingTimer.Stop();
+                recordingStopwatch.Stop();
 
-            recordingTimer.Stop();
-            recordingStopwatch.Stop();
+                IsRecording = false;
+                HasLastScreencast = true;
 
-            IsRecording = false;
-            HasLastScreencast = true;
-
-            WindowState = WindowState.Normal;
+                WindowState = WindowState.Normal;
+            }
         }
 
         private void recordingTimer_Tick(object sender, EventArgs e)
@@ -185,7 +193,8 @@ namespace SharpAvi.Sample
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error starting recording\r\n" + ex.Message);
+                MessageBox.Show("Error starting recording\r\n" + ex.ToString());
+                StopRecording();
             }
         }
 
@@ -197,7 +206,7 @@ namespace SharpAvi.Sample
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error stopping recording\r\n" + ex.Message);
+                MessageBox.Show("Error stopping recording\r\n" + ex.ToString());
             }
         }
 
