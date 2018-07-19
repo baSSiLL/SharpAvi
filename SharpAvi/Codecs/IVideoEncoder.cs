@@ -23,6 +23,11 @@ namespace SharpAvi.Codecs
         int MaxEncodedSize { get; }
 
         /// <summary>
+        /// Wether to vertically flip the frame before writing
+        /// </summary>
+        bool FlipVertical { get; set; }
+
+        /// <summary>
         /// Encodes video frame.
         /// </summary>
         /// <param name="source">
@@ -72,6 +77,8 @@ namespace SharpAvi.Codecs
                     throw new NotImplementedException(); 
                 }
             }
+
+            public abstract bool FlipVertical { get; set; }
 
             public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
             {

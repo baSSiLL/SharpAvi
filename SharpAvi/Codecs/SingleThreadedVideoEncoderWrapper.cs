@@ -24,7 +24,7 @@ namespace SharpAvi.Codecs
         private readonly IVideoEncoder encoder;
         private readonly Thread thread;
         private readonly Dispatcher dispatcher;
-
+        
         /// <summary>
         /// Creates a new instance of <see cref="SingleThreadedVideoEncoderWrapper"/>.
         /// </summary>
@@ -99,6 +99,15 @@ namespace SharpAvi.Codecs
             {
                 return DispatcherInvokeAndPropagateException(() => encoder.MaxEncodedSize);
             }
+        }
+
+        /// <summary>
+        /// Wether to vertically flip the frame before writing
+        /// </summary>
+        public bool FlipVertical
+        {
+            get { return encoder.FlipVertical; }
+            set { encoder.FlipVertical = value; }
         }
 
         /// <summary>

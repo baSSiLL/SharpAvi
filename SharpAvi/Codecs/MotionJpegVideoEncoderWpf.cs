@@ -32,6 +32,10 @@ namespace SharpAvi.Codecs
     {
         private readonly Int32Rect rect;
         private readonly int quality;
+        private bool flipVertical = false;
+        private byte[] sourceBuffer;
+
+
 #if FX45
         private readonly ThreadLocal<WriteableBitmap> bitmapHolder;
 #else
@@ -95,15 +99,36 @@ namespace SharpAvi.Codecs
         }
 
         /// <summary>
+        /// Whether to vertically flip the frame before writing
+        /// </summary>
+        public bool FlipVertical
+        {
+            get { return flipVertical; }
+            set { flipVertical = value; }
+        }
+
+        /// <summary>
         /// Encodes a frame.
         /// </summary>
         /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
+            if (flipVertical)
+            {
+                if (sourceBuffer == null)
+                {
+                    sourceBuffer = new byte[rect.Width * rect.Height * 4];
+                }
+                BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, rect.Height, rect.Width * 4);
+            } else
+            {
+                sourceBuffer = source;
+            }
+
 #if FX45
             var bitmap = bitmapHolder.Value;
 #endif
-            bitmap.WritePixels(rect, source, rect.Width * 4, srcOffset);
+            bitmap.WritePixels(rect, sourceBuffer, rect.Width * 4, srcOffset);
 
             var encoderImpl = new JpegBitmapEncoder
             {

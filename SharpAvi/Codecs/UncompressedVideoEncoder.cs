@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace SharpAvi.Codecs
 {
@@ -13,7 +14,8 @@ namespace SharpAvi.Codecs
     {
         private readonly int width;
         private readonly int height;
-        private readonly byte[] sourceBuffer;
+        private byte[] sourceBuffer;
+        private bool flipVertical = true;
 
         /// <summary>
         /// Creates a new instance of <see cref="UncompressedVideoEncoder"/>.
@@ -55,12 +57,33 @@ namespace SharpAvi.Codecs
         }
 
         /// <summary>
+        /// Whether to vertically flip the frame before writing
+        /// </summary>
+        public bool FlipVertical
+        {
+            get { return flipVertical; }
+            set { flipVertical = value; }
+        }
+
+        /// <summary>
         /// Encodes a frame.
         /// </summary>
         /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
-            BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
+            if (flipVertical)
+            {
+                if (sourceBuffer == null)
+                {
+                    sourceBuffer = new byte[width * height * 4];
+                }
+                BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
+            }
+            else
+            {
+                sourceBuffer = source;
+            }
+
             BitmapUtils.Bgr32ToBgr24(sourceBuffer, 0, destination, destOffset, width * height);
             isKeyFrame = true;
             return MaxEncodedSize;

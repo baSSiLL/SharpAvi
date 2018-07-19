@@ -115,7 +115,7 @@ namespace SharpAvi.Codecs
 
         private readonly int width;
         private readonly int height;
-        private readonly byte[] sourceBuffer;
+        private byte[] sourceBuffer;
         private readonly VfwApi.BitmapInfoHeader inBitmapInfo;
         private readonly VfwApi.BitmapInfoHeader outBitmapInfo;
         private readonly IntPtr compressorHandle;
@@ -129,6 +129,7 @@ namespace SharpAvi.Codecs
         private int framesFromLastKey;
         private bool isDisposed;
         private bool needEnd;
+        private bool flipVertical = true;
 
         /// <summary>
         /// Creates a new instance of <see cref="Mpeg4VideoEncoderVcm"/>.
@@ -287,6 +288,15 @@ namespace SharpAvi.Codecs
             get { return maxEncodedSize; }
         }
 
+        /// <summary>
+        /// Whether to vertically flip the frame before writing
+        /// </summary>
+        public bool FlipVertical
+        {
+            get { return flipVertical;}
+            set { flipVertical = value; }
+        }
+
         /// <summary>Encodes a frame.</summary>
         /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
@@ -294,7 +304,17 @@ namespace SharpAvi.Codecs
             // TODO: Introduce Width and Height in IVideoRecorder and add Requires to EncodeFrame contract
             Contract.Assert(srcOffset + 4 * width * height <= source.Length);
 
-            BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
+            if (flipVertical)
+            {
+                if (sourceBuffer == null)
+                {
+                    sourceBuffer = new byte[width * height * 4];
+                }
+                BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
+            } else
+            {
+                sourceBuffer = source;
+            }
 
             var sourceHandle = GCHandle.Alloc(sourceBuffer, GCHandleType.Pinned);
             var encodedHandle = GCHandle.Alloc(destination, GCHandleType.Pinned);
