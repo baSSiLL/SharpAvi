@@ -13,6 +13,7 @@ namespace SharpAvi.Codecs
     {
         private readonly int width;
         private readonly int height;
+        private readonly int stride;
         private readonly byte[] sourceBuffer;
 
         /// <summary>
@@ -27,6 +28,8 @@ namespace SharpAvi.Codecs
 
             this.width = width;
             this.height = height;
+            // Scan lines in Windows bitmaps should be aligned by 4 bytes (DWORDs)
+            this.stride = (width * 3 + 3) / 4 * 4;
             sourceBuffer = new byte[width * height * 4];
         }
 
@@ -51,7 +54,7 @@ namespace SharpAvi.Codecs
         /// </summary>
         public int MaxEncodedSize
         {
-            get { return width * height * 3; }
+            get { return stride * height; }
         }
 
         /// <summary>
@@ -61,7 +64,10 @@ namespace SharpAvi.Codecs
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
             BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
-            BitmapUtils.Bgr32ToBgr24(sourceBuffer, 0, destination, destOffset, width * height);
+            for (var i = 0; i < height; i++)
+            {
+                BitmapUtils.Bgr32ToBgr24(sourceBuffer, i * width * 4, destination, destOffset + i * stride, width);
+            }
             isKeyFrame = true;
             return MaxEncodedSize;
         }

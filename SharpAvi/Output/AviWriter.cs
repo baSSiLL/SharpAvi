@@ -545,7 +545,10 @@ namespace SharpAvi.Output
             fileWriter.Write((short)1); // planes
             fileWriter.Write((ushort)videoStream.BitsPerPixel); // bits per pixel
             fileWriter.Write((uint)videoStream.Codec); // compression (codec FOURCC)
-            var sizeInBytes = videoStream.Width * videoStream.Height * (((int)videoStream.BitsPerPixel) / 8);
+            // 0 size is safer for uncompressed formats not to bother with stride calculation
+            var sizeInBytes = videoStream.Codec == KnownFourCCs.Codecs.Uncompressed
+                ? 0
+                : videoStream.Width * videoStream.Height * (((int)videoStream.BitsPerPixel) / 8);
             fileWriter.Write((uint)sizeInBytes); // image size in bytes
             fileWriter.Write(0); // X pixels per meter
             fileWriter.Write(0); // Y pixels per meter
