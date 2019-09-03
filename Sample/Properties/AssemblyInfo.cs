@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SharpAvi")]
-[assembly: AssemblyCopyright("Copyright © Vasili Maslov 2013-2015")]
+[assembly: AssemblyCopyright("Copyright © Vasili Maslov 2013-2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

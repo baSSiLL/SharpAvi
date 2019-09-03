@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SharpAvi</id>
-        <version>2.1.1</version>
+        <version>2.1.2</version>
         <authors>Vasili Maslov</authors>
         <licenseUrl>https://github.com/baSSiLL/SharpAvi/blob/master/LICENSE.md</licenseUrl>
         <projectUrl>https://github.com/baSSiLL/SharpAvi</projectUrl>
@@ -13,7 +13,7 @@ Writing uncompressed AVI does not require any external dependencies, it's pure .
 
 Video is created by supplying individual in-memory bitmaps (byte arrays) and audio samples. Included are implementations of encoders for Motion JPEG (requires WPF), MPEG-4 (requires external VfW codecs) and MP3 (requires LAME binaries). Asynchronous writing/encoding is supported.</description>
         <summary>A simple library for creating video files in AVI format.</summary>
-        <releaseNotes>SingleThreadedVideoEncoderWrapper propagates errors from wrapped encoder onto a calling thread.</releaseNotes>
+        <releaseNotes>Fixed uncompressed video for frame widths which are not multiples of 4.</releaseNotes>
         <tags>AVI video authoring encoding OpenDML</tags>
         <references>
             <reference file="SharpAvi.dll" />
