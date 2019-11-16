@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 
 namespace SharpAvi
 {
@@ -45,7 +47,9 @@ namespace SharpAvi
             /// <param name="compressed">Whether stream contents is compressed.</param>
             public static FourCC VideoFrame(int streamIndex, bool compressed)
             {
+#if !NET35
                 Contract.Requires(0 <= streamIndex && streamIndex <= 99);
+#endif
 
                 return string.Format(compressed ? "{0:00}dc" : "{0:00}db", streamIndex);
             }
@@ -54,7 +58,9 @@ namespace SharpAvi
             /// <param name="streamIndex">Sequential number of the stream.</param>
             public static FourCC AudioData(int streamIndex)
             {
+#if !NET35
                 Contract.Requires(0 <= streamIndex && streamIndex <= 99);
+#endif
 
                 return string.Format("{0:00}wb", streamIndex);
             }
@@ -63,7 +69,9 @@ namespace SharpAvi
             /// <param name="streamIndex">Sequential number of the stream.</param>
             public static FourCC IndexData(int streamIndex)
             {
+#if !NET35
                 Contract.Requires(0 <= streamIndex && streamIndex <= 99);
+#endif
 
                 return string.Format("ix{0:00}", streamIndex);
             }

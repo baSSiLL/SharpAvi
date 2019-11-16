@@ -1,10 +1,13 @@
-﻿<Window x:Class="SharpAvi.Sample.SettingsWindow"
+﻿<Window x:Class="Sample.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Sample"
+        mc:Ignorable="d"
         Title="SettingsWindow" ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Height="300" Width="300" SizeToContent="Height"
         WindowStyle="None" AllowsTransparency="True" Background="White">
-    
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -12,7 +15,6 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
-    
     <Border BorderBrush="DarkGray" BorderThickness="2"
             SnapsToDevicePixels="True">
         <DockPanel>
@@ -101,11 +103,11 @@
                                   DisplayMemberPath="Value"
                                   SelectedValuePath="Key"
                                   SelectedValue="{Binding SelectedAudioSourceIndex, Mode=TwoWay}"/>
-                        
+
                         <CheckBox Grid.Row="2" Grid.Column="2"
                                   Content="Stereo"
                                   IsChecked="{Binding UseStereo}"/>
-                        
+
                         <Label Grid.Row="4" Grid.Column="0">
                             MP3 Encoding
                         </Label>

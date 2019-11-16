@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Threading;
 using NAudio.Wave;
+using SharpAvi;
 using SharpAvi.Codecs;
 
-namespace SharpAvi.Sample
+namespace Sample
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -83,8 +82,8 @@ namespace SharpAvi.Sample
 
             lastFileName = System.IO.Path.Combine(outputFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".avi");
             var bitRate = Mp3AudioEncoderLame.SupportedBitRates.OrderBy(br => br).ElementAt(audioQuality);
-            recorder = new Recorder(lastFileName, 
-                encoder, encodingQuality, 
+            recorder = new Recorder(lastFileName,
+                encoder, encodingQuality,
                 audioSourceIndex, audioWaveFormat, encodeAudio, bitRate);
 
             recordingStopwatch.Start();
@@ -119,8 +118,8 @@ namespace SharpAvi.Sample
         {
             var elapsed = recordingStopwatch.Elapsed;
             Elapsed = string.Format(
-                "{0:00}:{1:00}", 
-                Math.Floor(elapsed.TotalMinutes), 
+                "{0:00}:{1:00}",
+                Math.Floor(elapsed.TotalMinutes),
                 elapsed.Seconds);
         }
 
@@ -168,7 +167,7 @@ namespace SharpAvi.Sample
                 AudioQuality = audioQuality,
                 MinimizeOnStart = minimizeOnStart
             };
-            
+
             if (dlg.ShowDialog() == true)
             {
                 outputFolder = dlg.Folder;

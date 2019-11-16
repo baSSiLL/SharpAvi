@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
+
 using System.Linq;
 using System.Text;
-using SharpAvi.Output;
 
 namespace SharpAvi.Codecs
 {
     /// <summary>
     /// Encoder of audio streams.
     /// </summary>
+#if !NET35
     [ContractClass(typeof(Contracts.AudioEncoderContract))]
+#endif
     public interface IAudioEncoder
     {
         /// <summary>
@@ -86,6 +91,7 @@ namespace SharpAvi.Codecs
     }
 
 
+#if !NET35
     namespace Contracts
     {
         [ContractClassFor(typeof(IAudioEncoder))]
@@ -174,4 +180,5 @@ namespace SharpAvi.Codecs
         }
 
     }
+#endif
 }

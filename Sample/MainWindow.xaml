@@ -1,13 +1,15 @@
-﻿<Window x:Class="SharpAvi.Sample.MainWindow"
+﻿<Window x:Class="Sample.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:SharpAvi.Sample"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Sample"
+        mc:Ignorable="d"
         Title="SharpAvi - Screencast Sample" 
         Height="350" Width="525" SizeToContent="WidthAndHeight"
         WindowStyle="None" AllowsTransparency="True" 
         WindowStartupLocation="CenterScreen" Topmost="True" 
         Background="Transparent">
-    
     <Window.Opacity>
         <Binding Path="IsActive" RelativeSource="{RelativeSource Self}">
             <Binding.Converter>
@@ -15,11 +17,9 @@
             </Binding.Converter>
         </Binding>
     </Window.Opacity>
-    
     <Window.Resources>
         <ResourceDictionary Source="Styles.xaml"/>
     </Window.Resources>
-
     <Border Background="White" 
             BorderBrush="DarkGray" BorderThickness="2"
             CornerRadius="26"
@@ -35,7 +35,7 @@
                     </Path.Data>
                 </Path>
             </Button>
-        
+
             <Button Visibility="{Binding IsRecording, Converter={StaticResource VcBool2Vis}}"
                     Click="StopRecording_Click"
                     Style="{StaticResource RoundButton}"
@@ -46,19 +46,19 @@
                     </Path.Data>
                 </Path>
             </Button>
-            
+
             <Ellipse VerticalAlignment="Center"
                      Width="15" Height="15" Margin="7,0,0,0"
                      Fill="Red"
                      Visibility="{Binding IsRecording, Converter={StaticResource VcBool2Vis}}"/>
-            
+
             <TextBox VerticalAlignment="Center"
                      Margin="7,0,0,0"
                      IsReadOnly="True"
                      FontSize="14" FontFamily="Verdana"
                      Text="{Binding Elapsed, Mode=OneWay}"
                      Visibility="{Binding IsRecording, Converter={StaticResource VcBool2Vis}}"/>
-            
+
             <Button Style="{StaticResource RoundButton}"
                     Margin="7,0,0,0"
                     ToolTip="Go To Last Screencast"
@@ -80,7 +80,7 @@
                     </Path.Data>
                 </Path>
             </Button>
-            
+
             <Button Margin="7,0,0,0"
                     Style="{StaticResource RoundButton}"
                     ToolTip="Settings"
@@ -102,7 +102,7 @@
                     </Path.Data>
                 </Path>
             </Button>
-            
+
             <Button Margin="7,0,0,0"
                     IsCancel="True"
                     Click="Exit_Click"

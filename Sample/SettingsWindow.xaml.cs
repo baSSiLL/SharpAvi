@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Interop;
 using NAudio.Wave;
+using SharpAvi;
 using SharpAvi.Codecs;
 
-namespace SharpAvi.Sample
+namespace Sample
 {
     /// <summary>
     /// Interaction logic for SettingsWindow.xaml
@@ -104,9 +104,9 @@ namespace SharpAvi.Sample
         public SupportedWaveFormat AudioWaveFormat
         {
             // TODO: Make wave format more adjustable
-            get 
+            get
             {
-                return UseStereo ? audioFormats[1] : audioFormats[0]; 
+                return UseStereo ? audioFormats[1] : audioFormats[0];
             }
             set
             {
@@ -158,10 +158,10 @@ namespace SharpAvi.Sample
         {
             get { return audioFormats; }
         }
-        private readonly SupportedWaveFormat[] audioFormats = new[] 
-        { 
-            SupportedWaveFormat.WAVE_FORMAT_44M16, 
-            SupportedWaveFormat.WAVE_FORMAT_44S16 
+        private readonly SupportedWaveFormat[] audioFormats = new[]
+        {
+            SupportedWaveFormat.WAVE_FORMAT_44M16,
+            SupportedWaveFormat.WAVE_FORMAT_44S16
         };
 
         public int MaximumAudioQuality
@@ -182,16 +182,19 @@ namespace SharpAvi.Sample
 
         private void BrowseFolder_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new FolderBrowserDialog()
+            var dlg = new System.Windows.Forms.FolderBrowserDialog()
             {
                 SelectedPath = Folder,
                 ShowNewFolderButton = true,
                 Description = "Select folder for screencasts"
             };
 
-            if (dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            using (dlg)
             {
-                Folder = dlg.SelectedPath;
+                if (dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                {
+                    Folder = dlg.SelectedPath;
+                }
             }
         }
 

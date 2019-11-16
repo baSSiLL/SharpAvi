@@ -1,5 +1,7 @@
 ﻿using System;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.IO;
 
 namespace SharpAvi.Output
@@ -8,8 +10,10 @@ namespace SharpAvi.Output
     {
         public static RiffItem OpenChunk(this BinaryWriter writer, FourCC fourcc, int expectedDataSize = -1)
         {
+#if !NET35
             Contract.Requires(writer != null);
             Contract.Requires(expectedDataSize <= int.MaxValue - RiffItem.ITEM_HEADER_SIZE);
+#endif
 
             writer.Write((uint)fourcc);
             writer.Write((uint)(expectedDataSize >= 0 ? expectedDataSize : 0));
@@ -19,14 +23,18 @@ namespace SharpAvi.Output
 
         public static RiffItem OpenList(this BinaryWriter writer, FourCC fourcc)
         {
+#if !NET35
             Contract.Requires(writer != null);
+#endif
 
             return writer.OpenList(fourcc, KnownFourCCs.ListTypes.List);
         }
 
         public static RiffItem OpenList(this BinaryWriter writer, FourCC fourcc, FourCC listType)
         {
+#if !NET35
             Contract.Requires(writer != null);
+#endif
 
             var result = writer.OpenChunk(listType);
             writer.Write((uint)fourcc);
@@ -66,8 +74,10 @@ namespace SharpAvi.Output
 
         public static void SkipBytes(this BinaryWriter writer, int count)
         {
+#if !NET35
             Contract.Requires(writer != null);
             Contract.Requires(count >= 0);
+#endif
 
             while (count > 0)
             {

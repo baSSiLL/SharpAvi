@@ -1,12 +1,16 @@
 ﻿using System;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 
 namespace SharpAvi.Output
 {
     /// <summary>
     /// A stream of AVI files.
     /// </summary>
+#if !NET35
     [ContractClass(typeof(Contracts.AviStreamContract))]
+#endif
     public interface IAviStream
     {
         /// <summary>
@@ -20,6 +24,7 @@ namespace SharpAvi.Output
     }
 
 
+#if !NET35
     namespace Contracts
     {
         [ContractClassFor(typeof(IAviStream))]
@@ -46,4 +51,5 @@ namespace SharpAvi.Output
             }
         }
     }
+#endif
 }

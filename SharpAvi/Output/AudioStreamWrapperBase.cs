@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.Linq;
 using System.Text;
-#if FX45
+#if !NET35
 using System.Threading.Tasks;
 #endif
 
@@ -19,7 +21,9 @@ namespace SharpAvi.Output
     {
         protected AudioStreamWrapperBase(IAviAudioStreamInternal baseStream)
         {
+#if !NET35
             Contract.Requires(baseStream != null);
+#endif
 
             this.baseStream = baseStream;
         }
@@ -28,6 +32,7 @@ namespace SharpAvi.Output
         {
             get { return baseStream; }
         }
+
         private readonly IAviAudioStreamInternal baseStream;
 
         public virtual void Dispose()
@@ -86,12 +91,7 @@ namespace SharpAvi.Output
             baseStream.WriteBlock(data, startIndex, length);
         }
 
-#if FX45
-        public virtual Task WriteBlockAsync(byte[] data, int startIndex, int length)
-        {
-            return baseStream.WriteBlockAsync(data, startIndex, length);
-        }
-#else
+#if NET35
         public virtual IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
         {
             return baseStream.BeginWriteBlock(data, startIndex, length, userCallback, stateObject);
@@ -100,6 +100,11 @@ namespace SharpAvi.Output
         public virtual void EndWriteBlock(IAsyncResult asyncResult)
         {
             baseStream.EndWriteBlock(asyncResult);
+        }
+#else
+        public virtual Task WriteBlockAsync(byte[] data, int startIndex, int length)
+        {
+            return baseStream.WriteBlockAsync(data, startIndex, length);
         }
 #endif
 

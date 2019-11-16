@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.Linq;
 using System.Text;
 
@@ -16,7 +18,9 @@ namespace SharpAvi.Output
     {
         protected VideoStreamWrapperBase(IAviVideoStreamInternal baseStream)
         {
+#if !NET35
             Contract.Requires(baseStream != null);
+#endif
 
             this.baseStream = baseStream;
         }
@@ -25,6 +29,7 @@ namespace SharpAvi.Output
         {
             get { return baseStream; }
         }
+
         private readonly IAviVideoStreamInternal baseStream;
 
         public virtual void Dispose()
@@ -65,13 +70,8 @@ namespace SharpAvi.Output
             baseStream.WriteFrame(isKeyFrame, frameData, startIndex, length);
         }
 
-#if FX45
-        public virtual System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
-        {
-            return baseStream.WriteFrameAsync(isKeyFrame, frameData, startIndex, length);
-        }
-#else
-        public virtual IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length, 
+#if NET35
+        public virtual IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length,
             AsyncCallback userCallback, object stateObject)
         {
             return baseStream.BeginWriteFrame(isKeyFrame, frameData, startIndex, length, userCallback, stateObject);
@@ -80,6 +80,11 @@ namespace SharpAvi.Output
         public virtual void EndWriteFrame(IAsyncResult asyncResult)
         {
             baseStream.EndWriteFrame(asyncResult);
+        }
+#else
+        public virtual System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
+        {
+            return baseStream.WriteFrameAsync(isKeyFrame, frameData, startIndex, length);
         }
 #endif
 

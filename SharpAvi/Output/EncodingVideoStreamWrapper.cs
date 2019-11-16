@@ -1,5 +1,7 @@
 ﻿using System;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using SharpAvi.Codecs;
 
 namespace SharpAvi.Output
@@ -23,8 +25,10 @@ namespace SharpAvi.Output
         public EncodingVideoStreamWrapper(IAviVideoStreamInternal baseStream, IVideoEncoder encoder, bool ownsEncoder)
             : base(baseStream)
         {
+#if !NET35
             Contract.Requires(baseStream != null);
             Contract.Requires(encoder != null);
+#endif
 
             this.encoder = encoder;
             this.ownsEncoder = ownsEncoder;
@@ -77,18 +81,18 @@ namespace SharpAvi.Output
             }
         }
 
-#if FX45
-        public override System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-#else
+#if NET35
         public override IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length, AsyncCallback userCallback, object stateObject)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
 
         public override void EndWriteFrame(IAsyncResult asyncResult)
+        {
+            throw new NotSupportedException("Asynchronous writes are not supported.");
+        }
+#else
+        public override System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }

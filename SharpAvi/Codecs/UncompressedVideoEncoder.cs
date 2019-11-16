@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Contracts;
+﻿#if !NET35
+using System.Diagnostics.Contracts;
+#endif
 
 namespace SharpAvi.Codecs
 {
@@ -23,8 +25,10 @@ namespace SharpAvi.Codecs
         /// <param name="height">Frame height.</param>
         public UncompressedVideoEncoder(int width, int height)
         {
+#if !NET35
             Contract.Requires(width > 0);
             Contract.Requires(height > 0);
+#endif
 
             this.width = width;
             this.height = height;
@@ -33,7 +37,7 @@ namespace SharpAvi.Codecs
             sourceBuffer = new byte[width * height * 4];
         }
 
-        #region IVideoEncoder Members
+#region IVideoEncoder Members
 
         /// <summary>Video codec.</summary>
         public FourCC Codec
@@ -72,6 +76,6 @@ namespace SharpAvi.Codecs
             return MaxEncodedSize;
         }
 
-        #endregion
+#endregion
     }
 }

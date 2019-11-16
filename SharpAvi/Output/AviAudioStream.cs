@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,8 +26,10 @@ namespace SharpAvi.Output
             int channelCount, int samplesPerSecond, int bitsPerSample)
             : base(index)
         {
+#if !NET35
             Contract.Requires(index >= 0);
             Contract.Requires(writeHandler != null);
+#endif
 
             this.writeHandler = writeHandler;
 
@@ -116,18 +120,18 @@ namespace SharpAvi.Output
             System.Threading.Interlocked.Increment(ref blocksWritten);
         }
 
-#if FX45
-        public System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-#else
+#if NET35
         public IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
 
         public void EndWriteBlock(IAsyncResult asyncResult)
+        {
+            throw new NotSupportedException("Asynchronous writes are not supported.");
+        }
+#else
+        public System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }

@@ -1,5 +1,7 @@
 ﻿using System;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 
 namespace SharpAvi.Output
 {
@@ -16,11 +18,13 @@ namespace SharpAvi.Output
             int width, int height, BitsPerPixel bitsPerPixel)
             : base(index)
         {
+#if !NET35
             Contract.Requires(index >= 0);
             Contract.Requires(writeHandler != null);
             Contract.Requires(width > 0);
             Contract.Requires(height > 0);
             Contract.Requires(Enum.IsDefined(typeof(BitsPerPixel), bitsPerPixel));
+#endif
 
             this.writeHandler = writeHandler;
             this.width = width;
@@ -76,19 +80,19 @@ namespace SharpAvi.Output
             System.Threading.Interlocked.Increment(ref framesWritten);
         }
 
-#if FX45
-        public System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int count)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-#else
-        public IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count, 
+#if NET35
+        public IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count,
             AsyncCallback userCallback, object stateObject)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
 
         public void EndWriteFrame(IAsyncResult asyncResult)
+        {
+            throw new NotSupportedException("Asynchronous writes are not supported.");
+        }
+#else
+        public System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }

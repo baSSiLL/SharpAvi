@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -23,8 +25,8 @@ namespace SharpAvi.Codecs
     /// and Xvid can produce some errors.
     /// </para>
     /// <para>
-    /// In multi-threaded scenarios, like asynchronous encoding, it is recommended to wrap this encoder into
-    /// <see cref="SingleThreadedVideoEncoderWrapper"/> for the stable work.
+    /// Note for .NET 3.5:
+    /// This encoder is designed for single-threaded use.
     /// </para>
     /// </remarks>
     public class Mpeg4VideoEncoderVcm : IVideoEncoder, IDisposable
@@ -163,11 +165,13 @@ namespace SharpAvi.Codecs
         /// </remarks>
         public Mpeg4VideoEncoderVcm(int width, int height, double fps, int frameCount, int quality, params FourCC[] codecPreference)
         {
+#if !NET35
             Contract.Requires(width > 0);
             Contract.Requires(height > 0);
             Contract.Requires(fps > 0);
             Contract.Requires(frameCount >= 0);
             Contract.Requires(1 <= quality && quality <= 100);
+#endif
 
             this.width = width;
             this.height = height;
@@ -265,7 +269,7 @@ namespace SharpAvi.Codecs
         }
 
 
-        #region IVideoEncoder Members
+#region IVideoEncoder Members
 
         /// <summary>Video codec.</summary>
         public FourCC Codec
@@ -291,8 +295,10 @@ namespace SharpAvi.Codecs
         /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
+#if !NET35
             // TODO: Introduce Width and Height in IVideoRecorder and add Requires to EncodeFrame contract
             Contract.Assert(srcOffset + 4 * width * height <= source.Length);
+#endif
 
             BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
 
@@ -334,10 +340,10 @@ namespace SharpAvi.Codecs
             }
         }
 
-        #endregion
+#endregion
 
 
-        #region IDisposable Members
+#region IDisposable Members
 
         /// <summary>
         /// Releases all unmanaged resources used by the encoder.
@@ -357,7 +363,7 @@ namespace SharpAvi.Codecs
             }
         }
 
-        #endregion
+#endregion
 
 
         private void CheckICResult(int result)

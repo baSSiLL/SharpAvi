@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.Linq;
 using System.Text;
-#if FX45
+#if !NET35
 using System.Threading.Tasks;
 #endif
 
@@ -19,7 +21,9 @@ namespace SharpAvi.Output
         public AsyncAudioStreamWrapper(IAviAudioStreamInternal baseStream)
             : base(baseStream)
         {
+#if !NET35
             Contract.Requires(baseStream != null);
+#endif
         }
 
         public override void WriteBlock(byte[] data, int startIndex, int length)
@@ -27,22 +31,22 @@ namespace SharpAvi.Output
             writeInvoker.Invoke(() => base.WriteBlock(data, startIndex, length));
         }
 
-#if FX45
-        public override Task WriteBlockAsync(byte[] data, int startIndex, int length)
-        {
-            return writeInvoker.InvokeAsync(() => base.WriteBlock(data, startIndex, length));
-        }
-#else
+#if NET35
         public override IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
         {
             return writeInvoker.BeginInvoke(
-                () => base.WriteBlock(data, startIndex, length), 
+                () => base.WriteBlock(data, startIndex, length),
                 userCallback, stateObject);
         }
 
         public override void EndWriteBlock(IAsyncResult asyncResult)
         {
             writeInvoker.EndInvoke(asyncResult);
+        }
+#else
+        public override Task WriteBlockAsync(byte[] data, int startIndex, int length)
+        {
+            return writeInvoker.InvokeAsync(() => base.WriteBlock(data, startIndex, length));
         }
 #endif
 

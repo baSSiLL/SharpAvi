@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.Linq;
 using System.Text;
 using SharpAvi.Codecs;
@@ -20,8 +22,10 @@ namespace SharpAvi.Output
         public EncodingAudioStreamWrapper(IAviAudioStreamInternal baseStream, IAudioEncoder encoder, bool ownsEncoder)
             : base(baseStream)
         {
+#if !NET35
             Contract.Requires(baseStream != null);
             Contract.Requires(encoder != null);
+#endif
 
             this.encoder = encoder;
             this.ownsEncoder = ownsEncoder;
@@ -121,18 +125,18 @@ namespace SharpAvi.Output
             }
         }
 
-#if FX45
-        public override System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-#else
+#if NET35
         public override IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
 
         public override void EndWriteBlock(IAsyncResult asyncResult)
+        {
+            throw new NotSupportedException("Asynchronous writes are not supported.");
+        }
+#else
+        public override System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }

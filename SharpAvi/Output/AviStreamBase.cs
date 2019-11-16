@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,7 +18,9 @@ namespace SharpAvi.Output
 
         protected AviStreamBase(int index)
         {
+#if !NET35
             Contract.Requires(index >= 0);
+#endif
 
             this.index = index;
         }

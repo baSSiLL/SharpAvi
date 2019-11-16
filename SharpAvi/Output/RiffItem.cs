@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Contracts;
+﻿#if !NET35
+using System.Diagnostics.Contracts;
+#endif
 
 namespace SharpAvi.Output
 {
@@ -14,8 +16,10 @@ namespace SharpAvi.Output
 
         public RiffItem(long dataStart, int dataSize = -1)
         {
+#if !NET35
             Contract.Requires(dataStart >= ITEM_HEADER_SIZE);
             Contract.Requires(dataSize <= int.MaxValue - ITEM_HEADER_SIZE);
+#endif
 
             this.dataStart = dataStart;
             this.dataSize = dataSize;
@@ -41,8 +45,10 @@ namespace SharpAvi.Output
             get { return dataSize; }
             set
             {
+#if !NET35
                 Contract.Requires(value >= 0);
                 Contract.Requires(DataSize < 0);
+#endif
 
                 dataSize = value;
             }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Data;
 
-namespace SharpAvi.Sample
+namespace Sample
 {
     public class BooleanToObjectConverter : IValueConverter
     {

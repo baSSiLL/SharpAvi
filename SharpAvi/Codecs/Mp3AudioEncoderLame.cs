@@ -4,12 +4,19 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+#if NETSTANDARD2_0
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
+#endif
 using SharpAvi;
 using SharpAvi.Codecs;
 
@@ -47,7 +54,9 @@ namespace SharpAvi.Codecs
         /// </remarks>
         public static void SetLameDllLocation(string lameDllPath)
         {
+#if !NET35
             Contract.Requires(!string.IsNullOrEmpty(lameDllPath));
+#endif
 
             var libraryName = Path.GetFileName(lameDllPath);
             if (!IsLibraryLoaded(libraryName))
@@ -66,22 +75,70 @@ namespace SharpAvi.Codecs
         private static Assembly GenerateLameFacadeAssembly(string lameDllName)
         {
             var thisAsm = typeof(Mp3AudioEncoderLame).Assembly;
+            var source = GetLameFacadeAssemblySource(lameDllName, thisAsm);
+
+#if NETSTANDARD2_0
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+            string assemblyName = Path.GetRandomFileName();
+
+            string[] refPaths = new[] {
+                typeof(System.Object).GetTypeInfo().Assembly.Location,
+                Path.Combine(Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location), "System.Runtime.dll"),
+                thisAsm.Location
+            };
+
+            MetadataReference[] references = refPaths.Select(r => MetadataReference.CreateFromFile(r)).ToArray();
+
+            CSharpCompilation compilation = CSharpCompilation.Create(
+                assemblyName,
+                syntaxTrees: new[] { syntaxTree },
+                references: references,
+                options: new CSharpCompilationOptions(
+                    OutputKind.DynamicallyLinkedLibrary,
+                    optimizationLevel: OptimizationLevel.Release));
+
+            using (var ms = new MemoryStream())
+            {
+                EmitResult result = compilation.Emit(ms);
+
+                if (!result.Success)
+                {
+                    IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
+                        diagnostic.IsWarningAsError ||
+                        diagnostic.Severity == DiagnosticSeverity.Error);
+
+                    var sb = new StringBuilder();
+
+                    foreach (Diagnostic diagnostic in failures)
+                    {
+                        sb.AppendFormat("{0}: {1}\n", diagnostic.Id, diagnostic.GetMessage());
+                    }
+
+                    throw new Exception("Could not generate LAME facade assembly.\n" + sb.ToString());
+                }
+                else
+                {
+                    ms.Position = 0;
+                    return Assembly.Load(ms.ToArray());
+                }
+            }
+#else
             var compiler = new Microsoft.CSharp.CSharpCodeProvider();
             var compilerOptions = new System.CodeDom.Compiler.CompilerParameters()
             {
-                 GenerateInMemory = true,
-                 GenerateExecutable = false,
-                 IncludeDebugInformation = false,
-                 CompilerOptions = "/optimize",
-                 ReferencedAssemblies = {"mscorlib.dll", thisAsm.Location}
+                GenerateInMemory = true,
+                GenerateExecutable = false,
+                IncludeDebugInformation = false,
+                CompilerOptions = "/optimize",
+                ReferencedAssemblies = { "mscorlib.dll", thisAsm.Location }
             };
-            var source = GetLameFacadeAssemblySource(lameDllName, thisAsm);
             var compilerResult = compiler.CompileAssemblyFromSource(compilerOptions, source);
             if (compilerResult.Errors.HasErrors)
             {
                 throw new Exception("Could not generate LAME facade assembly.");
             }
             return compilerResult.CompiledAssembly;
+#endif
         }
 
         private static string GetLameFacadeAssemblySource(string lameDllName, Assembly resourceAsm)
@@ -110,7 +167,7 @@ namespace SharpAvi.Codecs
         [DllImport("kernel32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto)]
         private static extern IntPtr LoadLibrary(string fileName);
 
-        #endregion
+#endregion
 
 
         private const int SAMPLE_BYTE_SIZE = 2;
@@ -130,9 +187,11 @@ namespace SharpAvi.Codecs
         /// </remarks>
         public Mp3AudioEncoderLame(int channelCount, int sampleRate, int outputBitRateKbps)
         {
+#if !NET35
             Contract.Requires(channelCount == 1 || channelCount == 2);
             Contract.Requires(sampleRate > 0);
             Contract.Requires(SupportedBitRates.Contains(outputBitRateKbps));
+#endif
 
             if (lameFacadeType == null)
             {

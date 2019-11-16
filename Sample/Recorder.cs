@@ -1,20 +1,23 @@
 ﻿using System;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Threading;
-#if FX45
+#if !NET35
 using System.Threading.Tasks;
 #endif
 using System.Windows;
 using NAudio.Wave;
+using SharpAvi;
 using SharpAvi.Codecs;
 using SharpAvi.Output;
 using System.Windows.Interop;
 using System.Diagnostics;
 
-namespace SharpAvi.Sample
+namespace Sample
 {
     internal class Recorder : IDisposable
     {
@@ -29,8 +32,8 @@ namespace SharpAvi.Sample
         private readonly AutoResetEvent videoFrameWritten = new AutoResetEvent(false);
         private readonly AutoResetEvent audioBlockWritten = new AutoResetEvent(false);
 
-        public Recorder(string fileName, 
-            FourCC codec, int quality, 
+        public Recorder(string fileName,
+            FourCC codec, int quality,
             int audioSourceIndex, SupportedWaveFormat audioWaveFormat, bool encodeAudio, int audioBitRate)
         {
             System.Windows.Media.Matrix toDevice;
@@ -99,12 +102,7 @@ namespace SharpAvi.Sample
             }
             else if (codec == KnownFourCCs.Codecs.MotionJpeg)
             {
-                return writer.AddMotionJpegVideoStream(screenWidth, screenHeight, quality
-#if !FX45
-                    // Implementation of this encoder for .NET 3.5 requires single-threaded access
-                    , forceSingleThreadedAccess: true
-#endif
-                    );
+                return writer.AddMotionJpegVideoStream(screenWidth, screenHeight, quality);
             }
             else
             {
@@ -112,10 +110,7 @@ namespace SharpAvi.Sample
                     // It seems that all tested MPEG-4 VfW codecs ignore the quality affecting parameters passed through VfW API
                     // They only respect the settings from their own configuration dialogs, and Mpeg4VideoEncoder currently has no support for this
                     quality: quality,
-                    codec: codec,
-                    // Most of VfW codecs expect single-threaded use, so we wrap this encoder to special wrapper
-                    // Thus all calls to the encoder (including its instantiation) will be invoked on a single thread although encoding (and writing) is performed asynchronously
-                    forceSingleThreadedAccess: true);
+                    codec: codec);
             }
         }
 
@@ -169,10 +164,10 @@ namespace SharpAvi.Sample
         {
             var stopwatch = new Stopwatch();
             var buffer = new byte[screenWidth * screenHeight * 4];
-#if FX45
-            Task videoWriteTask = null;
-#else
+#if NET35
             IAsyncResult videoWriteResult = null;
+#else
+            Task videoWriteTask = null;
 #endif
             var isFirstFrame = true;
             var shotsTaken = 0;
@@ -187,26 +182,26 @@ namespace SharpAvi.Sample
                 // Wait for the previous frame is written
                 if (!isFirstFrame)
                 {
-#if FX45
-                    videoWriteTask.Wait();
-#else
+#if NET35
                     videoStream.EndWriteFrame(videoWriteResult);
+#else
+                    videoWriteTask.Wait();
 #endif
                     videoFrameWritten.Set();
                 }
 
                 if (audioStream != null)
                 {
-                    var signalled = WaitHandle.WaitAny(new WaitHandle[] {audioBlockWritten, stopThread});
+                    var signalled = WaitHandle.WaitAny(new WaitHandle[] { audioBlockWritten, stopThread });
                     if (signalled == 1)
                         break;
                 }
 
                 // Start asynchronous (encoding and) writing of the new frame
-#if FX45
-                videoWriteTask = videoStream.WriteFrameAsync(true, buffer, 0, buffer.Length);
-#else
+#if NET35
                 videoWriteResult = videoStream.BeginWriteFrame(true, buffer, 0, buffer.Length, null, null);
+#else
+                videoWriteTask = videoStream.WriteFrameAsync(true, buffer, 0, buffer.Length);
 #endif
 
                 timeTillNextFrame = TimeSpan.FromSeconds(shotsTaken / (double)writer.FramesPerSecond - stopwatch.Elapsed.TotalSeconds);
@@ -221,10 +216,10 @@ namespace SharpAvi.Sample
             // Wait for the last frame is written
             if (!isFirstFrame)
             {
-#if FX45
-                videoWriteTask.Wait();
-#else
+#if NET35
                 videoStream.EndWriteFrame(videoWriteResult);
+#else
+                videoWriteTask.Wait();
 #endif
             }
         }

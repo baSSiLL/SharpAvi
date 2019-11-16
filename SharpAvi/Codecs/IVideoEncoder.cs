@@ -1,12 +1,17 @@
 ﻿using System;
+
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 
 namespace SharpAvi.Codecs
 {
     /// <summary>
     /// Encoder for video AVI stream.
     /// </summary>
+#if !NET35
     [ContractClass(typeof(Contracts.VideoEncoderContract))]
+#endif
     public interface IVideoEncoder
     {
         /// <summary>Codec ID.</summary>
@@ -48,7 +53,7 @@ namespace SharpAvi.Codecs
         int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame);
     }
 
-
+#if !NET35
     namespace Contracts
     {
         [ContractClassFor(typeof(IVideoEncoder))]
@@ -85,4 +90,5 @@ namespace SharpAvi.Codecs
             }
         }
     }
+#endif
 }

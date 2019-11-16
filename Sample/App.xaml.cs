@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Windows;
 using SharpAvi.Codecs;
 
-namespace SharpAvi.Sample
+namespace Sample
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -17,10 +17,10 @@ namespace SharpAvi.Sample
 
             // Set LAME DLL path for MP3 encoder
             var asmDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-#if FX45
-            var is64BitProcess = Environment.Is64BitProcess;
-#else
+#if NET35
             var is64BitProcess = IntPtr.Size * 8 == 64;
+#else
+            var is64BitProcess = Environment.Is64BitProcess;
 #endif
             var dllName = string.Format("lameenc{0}.dll", is64BitProcess ? "64" : "32");
             Mp3AudioEncoderLame.SetLameDllLocation(Path.Combine(asmDir, dllName));

@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Contracts;
+﻿#if !NET35
+using System.Diagnostics.Contracts;
+#endif
 using System.Linq;
 
 namespace SharpAvi
@@ -45,10 +47,12 @@ namespace SharpAvi
         /// </remarks>
         public FourCC(string value)
         {
+#if !NET35
             Contract.Requires(value != null);
             Contract.Requires(value.Length <= 4);
             // Allow only printable ASCII characters
             Contract.Requires(Contract.ForAll(value, c => ' ' <= c && c <= '~'));
+#endif
 
             valueString = value.PadRight(4);
             valueDWord = (uint)valueString[0] + ((uint)valueString[1] << 8) + ((uint)valueString[2] << 16) + ((uint)valueString[3] << 24);

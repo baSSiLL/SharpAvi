@@ -28,7 +28,6 @@ namespace SharpAvi.Codecs.Runtime
             }
         }
 
-
         public int ChannelCount
         {
             get { return lame_get_num_channels(context); }
@@ -230,7 +229,7 @@ namespace SharpAvi.Codecs.Runtime
 
         [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern int lame_set_VBR(IntPtr context, VbrMode value);
-        
+
         [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern VbrMode lame_get_VBR(IntPtr context);
 
