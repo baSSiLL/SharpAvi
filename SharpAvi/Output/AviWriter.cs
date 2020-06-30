@@ -23,7 +23,7 @@ namespace SharpAvi.Output
         private const int RIFF_AVI_SIZE_TRESHOLD = 512 * 1024 * 1024;
         private const int RIFF_AVIX_SIZE_TRESHOLD = int.MaxValue - 1024 * 1024;
 
-        private readonly BinaryWriter fileWriter;
+        private BinaryWriter fileWriter;
 #if !FX45
         private readonly bool closeWriter;
 #endif
@@ -51,20 +51,39 @@ namespace SharpAvi.Output
 #endif
         private StreamInfo[] streamsInfo;
 
+        private readonly bool splitFiles = false;
+        private readonly int splitMsec;
+        private readonly int filesToKeep;
+        private readonly string fileName;
+        private readonly string fileNameWithoutExtension;
+        private int fileIndex = 0;
+        private DateTime nextSplitTime;
+
         /// <summary>
         /// Creates a new instance of <see cref="AviWriter"/> for writing to a file.
         /// </summary>
         /// <param name="fileName">Path to an AVI file being written.</param>
-        public AviWriter(string fileName)
+        /// <param name="splitFiles">Whether to split output files.</param>
+        /// <param name="splitMsec">Number of milliseconds to wait, when splitting, before creating a new AVI file.</param>
+        /// <param name="filesToKeep">Number of completed files to keep before deleting the oldest file (0 = keep endless number of files).</param>
+        public AviWriter(string fileName, bool splitFiles = false, int splitMsec = 60000, int filesToKeep = 0)
         {
             Contract.Requires(!string.IsNullOrEmpty(fileName));
+            Contract.Requires(!splitFiles || splitMsec >= 30000 && filesToKeep >= 0);
 
 #if !FX45
             streamsRO = new ReadOnlyCollection<IAviStream>(streamsList);
+            closeWriter = true;
 #endif
+            this.fileName = fileName;
+            this.fileNameWithoutExtension = Path.Combine(
+                Path.GetDirectoryName(fileName),
+                Path.GetFileNameWithoutExtension(fileName));
+            this.splitFiles = splitFiles;
+            this.splitMsec = splitMsec;
+            this.filesToKeep = filesToKeep;
 
-            var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
-            fileWriter = new BinaryWriter(fileStream);
+            CreateNewFileWriter();
         }
 
         /// <summary>
@@ -432,6 +451,58 @@ namespace SharpAvi.Output
         void IAviStreamWriteHandler.WriteAudioBlock(AviAudioStream stream, byte[] blockData, int startIndex, int count)
         {
             WriteStreamFrame(stream, true, blockData, startIndex, count);
+
+            StartNewSplitFile();
+        }
+
+        private void StartNewSplitFile()
+        {
+            lock (syncWrite)
+            {
+                if (!ShouldSplit())
+                {
+                    return;
+                }
+
+                CheckNotClosed();
+
+                // Assume that we have started writing as this should happen after at least half a minute
+
+                foreach (var stream in streams)
+                {
+                    FlushStreamIndex(stream);
+                }
+
+                CloseCurrentRiff();
+
+                // Rewrite header with actual data like frames count, super index, etc.
+                fileWriter.BaseStream.Position = header.ItemStart;
+                WriteHeader();
+
+#if FX45
+                fileWriter.Close();
+#else
+                    if (closeWriter)
+                    {
+                        fileWriter.Close();
+                    }
+                    else
+                    {
+                        fileWriter.Flush();
+                    }
+#endif
+                DeleteOldestFile();
+                
+                CreateNewFileWriter();
+
+                isFirstRiff = true;
+
+                streamsInfo = streams.Select(s => new StreamInfo(KnownFourCCs.Chunks.IndexData(s.Index))).ToArray();
+
+                currentRiff = fileWriter.OpenList(KnownFourCCs.Lists.Avi, KnownFourCCs.ListTypes.Riff);
+                WriteHeader();
+                currentMovie = fileWriter.OpenList(KnownFourCCs.Lists.Movie);
+            }
         }
 
         private void WriteStreamFrame(AviStreamBase stream, bool isKeyFrame, byte[] frameData, int startIndex, int count)
@@ -817,6 +888,63 @@ namespace SharpAvi.Output
             superIndex.Add(newEntry);
 
             index.Clear();
+        }
+
+        #endregion
+
+        #region FileWriter
+
+        private void CreateNewFileWriter()
+        {
+            var fileStream = new FileStream(GetActualFileName(), FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
+            fileWriter = new BinaryWriter(fileStream);
+        }
+
+        private void DeleteOldestFile()
+        {
+            if (filesToKeep <= 0 || fileIndex <= filesToKeep)
+            {
+                return;
+            }
+
+            // Delete oldest file
+            //
+            // For example, if fileIndex = 3, we have finished writing file 2 (there are 3 complete))
+            // fileIndex = 3, filesToKeep = 2 - delete 0, keep 1 and 2
+            // fileIndex = 4, filesToKeep = 2 - delete 1, keep 2 and 3 
+            // fileIndex = 5, filesToKeep = 2 - delete 2, keep 3 and 4
+
+            var indexToDelete = fileIndex - filesToKeep - 1;
+            var fileToDelete = $"{fileNameWithoutExtension}-{indexToDelete}.avi";
+
+            if (File.Exists(fileToDelete))
+            {
+                try
+                {
+                    File.Delete(fileToDelete);
+                }
+                catch (Exception)
+                {
+                    throw new InvalidOperationException("Cannot delete oldest file.");
+                }
+            }
+        }
+
+        private string GetActualFileName()
+        {
+            if (!splitFiles)
+            {
+                return fileName;
+            }    
+
+            nextSplitTime = DateTime.Now.AddMilliseconds(splitMsec);
+
+            return $"{fileNameWithoutExtension}-{fileIndex++}.avi";
+        }
+
+        private bool ShouldSplit()
+        {
+            return splitFiles && DateTime.Now > nextSplitTime;
         }
 
         #endregion
