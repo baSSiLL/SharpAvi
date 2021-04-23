@@ -14,29 +14,29 @@ namespace SharpAvi.Sample
 
         public static void Attach(Window window)
         {
-            window.Closed += window_Closed;
-            window.MouseLeftButtonDown += window_MouseLeftButtonDown;
-            window.MouseLeftButtonUp += window_MouseLeftButtonUp;
-            window.MouseMove += window_MouseMove;
+            window.Closed += Window_Closed;
+            window.MouseLeftButtonDown += Window_MouseLeftButtonDown;
+            window.MouseLeftButtonUp += Window_MouseLeftButtonUp;
+            window.MouseMove += Window_MouseMove;
         }
 
-        private static void window_Closed(object sender, EventArgs e)
+        private static void Window_Closed(object sender, EventArgs e)
         {
             var window = (Window)sender;
-            window.Closed -= window_Closed;
-            window.MouseLeftButtonDown -= window_MouseLeftButtonDown;
-            window.MouseLeftButtonUp -= window_MouseLeftButtonUp;
-            window.MouseMove -= window_MouseMove;
+            window.Closed -= Window_Closed;
+            window.MouseLeftButtonDown -= Window_MouseLeftButtonDown;
+            window.MouseLeftButtonUp -= Window_MouseLeftButtonUp;
+            window.MouseMove -= Window_MouseMove;
         }
 
-        private static void window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private static void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var window = (Window)sender;
             window.SetValue(MoveOriginProperty, e.GetPosition(window));
             window.CaptureMouse();
         }
 
-        private static void window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private static void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             var window = (Window)sender;
             if (window.IsMouseCaptured)
@@ -45,7 +45,7 @@ namespace SharpAvi.Sample
             }
         }
 
-        private static void window_MouseMove(object sender, MouseEventArgs e)
+        private static void Window_MouseMove(object sender, MouseEventArgs e)
         {
             var window = (Window)sender;
             if (window.IsMouseCaptured)

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpAvi", "SharpAvi\SharpAvi.Fx35.csproj", "{99ADB02B-C515-4F99-BA20-112CA82E2498}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpAvi.Fx35", "SharpAvi\SharpAvi.Fx35.csproj", "{99ADB02B-C515-4F99-BA20-112CA82E2498}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.Fx35.csproj", "{960B7709-DDB4-4F25-ADD8-936E9C218551}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Fx35", "Sample\Sample.Fx35.csproj", "{960B7709-DDB4-4F25-ADD8-936E9C218551}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8141657B-0A43-4BC0-9CE6-6A784FE9FA43}
 	EndGlobalSection
 EndGlobal
