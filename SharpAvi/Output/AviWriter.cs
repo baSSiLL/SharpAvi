@@ -337,6 +337,7 @@ namespace SharpAvi.Output
                         fileWriter.Flush();
                     }
 #endif
+                    fileWriter.Dispose();
                     isClosed = true;
                 }
 
