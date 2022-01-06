@@ -1,34 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{07B83677-E9B8-4166-A383-CF3B3D393FBD}</ProjectGuid>
+	<TargetFramework>net6.0-windows</TargetFramework>
+	<Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpAvi</RootNamespace>
-    <AssemblyName>SharpAvi</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\Debug\AviWriter.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
@@ -67,18 +51,9 @@
     <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\Release\AviWriter.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
@@ -117,7 +92,6 @@
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>bin\Release\SharpAvi.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
     <CodeContractsAssertsToContractsCheckBox>True</CodeContractsAssertsToContractsCheckBox>
     <CodeContractsRedundantTests>True</CodeContractsRedundantTests>
     <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
@@ -131,67 +105,13 @@
     <CodeContractsBeingOptimisticOnExternal>True</CodeContractsBeingOptimisticOnExternal>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="System" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
+    <EmbeddedResource Include="Codecs\LameFacadeImpl.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Argument.cs" />
-    <Compile Include="AudioFormats.cs" />
-    <Compile Include="Codecs\CodecInfo.cs" />
-    <Compile Include="Codecs\EncodingStreamFactory.cs" />
-    <Compile Include="Codecs\IAudioEncoder.cs" />
-    <Compile Include="Codecs\Mp3AudioEncoderLame.cs" />
-    <Compile Include="Codecs\Mp3AudioEncoderLame.ILameFacade.cs" />
-    <EmbeddedResource Include="Codecs\LameFacadeImpl.cs" />
-    <Compile Include="Codecs\SingleThreadedVideoEncoderWrapper.cs" />
-    <Compile Include="Index1Entry.cs" />
-    <Compile Include="IndexType.cs" />
-    <Compile Include="AviUtils.cs" />
-    <Compile Include="Output\AsyncAudioStreamWrapper.cs" />
-    <Compile Include="Output\AsyncVideoStreamWrapper.cs" />
-    <Compile Include="Output\AudioStreamWrapperBase.cs" />
-    <Compile Include="Output\IAviAudioStreamInternal.cs" />
-    <Compile Include="Output\IAviVideoStreamInternal.cs" />
-    <Compile Include="Output\SequentialInvoker.cs" />
-    <Compile Include="Output\AviAudioStream.cs" />
-    <Compile Include="Output\AviStreamBase.cs" />
-    <Compile Include="Output\AviVideoStream.cs" />
-    <Compile Include="Codecs\BitmapUtils.cs" />
-    <Compile Include="Codecs\IVideoEncoder.cs" />
-    <Compile Include="Codecs\MotionJpegVideoEncoderWpf.cs" />
-    <Compile Include="Codecs\Mpeg4VideoEncoderVcm.cs" />
-    <Compile Include="Codecs\VfwApi.cs" />
-    <Compile Include="Output\EncodingAudioStreamWrapper.cs" />
-    <Compile Include="Output\EncodingVideoStreamWrapper.cs" />
-    <Compile Include="Output\IAviAudioStream.cs" />
-    <Compile Include="Output\IAviStreamInternal.cs" />
-    <Compile Include="Output\IAviVideoStream.cs" />
-    <Compile Include="Output\IAviStreamWriteHandler.cs" />
-    <Compile Include="KnownFourCCs.cs" />
-    <Compile Include="MainHeaderFlags.cs" />
-    <Compile Include="Output\AviWriter.cs" />
-    <Compile Include="FourCC.cs" />
-    <Compile Include="Output\IAviStream.cs" />
-    <Compile Include="BitsPerPixel.cs" />
-    <Compile Include="Output\VideoStreamWrapperBase.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Codecs\UncompressedVideoEncoder.cs" />
-    <Compile Include="Output\RiffItem.cs" />
-    <Compile Include="Output\RiffWriterExtensions.cs" />
-    <Compile Include="StreamHeaderFlags.cs" />
-    <Compile Include="StandardIndexEntry.cs" />
-    <Compile Include="Output\AviStreamInfo.cs" />
-    <Compile Include="SuperIndexEntry.cs" />
+    <Compile Remove="Codecs\LameFacadeImpl.cs" />
+    <Compile Remove="Output\SequentialInvoker35.cs" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
+  </ItemGroup>
 </Project>
