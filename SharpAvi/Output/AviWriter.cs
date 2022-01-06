@@ -17,7 +17,6 @@ namespace SharpAvi.Output
     /// </remarks>
     public class AviWriter : IDisposable, IAviStreamWriteHandler
     {
-        private const int MAX_SUPER_INDEX_ENTRIES = 256;
         private const int MAX_INDEX_ENTRIES = 15000;
         private const int INDEX1_ENTRY_SIZE = 4 * sizeof(uint);
         private const int RIFF_AVI_SIZE_TRESHOLD = 512 * 1024 * 1024;
@@ -92,6 +91,9 @@ namespace SharpAvi.Output
         /// The value of the property is rounded to 3 fractional digits.
         /// Default value is <c>1</c>.
         /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Already started to write frames hence this information cannot be changed.
+        /// </exception>
         public decimal FramesPerSecond
         {
             get { return framesPerSecond; }
@@ -118,6 +120,9 @@ namespace SharpAvi.Output
         /// Presence of v1 index may improve the compatibility of generated AVI files with certain software, 
         /// especially when there are multiple streams.
         /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Already started to write frames hence this information cannot be changed.
+        /// </exception>
         public bool EmitIndex1
         {
             get { return emitIndex1; }
@@ -131,6 +136,40 @@ namespace SharpAvi.Output
             }
         }
         private bool emitIndex1;
+
+        /// <summary>
+        /// The maximum number of super index entries.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This number should be known before writing starts because the space for
+        /// super-index entries is reserved in the file header.
+        /// It effectively limits the number of frames which can be written to an individual stream.
+        /// Each super-index entry points to a single index block which can reference up to <c>15,000</c> frames.
+        /// </para>
+        /// <para>
+        /// The default value is <c>256</c>. For a 60 frames/s video stream this is equivalent to a duration
+        /// of more than 17 hours.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Already started to write frames hence this information cannot be changed.
+        /// </exception>
+        public int MaxSuperIndexEntries
+        {
+            get { return maxSuperIndexEntries; }
+            set 
+            {
+                Contract.Requires(value > 0);
+
+                lock (syncWrite)
+                {
+                    CheckNotStartedWriting();
+                    maxSuperIndexEntries = value;
+                }
+            }
+        }
+        private int maxSuperIndexEntries = 256;
 
         /// <summary>AVI streams that have been added so far.</summary>
 #if FX45
@@ -446,14 +485,13 @@ namespace SharpAvi.Output
                 }
 
                 var si = streamsInfo[stream.Index];
-                if (si.SuperIndex.Count == MAX_SUPER_INDEX_ENTRIES)
-                {
-                    throw new InvalidOperationException("Cannot write more frames to this stream.");
-                }
-
                 if (ShouldFlushStreamIndex(si.StandardIndex))
                 {
                     FlushStreamIndex(stream);
+                }
+                if (si.SuperIndex.Count == maxSuperIndexEntries)
+                {
+                    throw new InvalidOperationException("Cannot write more frames to this stream.");
                 }
 
                 var shouldCreateIndex1Entry = emitIndex1 && isFirstRiff;
@@ -614,7 +652,7 @@ namespace SharpAvi.Output
 
         private void WriteJunkInsteadOfMissingSuperIndexEntries()
         {
-            var missingEntriesCount = streamsInfo.Sum(si => MAX_SUPER_INDEX_ENTRIES - si.SuperIndex.Count);
+            var missingEntriesCount = streamsInfo.Sum(si => maxSuperIndexEntries - si.SuperIndex.Count);
             if (missingEntriesCount > 0)
             {
                 var junkDataSize = missingEntriesCount * sizeof(uint) * 4 - RiffItem.ITEM_HEADER_SIZE;
