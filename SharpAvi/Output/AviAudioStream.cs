@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace SharpAvi.Output
 {
@@ -116,22 +112,10 @@ namespace SharpAvi.Output
             System.Threading.Interlocked.Increment(ref blocksWritten);
         }
 
-#if FX45
         public System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
-#else
-        public IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-
-        public void EndWriteBlock(IAsyncResult asyncResult)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-#endif
 
         public int BlocksWritten
         {

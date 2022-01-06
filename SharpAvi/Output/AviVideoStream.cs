@@ -76,23 +76,10 @@ namespace SharpAvi.Output
             System.Threading.Interlocked.Increment(ref framesWritten);
         }
 
-#if FX45
         public System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
-#else
-        public IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count, 
-            AsyncCallback userCallback, object stateObject)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-
-        public void EndWriteFrame(IAsyncResult asyncResult)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-#endif
 
         public int FramesWritten
         {

@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Text;
-#if FX45
 using System.Threading.Tasks;
-#endif
 
 namespace SharpAvi.Output
 {
@@ -86,22 +81,10 @@ namespace SharpAvi.Output
             baseStream.WriteBlock(data, startIndex, length);
         }
 
-#if FX45
         public virtual Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
             return baseStream.WriteBlockAsync(data, startIndex, length);
         }
-#else
-        public virtual IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
-        {
-            return baseStream.BeginWriteBlock(data, startIndex, length, userCallback, stateObject);
-        }
-
-        public virtual void EndWriteBlock(IAsyncResult asyncResult)
-        {
-            baseStream.EndWriteBlock(asyncResult);
-        }
-#endif
 
         public int BlocksWritten
         {

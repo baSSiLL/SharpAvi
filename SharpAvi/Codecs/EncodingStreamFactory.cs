@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using SharpAvi.Output;
+using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Text;
-using SharpAvi.Output;
 
 namespace SharpAvi.Codecs
 {
@@ -28,7 +26,6 @@ namespace SharpAvi.Codecs
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
 
-#if FX45
         /// <summary>
         /// Adds new video stream with <see cref="MotionJpegVideoEncoderWpf"/>.
         /// </summary>
@@ -38,26 +35,7 @@ namespace SharpAvi.Codecs
         /// <param name="quality">Requested quality of compression.</param>
         /// <seealso cref="AviWriter.AddEncodingVideoStream"/>
         /// <seealso cref="MotionJpegVideoEncoderWpf"/>
-#else
-        /// <summary>
-        /// Adds new video stream with <see cref="MotionJpegVideoEncoderWpf"/>.
-        /// </summary>
-        /// <param name="writer">Writer object to which new stream is added.</param>
-        /// <param name="width">Frame width.</param>
-        /// <param name="height">Frame height.</param>
-        /// <param name="quality">Requested quality of compression.</param>
-        /// <param name="forceSingleThreadedAccess">
-        /// When <c>true</c>, the created <see cref="MotionJpegVideoEncoderWpf"/> instance is wrapped into
-        /// <see cref="SingleThreadedVideoEncoderWrapper"/>.
-        /// </param>
-        /// <seealso cref="AviWriter.AddEncodingVideoStream"/>
-        /// <seealso cref="MotionJpegVideoEncoderWpf"/>
-#endif
-        public static IAviVideoStream AddMotionJpegVideoStream(this AviWriter writer, int width, int height, int quality = 70
-#if !FX45
-            , bool forceSingleThreadedAccess = false
-#endif
-            )
+        public static IAviVideoStream AddMotionJpegVideoStream(this AviWriter writer, int width, int height, int quality = 70)
         {
             Contract.Requires(writer != null);
             Contract.Requires(width > 0);
@@ -65,14 +43,7 @@ namespace SharpAvi.Codecs
             Contract.Requires(1 <= quality && quality <= 100);
             Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
 
-#if FX45
             var encoder = new MotionJpegVideoEncoderWpf(width, height, quality);
-#else
-            var encoderFactory = new Func<IVideoEncoder>(() => new MotionJpegVideoEncoderWpf(width, height, quality));
-            var encoder = forceSingleThreadedAccess
-                ? new SingleThreadedVideoEncoderWrapper(encoderFactory)
-                : encoderFactory.Invoke();
-#endif
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
 

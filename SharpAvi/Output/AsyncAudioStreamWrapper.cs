@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Text;
-#if FX45
+﻿using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
-#endif
 
 namespace SharpAvi.Output
 {
@@ -27,24 +21,10 @@ namespace SharpAvi.Output
             writeInvoker.Invoke(() => base.WriteBlock(data, startIndex, length));
         }
 
-#if FX45
         public override Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
             return writeInvoker.InvokeAsync(() => base.WriteBlock(data, startIndex, length));
         }
-#else
-        public override IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
-        {
-            return writeInvoker.BeginInvoke(
-                () => base.WriteBlock(data, startIndex, length), 
-                userCallback, stateObject);
-        }
-
-        public override void EndWriteBlock(IAsyncResult asyncResult)
-        {
-            writeInvoker.EndInvoke(asyncResult);
-        }
-#endif
 
         public override void FinishWriting()
         {

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using SharpAvi.Codecs;
+using System;
 using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Text;
-using SharpAvi.Codecs;
 
 namespace SharpAvi.Output
 {
@@ -121,22 +118,10 @@ namespace SharpAvi.Output
             }
         }
 
-#if FX45
         public override System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
-#else
-        public override IAsyncResult BeginWriteBlock(byte[] data, int startIndex, int length, AsyncCallback userCallback, object stateObject)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-
-        public override void EndWriteBlock(IAsyncResult asyncResult)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-#endif
 
         public override void PrepareForWriting()
         {

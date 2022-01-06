@@ -77,22 +77,10 @@ namespace SharpAvi.Output
             }
         }
 
-#if FX45
         public override System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
-#else
-        public override IAsyncResult BeginWriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length, AsyncCallback userCallback, object stateObject)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-
-        public override void EndWriteFrame(IAsyncResult asyncResult)
-        {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
-        }
-#endif
 
         public override void PrepareForWriting()
         {

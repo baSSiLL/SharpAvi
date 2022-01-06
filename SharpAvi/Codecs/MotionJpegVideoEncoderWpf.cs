@@ -1,11 +1,10 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System;
-using System.Threading;
-using System.Collections.Generic;
 
 namespace SharpAvi.Codecs
 {
@@ -15,11 +14,6 @@ namespace SharpAvi.Codecs
     /// <remarks>
     /// <para>
     /// The implementation relies on <see cref="JpegBitmapEncoder"/>.
-    /// </para>
-    /// <para>
-    /// Note for .NET 3.5:
-    /// This encoder is designed for single-threaded use. If you use it in multi-threaded scenarios 
-    /// (like asynchronous calls), then consider wrapping it in <see cref="SingleThreadedVideoEncoderWrapper"/>.
     /// </para>
     /// <para>
     /// This encoder is not fully conformant to the Motion JPEG standard, as each encoded frame is a full JPEG picture 
@@ -32,11 +26,7 @@ namespace SharpAvi.Codecs
     {
         private readonly Int32Rect rect;
         private readonly int quality;
-#if FX45
         private readonly ThreadLocal<WriteableBitmap> bitmapHolder;
-#else
-        private readonly WriteableBitmap bitmap;
-#endif
 
         /// <summary>
         /// Creates a new instance of <see cref="MotionJpegVideoEncoderWpf"/>.
@@ -56,13 +46,9 @@ namespace SharpAvi.Codecs
             rect = new Int32Rect(0, 0, width, height);
             this.quality = quality;
 
-#if FX45
             bitmapHolder = new ThreadLocal<WriteableBitmap>(
                 () => new WriteableBitmap(rect.Width, rect.Height, 96, 96, PixelFormats.Bgr32, null),
                 false);
-#else
-            bitmap = new WriteableBitmap(rect.Width, rect.Height, 96, 96, PixelFormats.Bgr32, null);
-#endif
         }
 
 
@@ -100,9 +86,7 @@ namespace SharpAvi.Codecs
         /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
-#if FX45
             var bitmap = bitmapHolder.Value;
-#endif
             bitmap.WritePixels(rect, source, rect.Width * 4, srcOffset);
 
             var encoderImpl = new JpegBitmapEncoder
