@@ -1,7 +1,6 @@
 ﻿using SharpAvi.Codecs;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -43,7 +42,7 @@ namespace SharpAvi.Output
         /// <param name="fileName">Path to an AVI file being written.</param>
         public AviWriter(string fileName)
         {
-            Contract.Requires(!string.IsNullOrEmpty(fileName));
+            Argument.IsNotNullOrEmpty(fileName, nameof(fileName));
 
             var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 1024);
             fileWriter = new BinaryWriter(fileStream);
@@ -56,8 +55,8 @@ namespace SharpAvi.Output
         /// <param name="leaveOpen">Whether to leave the stream open when closing <see cref="AviWriter"/>.</param>
         public AviWriter(Stream stream, bool leaveOpen = false)
         {
-            Contract.Requires(stream.CanWrite);
-            Contract.Requires(stream.CanSeek);
+            Argument.Meets(stream.CanWrite, nameof(stream), "A stream is not writeable.");
+            Argument.Meets(stream.CanSeek, nameof(stream), "A stream is not seekable.");
 
             fileWriter = new BinaryWriter(stream, Encoding.Default, leaveOpen);
 
@@ -76,7 +75,7 @@ namespace SharpAvi.Output
             get { return framesPerSecond; }
             set
             {
-                Contract.Requires(value > 0);
+                Argument.IsPositive(value, nameof(value));
 
                 lock (syncWrite)
                 {
@@ -137,7 +136,7 @@ namespace SharpAvi.Output
             get { return maxSuperIndexEntries; }
             set 
             {
-                Contract.Requires(value > 0);
+                Argument.IsPositive(value, nameof(value));
 
                 lock (syncWrite)
                 {
@@ -166,11 +165,9 @@ namespace SharpAvi.Output
         /// </remarks>
         public IAviVideoStream AddVideoStream(int width = 1, int height = 1, BitsPerPixel bitsPerPixel = BitsPerPixel.Bpp32)
         {
-            Contract.Requires(width > 0);
-            Contract.Requires(height > 0);
-            Contract.Requires(Enum.IsDefined(typeof(BitsPerPixel), bitsPerPixel));
-            Contract.Requires(Streams.Count < 100);
-            Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsEnumMember(bitsPerPixel, nameof(bitsPerPixel));
 
             return AddStream<IAviVideoStreamInternal>(index => 
                 {
@@ -202,9 +199,9 @@ namespace SharpAvi.Output
         /// </remarks>
         public IAviVideoStream AddEncodingVideoStream(IVideoEncoder encoder, bool ownsEncoder = true, int width = 1, int height = 1)
         {
-            Contract.Requires(encoder != null);
-            Contract.Requires(Streams.Count < 100);
-            Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
+            Argument.IsNotNull(encoder, nameof(encoder));
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
 
             return AddStream<IAviVideoStreamInternal>(index => 
                 {
@@ -227,11 +224,10 @@ namespace SharpAvi.Output
         /// </remarks>
         public IAviAudioStream AddAudioStream(int channelCount = 1, int samplesPerSecond = 44100, int bitsPerSample = 16)
         {
-            Contract.Requires(channelCount > 0);
-            Contract.Requires(samplesPerSecond > 0);
-            Contract.Requires(bitsPerSample > 0 && (bitsPerSample % 8) == 0);
-            Contract.Requires(Streams.Count < 100);
-            Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
+            Argument.IsPositive(channelCount, nameof(channelCount));
+            Argument.IsPositive(samplesPerSecond, nameof(samplesPerSecond));
+            Argument.IsPositive(bitsPerSample, nameof(bitsPerSample));
+            Argument.Meets(bitsPerSample % 8 == 0, nameof(bitsPerSample), "A multiple of 8 is expected.");
 
             return AddStream<IAviAudioStreamInternal>(index => 
                 {
@@ -262,9 +258,7 @@ namespace SharpAvi.Output
         /// </remarks>
         public IAviAudioStream AddEncodingAudioStream(IAudioEncoder encoder, bool ownsEncoder = true)
         {
-            Contract.Requires(encoder != null);
-            Contract.Requires(Streams.Count < 100);
-            Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
+            Argument.IsNotNull(encoder, nameof(encoder));
 
             return AddStream<IAviAudioStreamInternal>(index => 
                 {
@@ -278,8 +272,8 @@ namespace SharpAvi.Output
         private TStream AddStream<TStream>(Func<int, TStream> streamFactory)
             where TStream : IAviStreamInternal
         {
-            Contract.Requires(streamFactory != null);
-            Contract.Requires(Streams.Count < 100);
+            if (Streams.Count >= 100)
+                throw new InvalidOperationException("Cannot add more streams.");
 
             lock (syncWrite)
             {
@@ -416,7 +410,7 @@ namespace SharpAvi.Output
         }
 
 
-        #region IAviStreamDataHandler implementation
+        #region IAviStreamWriteHandler implementation
 
         void IAviStreamWriteHandler.WriteVideoFrame(AviVideoStream stream, bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {

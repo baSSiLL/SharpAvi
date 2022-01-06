@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -13,16 +12,25 @@ namespace SharpAvi.Output
         public AsyncAudioStreamWrapper(IAviAudioStreamInternal baseStream)
             : base(baseStream)
         {
-            Contract.Requires(baseStream != null);
         }
 
         public override void WriteBlock(byte[] data, int startIndex, int length)
         {
+            Argument.IsNotNull(data, nameof(data));
+            Argument.IsNotNegative(startIndex, nameof(startIndex));
+            Argument.IsPositive(length, nameof(length));
+            Argument.ConditionIsMet(startIndex + length <= data.Length, "End offset exceeds the length of data.");
+
             writeInvoker.Invoke(() => base.WriteBlock(data, startIndex, length));
         }
 
         public override Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
+            Argument.IsNotNull(data, nameof(data));
+            Argument.IsNotNegative(startIndex, nameof(startIndex));
+            Argument.IsPositive(length, nameof(length));
+            Argument.ConditionIsMet(startIndex + length <= data.Length, "End offset exceeds the length of data.");
+
             return writeInvoker.InvokeAsync(() => base.WriteBlock(data, startIndex, length));
         }
 

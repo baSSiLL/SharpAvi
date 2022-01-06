@@ -1,6 +1,6 @@
 ﻿using SharpAvi.Codecs;
 using System;
-using System.Diagnostics.Contracts;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -17,8 +17,7 @@ namespace SharpAvi.Output
         public EncodingAudioStreamWrapper(IAviAudioStreamInternal baseStream, IAudioEncoder encoder, bool ownsEncoder)
             : base(baseStream)
         {
-            Contract.Requires(baseStream != null);
-            Contract.Requires(encoder != null);
+            Argument.IsNotNull(encoder, nameof(encoder));
 
             this.encoder = encoder;
             this.ownsEncoder = ownsEncoder;
@@ -106,6 +105,11 @@ namespace SharpAvi.Output
         /// </summary>
         public override void WriteBlock(byte[] data, int startIndex, int length)
         {
+            Argument.IsNotNull(data, nameof(data));
+            Argument.IsNotNegative(startIndex, nameof(startIndex));
+            Argument.IsPositive(length, nameof(length));
+            Argument.ConditionIsMet(startIndex + length <= data.Length, "End offset exceeds the length of data.");
+
             // Prevent accessing encoded buffer by multiple threads simultaneously
             lock (syncBuffer)
             {
@@ -118,7 +122,7 @@ namespace SharpAvi.Output
             }
         }
 
-        public override System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
+        public override Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }

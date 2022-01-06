@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics.Contracts;
 
 namespace SharpAvi.Codecs
 {
@@ -10,13 +6,15 @@ namespace SharpAvi.Codecs
     {
         public static unsafe void Bgr32ToBgr24(byte[] source, int srcOffset, byte[] destination, int destOffset, int pixelCount)
         {
-            Contract.Requires(source != null);
-            Contract.Requires(srcOffset >= 0);
-            Contract.Requires(destination != null);
-            Contract.Requires(destOffset >= 0);
-            Contract.Requires(pixelCount >= 0);
-            Contract.Requires(srcOffset + 4 * pixelCount <= source.Length);
-            Contract.Requires(destOffset + 3 * pixelCount <= destination.Length);
+            Argument.IsNotNull(source, nameof(source));
+            Argument.IsNotNegative(srcOffset, nameof(srcOffset));
+            Argument.IsNotNull(destination, nameof(destination));
+            Argument.IsNotNegative(destOffset, nameof(destOffset));
+            Argument.IsPositive(pixelCount, nameof(pixelCount));
+            Argument.ConditionIsMet(srcOffset + 4 * pixelCount <= source.Length,
+                "Source end offset exceeds the source length.");
+            Argument.ConditionIsMet(destOffset + 3 * pixelCount <= destination.Length,
+                "Destination end offset exceeds the destination length.");
 
             fixed (byte* sourcePtr = source, destinationPtr = destination)
             {
@@ -37,12 +35,14 @@ namespace SharpAvi.Codecs
 
         public static void FlipVertical(byte[] source, int srcOffset, byte[] destination, int destOffset, int height, int stride)
         {
-            Contract.Requires(source != null);
-            Contract.Requires(destination != null);
-            Contract.Requires(height >= 0);
-            Contract.Requires(stride > 0);
-            Contract.Requires(srcOffset + stride * height <= source.Length);
-            Contract.Requires(destOffset + stride * height <= destination.Length);
+            Argument.IsNotNull(source, nameof(source));
+            Argument.IsNotNull(destination, nameof(destination));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsPositive(stride, nameof(stride));
+            Argument.ConditionIsMet(srcOffset + stride * height <= source.Length,
+                "Source end offset exceeds the source length.");
+            Argument.ConditionIsMet(destOffset + stride * height <= destination.Length,
+                "Destination end offset exceeds the destination length.");
 
             var src = srcOffset;
             var dest = destOffset + (height - 1) * stride;

@@ -2,16 +2,11 @@
 // https://github.com/Corey-M/NAudio.Lame
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using SharpAvi;
-using SharpAvi.Codecs;
 
 namespace SharpAvi.Codecs
 {
@@ -47,7 +42,7 @@ namespace SharpAvi.Codecs
         /// </remarks>
         public static void SetLameDllLocation(string lameDllPath)
         {
-            Contract.Requires(!string.IsNullOrEmpty(lameDllPath));
+            Argument.IsNotNullOrEmpty(lameDllPath, nameof(lameDllPath));
 
             var libraryName = Path.GetFileName(lameDllPath);
             if (!IsLibraryLoaded(libraryName))
@@ -130,9 +125,9 @@ namespace SharpAvi.Codecs
         /// </remarks>
         public Mp3AudioEncoderLame(int channelCount, int sampleRate, int outputBitRateKbps)
         {
-            Contract.Requires(channelCount == 1 || channelCount == 2);
-            Contract.Requires(sampleRate > 0);
-            Contract.Requires(SupportedBitRates.Contains(outputBitRateKbps));
+            Argument.IsInRange(channelCount, 1, 2, nameof(channelCount));
+            Argument.IsPositive(sampleRate, nameof(sampleRate));
+            Argument.Meets(SupportedBitRates.Contains(outputBitRateKbps), nameof(outputBitRateKbps));
 
             if (lameFacadeType == null)
             {
@@ -166,6 +161,14 @@ namespace SharpAvi.Codecs
         /// </summary>
         public int EncodeBlock(byte[] source, int sourceOffset, int sourceCount, byte[] destination, int destinationOffset)
         {
+            Argument.IsNotNull(source, nameof(source));
+            Argument.IsNotNegative(sourceOffset, nameof(sourceOffset));
+            Argument.IsPositive(sourceCount, nameof(sourceCount));
+            Argument.ConditionIsMet(sourceOffset + sourceCount <= source.Length,
+                "Source end offset exceeds the source length.");
+            Argument.IsNotNull(destination, nameof(destination));
+            Argument.IsNotNegative(destinationOffset, nameof(destinationOffset));
+
             return lame.Encode(source, sourceOffset, sourceCount / SAMPLE_BYTE_SIZE, destination, destinationOffset);
         }
 
@@ -174,6 +177,9 @@ namespace SharpAvi.Codecs
         /// </summary>
         public int Flush(byte[] destination, int destinationOffset)
         {
+            Argument.IsNotNull(destination, nameof(destination));
+            Argument.IsNotNegative(destinationOffset, nameof(destinationOffset));
+
             return lame.FinishEncoding(destination, destinationOffset);
         }
 
@@ -182,6 +188,8 @@ namespace SharpAvi.Codecs
         /// </summary>
         public int GetMaxEncodedLength(int sourceCount)
         {
+            Argument.IsNotNegative(sourceCount, nameof(sourceCount));
+
             // Estimate taken from the description of 'lame_encode_buffer' method in 'lame.h'
             var numberOfSamples = sourceCount / SAMPLE_BYTE_SIZE;
             return (int)Math.Ceiling(1.25 * numberOfSamples + 7200);

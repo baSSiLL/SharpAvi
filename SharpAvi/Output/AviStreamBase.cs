@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace SharpAvi.Output
 {
@@ -16,7 +11,7 @@ namespace SharpAvi.Output
 
         protected AviStreamBase(int index)
         {
-            Contract.Requires(index >= 0);
+            Argument.IsNotNegative(index, nameof(index));
 
             this.index = index;
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -163,11 +162,11 @@ namespace SharpAvi.Codecs
         /// </remarks>
         public Mpeg4VideoEncoderVcm(int width, int height, double fps, int frameCount, int quality, params FourCC[] codecPreference)
         {
-            Contract.Requires(width > 0);
-            Contract.Requires(height > 0);
-            Contract.Requires(fps > 0);
-            Contract.Requires(frameCount >= 0);
-            Contract.Requires(1 <= quality && quality <= 100);
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsPositive(fps, nameof(fps));
+            Argument.IsNotNegative(frameCount, nameof(frameCount));
+            Argument.IsInRange(quality, 1, 100, nameof(quality));
 
             this.width = width;
             this.height = height;
@@ -291,8 +290,12 @@ namespace SharpAvi.Codecs
         /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
-            // TODO: Introduce Width and Height in IVideoRecorder and add Requires to EncodeFrame contract
-            Contract.Assert(srcOffset + 4 * width * height <= source.Length);
+            Argument.IsNotNull(source, nameof(source));
+            Argument.IsNotNegative(srcOffset, nameof(srcOffset));
+            Argument.ConditionIsMet(srcOffset + 4 * width * height <= source.Length,
+                "Source end offset exceeds the source length.");
+            Argument.IsNotNull(destination, nameof(destination));
+            Argument.IsNotNegative(destOffset, nameof(destOffset));
 
             BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
 

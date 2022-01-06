@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Threading;
 using System.Windows;
@@ -39,9 +38,9 @@ namespace SharpAvi.Codecs
         /// </param>
         public MotionJpegVideoEncoderWpf(int width, int height, int quality)
         {
-            Contract.Requires(width > 0);
-            Contract.Requires(height > 0);
-            Contract.Requires(1 <= quality && quality <= 100);
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsInRange(quality, 1, 100, nameof(quality));
 
             rect = new Int32Rect(0, 0, width, height);
             this.quality = quality;
@@ -65,7 +64,7 @@ namespace SharpAvi.Codecs
         /// </summary>
         public BitsPerPixel BitsPerPixel
         {
-            get { return SharpAvi.BitsPerPixel.Bpp24; }
+            get { return BitsPerPixel.Bpp24; }
         }
 
         /// <summary>
@@ -86,6 +85,13 @@ namespace SharpAvi.Codecs
         /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
+            Argument.IsNotNull(source, nameof(source));
+            Argument.IsNotNegative(srcOffset, nameof(srcOffset));
+            Argument.ConditionIsMet(srcOffset + 4 * rect.Width * rect.Height <= source.Length,
+                "Source end offset exceeds the source length.");
+            Argument.IsNotNull(destination, nameof(destination));
+            Argument.IsNotNegative(destOffset, nameof(destOffset));
+
             var bitmap = bitmapHolder.Value;
             bitmap.WritePixels(rect, source, rect.Width * 4, srcOffset);
 

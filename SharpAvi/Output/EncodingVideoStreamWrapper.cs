@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
+using System.Threading.Tasks;
 using SharpAvi.Codecs;
 
 namespace SharpAvi.Output
@@ -23,8 +23,7 @@ namespace SharpAvi.Output
         public EncodingVideoStreamWrapper(IAviVideoStreamInternal baseStream, IVideoEncoder encoder, bool ownsEncoder)
             : base(baseStream)
         {
-            Contract.Requires(baseStream != null);
-            Contract.Requires(encoder != null);
+            Argument.IsNotNull(encoder, nameof(encoder));
 
             this.encoder = encoder;
             this.ownsEncoder = ownsEncoder;
@@ -67,17 +66,22 @@ namespace SharpAvi.Output
         }
 
         /// <summary>Encodes and writes a frame.</summary>
-        public override void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
+        public override void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length)
         {
+            Argument.IsNotNull(frameData, nameof(frameData));
+            Argument.IsNotNegative(startIndex, nameof(startIndex));
+            Argument.IsPositive(length, nameof(length));
+            Argument.ConditionIsMet(startIndex + length <= frameData.Length, "End offset exceeds the length of frame data.");
+
             // Prevent accessing encoded buffer by multiple threads simultaneously
             lock (syncBuffer)
             {
-                count = encoder.EncodeFrame(frameData, startIndex, encodedBuffer, 0, out isKeyFrame);
-                base.WriteFrame(isKeyFrame, encodedBuffer, 0, count);
+                length = encoder.EncodeFrame(frameData, startIndex, encodedBuffer, 0, out isKeyFrame);
+                base.WriteFrame(isKeyFrame, encodedBuffer, 0, length);
             }
         }
 
-        public override System.Threading.Tasks.Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
+        public override Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Diagnostics.Contracts;
-
-namespace SharpAvi.Codecs
+﻿namespace SharpAvi.Codecs
 {
     /// <summary>
     /// Encoder for video AVI stream.
     /// </summary>
-    [ContractClass(typeof(Contracts.VideoEncoderContract))]
     public interface IVideoEncoder
     {
         /// <summary>Codec ID.</summary>
@@ -46,43 +42,5 @@ namespace SharpAvi.Codecs
         /// The actual number of bytes written to the <paramref name="destination"/> buffer.
         /// </returns>
         int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame);
-    }
-
-
-    namespace Contracts
-    {
-        [ContractClassFor(typeof(IVideoEncoder))]
-        internal abstract class VideoEncoderContract : IVideoEncoder
-        {
-            public FourCC Codec
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public BitsPerPixel BitsPerPixel
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public int MaxEncodedSize
-            {
-                get 
-                {
-                    Contract.Ensures(Contract.Result<int>() > 0);
-                    throw new NotImplementedException(); 
-                }
-            }
-
-            public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
-            {
-                Contract.Requires(source != null);
-                Contract.Requires(source.Length > 0);
-                Contract.Requires(0 <= srcOffset && srcOffset < source.Length);
-                Contract.Requires(destination != null);
-                Contract.Requires(0 <= destOffset && destOffset + MaxEncodedSize <= destination.Length);
-                Contract.Ensures(Contract.Result<int>() >= 0);
-                throw new NotImplementedException();
-            }
-        }
     }
 }

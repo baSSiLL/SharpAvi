@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics.Contracts;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -10,7 +8,6 @@ namespace SharpAvi.Output
     /// <remarks>
     /// After the first invocation of <see cref="WriteFrame"/> no properties of the stream can be changed.
     /// </remarks>
-    [ContractClass(typeof(Contracts.AviVideoStreamContract))]
     public interface IAviVideoStream : IAviStream
     {
         /// <summary>Frame width.</summary>
@@ -51,110 +48,5 @@ namespace SharpAvi.Output
         /// Number of frames written.
         /// </summary>
         int FramesWritten { get; }
-    }
-
-    
-    namespace Contracts
-    {
-        [ContractClassFor(typeof(IAviVideoStream))]
-        internal abstract class AviVideoStreamContract : IAviVideoStream
-        {
-            public int Width
-            {
-                get 
-                { 
-                    Contract.Ensures(Contract.Result<int>() > 0);
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    Contract.Requires(value > 0);
-                }
-            }
-
-            public int Height
-            {
-                get
-                {
-                    Contract.Ensures(Contract.Result<int>() > 0);
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    Contract.Requires(value > 0);
-                }
-            }
-
-            public BitsPerPixel BitsPerPixel
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    Contract.Requires(Enum.IsDefined(typeof(BitsPerPixel), value));
-                }
-            }
-
-            public FourCC Codec
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                }
-            }
-
-            public void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length)
-            {
-                Contract.Requires(frameData != null);
-                Contract.Requires(startIndex >= 0);
-                Contract.Requires(length >= 0);
-                Contract.Requires(startIndex + length <= frameData.Length);
-            }
-
-            public Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
-            {
-                Contract.Requires(frameData != null);
-                Contract.Requires(startIndex >= 0);
-                Contract.Requires(length >= 0);
-                Contract.Requires(startIndex + length <= frameData.Length);
-                Contract.Ensures(Contract.Result<Task>() != null);
-                throw new NotImplementedException();
-            }
-
-            public int FramesWritten
-            {
-                get
-                {
-                    Contract.Ensures(Contract.Result<int>() >= 0);
-                    throw new NotImplementedException();
-                }
-            }
-
-            public int Index
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public string Name
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                }
-            }
-
-            public FourCC StreamType
-            {
-                get { throw new NotImplementedException(); }
-            }
-        }
     }
 }

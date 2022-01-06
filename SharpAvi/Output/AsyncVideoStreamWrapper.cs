@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -13,16 +12,25 @@ namespace SharpAvi.Output
         public AsyncVideoStreamWrapper(IAviVideoStreamInternal baseStream)
             : base(baseStream)
         {
-            Contract.Requires(baseStream != null);
         }
 
         public override void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length)
         {
+            Argument.IsNotNull(frameData, nameof(frameData));
+            Argument.IsNotNegative(startIndex, nameof(startIndex));
+            Argument.IsPositive(length, nameof(length));
+            Argument.ConditionIsMet(startIndex + length <= frameData.Length, "End offset exceeds the length of frame data.");
+
             writeInvoker.Invoke(() => base.WriteFrame(isKeyFrame, frameData, startIndex, length));
         }
 
         public override Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
         {
+            Argument.IsNotNull(frameData, nameof(frameData));
+            Argument.IsNotNegative(startIndex, nameof(startIndex));
+            Argument.IsPositive(length, nameof(length));
+            Argument.ConditionIsMet(startIndex + length <= frameData.Length, "End offset exceeds the length of frame data.");
+
             return writeInvoker.InvokeAsync(() => base.WriteFrame(isKeyFrame, frameData, startIndex, length));
         }
 

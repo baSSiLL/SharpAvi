@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
 
 namespace SharpAvi.Output
 {
@@ -14,8 +14,8 @@ namespace SharpAvi.Output
 
         public RiffItem(long dataStart, int dataSize = -1)
         {
-            Contract.Requires(dataStart >= ITEM_HEADER_SIZE);
-            Contract.Requires(dataSize <= int.MaxValue - ITEM_HEADER_SIZE);
+            Argument.Meets(dataStart >= ITEM_HEADER_SIZE, nameof(dataStart));
+            Argument.Meets(dataSize <= int.MaxValue - ITEM_HEADER_SIZE, nameof(dataSize));
 
             this.dataStart = dataStart;
             this.dataSize = dataSize;
@@ -41,8 +41,10 @@ namespace SharpAvi.Output
             get { return dataSize; }
             set
             {
-                Contract.Requires(value >= 0);
-                Contract.Requires(DataSize < 0);
+                Argument.IsNotNegative(value, nameof(value));
+                
+                if (DataSize >= 0)
+                    throw new InvalidOperationException("Data size has been already set.");
 
                 dataSize = value;
             }

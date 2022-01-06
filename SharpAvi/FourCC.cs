@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
 using System.Linq;
 
 namespace SharpAvi
@@ -45,13 +45,12 @@ namespace SharpAvi
         /// </remarks>
         public FourCC(string value)
         {
-            Contract.Requires(value != null);
-            Contract.Requires(value.Length <= 4);
-            // Allow only printable ASCII characters
-            Contract.Requires(Contract.ForAll(value, c => ' ' <= c && c <= '~'));
+            Argument.IsNotNull(value, nameof(value));
+            Argument.Meets(value.Length <= 4, nameof(value), "Value cannot be longer than 4 characters.");
+            Argument.Meets(value.All(c => ' ' <= c && c <= '~'), nameof(value), "Value can only contain printable ASCII characters.");
 
             valueString = value.PadRight(4);
-            valueDWord = (uint)valueString[0] + ((uint)valueString[1] << 8) + ((uint)valueString[2] << 16) + ((uint)valueString[3] << 24);
+            valueDWord = valueString[0] + ((uint)valueString[1] << 8) + ((uint)valueString[2] << 16) + ((uint)valueString[3] << 24);
         }
 
         /// <summary>

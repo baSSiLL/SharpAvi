@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
 using System.IO;
 
 namespace SharpAvi.Output
@@ -8,8 +7,8 @@ namespace SharpAvi.Output
     {
         public static RiffItem OpenChunk(this BinaryWriter writer, FourCC fourcc, int expectedDataSize = -1)
         {
-            Contract.Requires(writer != null);
-            Contract.Requires(expectedDataSize <= int.MaxValue - RiffItem.ITEM_HEADER_SIZE);
+            Argument.IsNotNull(writer, nameof(writer));
+            Argument.Meets(expectedDataSize <= int.MaxValue - RiffItem.ITEM_HEADER_SIZE, nameof(expectedDataSize));
 
             writer.Write((uint)fourcc);
             writer.Write((uint)(expectedDataSize >= 0 ? expectedDataSize : 0));
@@ -19,14 +18,14 @@ namespace SharpAvi.Output
 
         public static RiffItem OpenList(this BinaryWriter writer, FourCC fourcc)
         {
-            Contract.Requires(writer != null);
+            Argument.IsNotNull(writer, nameof(writer));
 
             return writer.OpenList(fourcc, KnownFourCCs.ListTypes.List);
         }
 
         public static RiffItem OpenList(this BinaryWriter writer, FourCC fourcc, FourCC listType)
         {
-            Contract.Requires(writer != null);
+            Argument.IsNotNull(writer, nameof(writer));
 
             var result = writer.OpenChunk(listType);
             writer.Write((uint)fourcc);
@@ -35,6 +34,8 @@ namespace SharpAvi.Output
 
         public static void CloseItem(this BinaryWriter writer, RiffItem item)
         {
+            Argument.IsNotNull(writer, nameof(writer));
+
             var position = writer.BaseStream.Position;
 
             var dataSize = position - item.DataStart;
@@ -66,8 +67,8 @@ namespace SharpAvi.Output
 
         public static void SkipBytes(this BinaryWriter writer, int count)
         {
-            Contract.Requires(writer != null);
-            Contract.Requires(count >= 0);
+            Argument.IsNotNull(writer, nameof(writer));
+            Argument.IsNotNegative(count, nameof(count));
 
             while (count > 0)
             {

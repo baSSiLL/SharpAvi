@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
 
 namespace SharpAvi.Output
 {
@@ -16,11 +15,10 @@ namespace SharpAvi.Output
             int width, int height, BitsPerPixel bitsPerPixel)
             : base(index)
         {
-            Contract.Requires(index >= 0);
-            Contract.Requires(writeHandler != null);
-            Contract.Requires(width > 0);
-            Contract.Requires(height > 0);
-            Contract.Requires(Enum.IsDefined(typeof(BitsPerPixel), bitsPerPixel));
+            Argument.IsNotNull(writeHandler, nameof(writeHandler));
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsEnumMember(bitsPerPixel, nameof(bitsPerPixel));
 
             this.writeHandler = writeHandler;
             this.width = width;
@@ -72,6 +70,11 @@ namespace SharpAvi.Output
 
         public void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
+            Argument.IsNotNull(frameData, nameof(frameData));
+            Argument.IsNotNegative(startIndex, nameof(startIndex));
+            Argument.IsPositive(count, nameof(count));
+            Argument.ConditionIsMet(startIndex + count <= frameData.Length, "End offset exceeds the length of frame data.");
+
             writeHandler.WriteVideoFrame(this, isKeyFrame, frameData, startIndex, count);
             System.Threading.Interlocked.Increment(ref framesWritten);
         }

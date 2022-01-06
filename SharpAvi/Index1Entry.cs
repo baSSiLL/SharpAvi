@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace SharpAvi
+﻿namespace SharpAvi
 {
     /// <summary>
     /// Entry of AVI v1 index.

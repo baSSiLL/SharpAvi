@@ -1,13 +1,10 @@
-﻿using System;
-using System.Diagnostics.Contracts;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
     /// <summary>
     /// Audio stream of AVI file.
     /// </summary>
-    [ContractClass(typeof(Contracts.AviAudioStreamContract))]
     public interface IAviAudioStream : IAviStream
     {
         /// <summary>
@@ -93,143 +90,5 @@ namespace SharpAvi.Output
         /// Number of blocks written.
         /// </summary>
         int BlocksWritten { get; }
-    }
-
-    
-    namespace Contracts
-    {
-        [ContractClassFor(typeof(IAviAudioStream))]
-        internal abstract class AviAudioStreamContract : IAviAudioStream
-        {
-            public int ChannelCount
-            {
-                get
-                {
-                    Contract.Ensures(Contract.Result<int>() > 0);
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    Contract.Requires(value > 0);
-                }
-            }
-
-            public int SamplesPerSecond
-            {
-                get
-                {
-                    Contract.Ensures(Contract.Result<int>() > 0);
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    Contract.Requires(value > 0);
-                }
-            }
-
-            public int BitsPerSample
-            {
-                get
-                {
-                    Contract.Ensures(Contract.Result<int>() > 0);
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    Contract.Requires(value > 0);
-                }
-            }
-
-            public short Format
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                }
-            }
-
-            public int BytesPerSecond
-            {
-                get
-                {
-                    Contract.Ensures(Contract.Result<int>() > 0);
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    Contract.Requires(value > 0);
-                }
-            }
-
-            public int Granularity
-            {
-                get
-                {
-                    Contract.Ensures(Contract.Result<int>() > 0);
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    Contract.Requires(value > 0);
-                }
-            }
-
-            public byte[] FormatSpecificData
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                }
-            }
-
-            public void WriteBlock(byte[] data, int startIndex, int length)
-            {
-                Contract.Requires(data != null);
-                Contract.Requires(startIndex >= 0);
-                Contract.Requires(length >= 0);
-                Contract.Requires(startIndex + length <= data.Length);
-            }
-
-            public Task WriteBlockAsync(byte[] data, int startIndex, int length)
-            {
-                Contract.Requires(data != null);
-                Contract.Requires(startIndex >= 0);
-                Contract.Requires(length >= 0);
-                Contract.Requires(startIndex + length <= data.Length);
-                Contract.Ensures(Contract.Result<Task>() != null);
-                throw new NotImplementedException();
-            }
-
-            public int BlocksWritten
-            {
-                get 
-                {
-                    Contract.Ensures(Contract.Result<int>() >= 0);
-                    throw new NotImplementedException();
-                }
-            }
-
-            public int Index
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public string Name
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                }
-            }
-        }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-
-namespace SharpAvi.Codecs
+﻿namespace SharpAvi.Codecs
 {
     /// <summary>
     /// Encodes frames in BGR24 format without compression.
@@ -23,8 +21,8 @@ namespace SharpAvi.Codecs
         /// <param name="height">Frame height.</param>
         public UncompressedVideoEncoder(int width, int height)
         {
-            Contract.Requires(width > 0);
-            Contract.Requires(height > 0);
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
 
             this.width = width;
             this.height = height;
@@ -63,6 +61,13 @@ namespace SharpAvi.Codecs
         /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
+            Argument.IsNotNull(source, nameof(source));
+            Argument.IsNotNegative(srcOffset, nameof(srcOffset));
+            Argument.ConditionIsMet(srcOffset + 4 * width * height <= source.Length,
+                "Source end offset exceeds the source length.");
+            Argument.IsNotNull(destination, nameof(destination));
+            Argument.IsNotNegative(destOffset, nameof(destOffset));
+
             BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
             for (var i = 0; i < height; i++)
             {

@@ -1,6 +1,5 @@
 ﻿using SharpAvi.Output;
 using System;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace SharpAvi.Codecs
@@ -17,10 +16,9 @@ namespace SharpAvi.Codecs
         /// <seealso cref="UncompressedVideoEncoder"/>
         public static IAviVideoStream AddUncompressedVideoStream(this AviWriter writer, int width, int height)
         {
-            Contract.Requires(writer != null);
-            Contract.Requires(width > 0);
-            Contract.Requires(height > 0);
-            Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
+            Argument.IsNotNull(writer, nameof(writer));
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
 
             var encoder = new UncompressedVideoEncoder(width, height);
             return writer.AddEncodingVideoStream(encoder, true, width, height);
@@ -37,11 +35,10 @@ namespace SharpAvi.Codecs
         /// <seealso cref="MotionJpegVideoEncoderWpf"/>
         public static IAviVideoStream AddMotionJpegVideoStream(this AviWriter writer, int width, int height, int quality = 70)
         {
-            Contract.Requires(writer != null);
-            Contract.Requires(width > 0);
-            Contract.Requires(height > 0);
-            Contract.Requires(1 <= quality && quality <= 100);
-            Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
+            Argument.IsNotNull(writer, nameof(writer));
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsInRange(quality, 1, 100, nameof(quality));
 
             var encoder = new MotionJpegVideoEncoderWpf(width, height, quality);
             return writer.AddEncodingVideoStream(encoder, true, width, height);
@@ -68,13 +65,12 @@ namespace SharpAvi.Codecs
             double fps, int frameCount = 0, int quality = 70, FourCC? codec = null, 
             bool forceSingleThreadedAccess = false)
         {
-            Contract.Requires(writer != null);
-            Contract.Requires(width > 0);
-            Contract.Requires(height > 0);
-            Contract.Requires(fps > 0);
-            Contract.Requires(frameCount >= 0);
-            Contract.Requires(1 <= quality && quality <= 100);
-            Contract.Ensures(Contract.Result<IAviVideoStream>() != null);
+            Argument.IsNotNull(writer, nameof(writer));
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsPositive(fps, nameof(fps));
+            Argument.IsNotNegative(frameCount, nameof(frameCount));
+            Argument.IsInRange(quality, 1, 100, nameof(quality));
 
             var encoderFactory = codec.HasValue
                 ? new Func<IVideoEncoder>(() => new Mpeg4VideoEncoderVcm(width, height, fps, frameCount, quality, codec.Value))
@@ -92,11 +88,10 @@ namespace SharpAvi.Codecs
         /// <seealso cref="Mp3AudioEncoderLame"/>
         public static IAviAudioStream AddMp3AudioStream(this AviWriter writer, int channelCount, int sampleRate, int outputBitRateKbps = 160)
         {
-            Contract.Requires(writer != null);
-            Contract.Requires(channelCount == 1 || channelCount == 2);
-            Contract.Requires(sampleRate > 0);
-            Contract.Requires(Mp3AudioEncoderLame.SupportedBitRates.Contains(outputBitRateKbps));
-            Contract.Ensures(Contract.Result<IAviAudioStream>() != null);
+            Argument.IsNotNull(writer, nameof(writer));
+            Argument.IsInRange(channelCount, 1, 2, nameof(channelCount));
+            Argument.IsPositive(sampleRate, nameof(sampleRate));
+            Argument.Meets(Mp3AudioEncoderLame.SupportedBitRates.Contains(outputBitRateKbps), nameof(outputBitRateKbps));
 
             var encoder = new Mp3AudioEncoderLame(channelCount, sampleRate, outputBitRateKbps);
             return writer.AddEncodingAudioStream(encoder, true);

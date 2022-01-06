@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Threading;
@@ -34,7 +33,7 @@ namespace SharpAvi.Codecs
         /// </param>
         public SingleThreadedVideoEncoderWrapper(Func<IVideoEncoder> encoderFactory)
         {
-            Contract.Requires(encoderFactory != null);
+            Argument.IsNotNull(encoderFactory, nameof(encoderFactory));
 
             this.thread = new Thread(RunDispatcher)
             {

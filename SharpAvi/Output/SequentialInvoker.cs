@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 
 namespace SharpAvi.Output
@@ -33,7 +32,7 @@ namespace SharpAvi.Output
         /// </remarks>
         public void Invoke(Action action)
         {
-            Contract.Requires(action != null);
+            Argument.IsNotNull(action, nameof(action));
 
             Task prevTask;
             var tcs = new TaskCompletionSource<bool>();
@@ -74,7 +73,7 @@ namespace SharpAvi.Output
         /// </remarks>
         public Task InvokeAsync(Action action)
         {
-            Contract.Requires(action != null);
+            Argument.IsNotNull(action, nameof(action));
 
             Task result;
             lock (sync)

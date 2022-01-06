@@ -46,6 +46,8 @@ namespace SharpAvi.Output
 
         public void OnFrameWritten(int chunkDataSize)
         {
+            Argument.IsNotNegative(chunkDataSize, nameof(chunkDataSize));
+
             FrameCount++;
             MaxChunkDataSize = Math.Max(MaxChunkDataSize, chunkDataSize);
             TotalDataSize += chunkDataSize;

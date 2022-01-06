@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -20,8 +20,7 @@ namespace SharpAvi.Output
             int channelCount, int samplesPerSecond, int bitsPerSample)
             : base(index)
         {
-            Contract.Requires(index >= 0);
-            Contract.Requires(writeHandler != null);
+            Argument.IsNotNull(writeHandler, nameof(writeHandler));
 
             this.writeHandler = writeHandler;
 
@@ -106,13 +105,18 @@ namespace SharpAvi.Output
             }
         }
 
-        public void WriteBlock(byte[] buffer, int startIndex, int count)
+        public void WriteBlock(byte[] data, int startIndex, int length)
         {
-            writeHandler.WriteAudioBlock(this, buffer, startIndex, count);
+            Argument.IsNotNull(data, nameof(data));
+            Argument.IsNotNegative(startIndex, nameof(startIndex));
+            Argument.IsPositive(length, nameof(length));
+            Argument.ConditionIsMet(startIndex + length <= data.Length, "End offset exceeds the length of data.");
+
+            writeHandler.WriteAudioBlock(this, data, startIndex, length);
             System.Threading.Interlocked.Increment(ref blocksWritten);
         }
 
-        public System.Threading.Tasks.Task WriteBlockAsync(byte[] data, int startIndex, int length)
+        public Task WriteBlockAsync(byte[] data, int startIndex, int length)
         {
             throw new NotSupportedException("Asynchronous writes are not supported.");
         }
