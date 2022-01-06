@@ -25,7 +25,7 @@ namespace SharpAvi.Output
 
         private readonly BinaryWriter fileWriter;
 #if !FX45
-        private readonly bool closeWriter;
+        private readonly bool closeWriter = true;
 #endif
         private bool isClosed = false;
         private bool startedWriting = false;
