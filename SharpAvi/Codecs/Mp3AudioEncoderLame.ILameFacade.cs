@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace SharpAvi.Codecs
+﻿namespace SharpAvi.Codecs
 {
     partial class Mp3AudioEncoderLame
     {

@@ -30,33 +30,70 @@ namespace SharpAvi.Codecs
 
         #region Loading LAME DLL
 
+        private static readonly object lameFacadeSync = new object();
         private static Type lameFacadeType;
+        private static string lastLameLibraryName;
 
         /// <summary>
-        /// Sets the location of LAME DLL for using by this class.
+        /// Sets the location of the LAME library for using by this class.
         /// </summary>
         /// <remarks>
         /// This method may be called before creating any instances of this class.
-        /// The LAME DLL should have the appropriate bitness (32/64), depending on the current process.
+        /// The LAME library should have the appropriate bitness (32/64), depending on the current process.
         /// If it is not already loaded into the process, the method loads it automatically.
         /// </remarks>
-        public static void SetLameDllLocation(string lameDllPath)
+        public static void SetLameDllLocation(string lameLibraryPath)
         {
-            Argument.IsNotNullOrEmpty(lameDllPath, nameof(lameDllPath));
+            Argument.IsNotNullOrEmpty(lameLibraryPath, nameof(lameLibraryPath));
 
-            var libraryName = Path.GetFileName(lameDllPath);
-            if (!IsLibraryLoaded(libraryName))
+            lock (lameFacadeSync)
             {
-                var loadResult = LoadLibrary(lameDllPath);
-                if (loadResult == IntPtr.Zero)
+                var libraryName = Path.GetFileName(lameLibraryPath);
+                if (!IsLibraryLoaded(libraryName))
                 {
-                    throw new DllNotFoundException(string.Format("Library '{0}' could not be loaded.", lameDllPath));
+#if NET5_0_OR_GREATER
+                    NativeLibrary.Load(lameLibraryPath);
+#else
+                    LoadLameLibrary45(lameLibraryPath);
+#endif
                 }
+#if NET5_0_OR_GREATER
+                ResolveFacadeImpl50(libraryName);
+#else
+                ResolveFacadeImpl45(libraryName);
+#endif
+                lastLameLibraryName = libraryName;
             }
-
-            var facadeAsm = GenerateLameFacadeAssembly(libraryName);
-            lameFacadeType = facadeAsm.GetType(typeof(Mp3AudioEncoderLame).Namespace + ".Runtime.LameFacadeImpl");
         }
+
+#if NET5_0_OR_GREATER
+        private static void ResolveFacadeImpl50(string libraryName)
+        {
+            RedirectDllResolver.SetRedirect(LameFacadeImpl.DLL_NAME, libraryName);
+            lameFacadeType = typeof(LameFacadeImpl);
+        }
+#else
+        private static void LoadLameLibrary45(string libraryPath)
+        {
+            var loadResult = LoadLibrary(libraryPath);
+            if (loadResult == IntPtr.Zero)
+            {
+                throw new DllNotFoundException(string.Format("Library '{0}' could not be loaded.", libraryPath));
+            }
+        }
+
+        [DllImport("kernel32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto)]
+        private static extern IntPtr LoadLibrary(string fileName);
+
+        private static void ResolveFacadeImpl45(string libraryName)
+        {
+            if (lameFacadeType is null || lastLameLibraryName != libraryName)
+            {
+                var facadeAsm = GenerateLameFacadeAssembly(libraryName);
+                lameFacadeType = facadeAsm.GetType(typeof(Mp3AudioEncoderLame).Namespace + ".Runtime.LameFacadeImpl");
+            }
+        }
+#endif
 
         private static Assembly GenerateLameFacadeAssembly(string lameDllName)
         {
@@ -102,10 +139,7 @@ namespace SharpAvi.Codecs
                 Any(m => string.Compare(m.ModuleName, libraryName, StringComparison.InvariantCultureIgnoreCase) == 0);
         }
 
-        [DllImport("kernel32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto)]
-        private static extern IntPtr LoadLibrary(string fileName);
-
-        #endregion
+#endregion
 
 
         private const int SAMPLE_BYTE_SIZE = 2;
@@ -129,12 +163,16 @@ namespace SharpAvi.Codecs
             Argument.IsPositive(sampleRate, nameof(sampleRate));
             Argument.Meets(SupportedBitRates.Contains(outputBitRateKbps), nameof(outputBitRateKbps));
 
-            if (lameFacadeType == null)
+            lock (lameFacadeSync)
             {
-                throw new InvalidOperationException("LAME DLL is not loaded. Call SetLameDllLocation first.");
+                if (lameFacadeType is null)
+                {
+                    throw new InvalidOperationException("LAME DLL is not loaded. Call SetLameDllLocation first.");
+                }
+
+                lame = (ILameFacade)Activator.CreateInstance(lameFacadeType);
             }
 
-            lame = (ILameFacade)Activator.CreateInstance(lameFacadeType);
             lame.ChannelCount = channelCount;
             lame.InputSampleRate = sampleRate;
             lame.OutputBitRate = outputBitRateKbps;
