@@ -4,12 +4,26 @@
 	<Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>Library</OutputType>
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Copyright>Copyright © Vasili Maslov 2013-2022</Copyright>
+    <Description>A simple library for creating video files in AVI format.</Description>
+    <Authors>baSSiLL</Authors>
+    <Company />
+    <PackageProjectUrl>https://github.com/baSSiLL/SharpAvi</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/baSSiLL/SharpAvi.git</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>AVI video authoring encoding OpenDML</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>3.0.0</Version>
+	<AssemblyVersion>$(Version).0</AssemblyVersion>
+	<FileVersion>$(Version).0</FileVersion>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <CodeAnalysisLogFile>bin\Debug\AviWriter.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
@@ -110,6 +124,12 @@
   <ItemGroup>
     <Compile Remove="Codecs\LameFacadeImpl.cs" />
     <Compile Remove="Output\SequentialInvoker35.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
