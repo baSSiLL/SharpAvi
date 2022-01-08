@@ -1,7 +1,6 @@
-﻿using System;
-using System.Reflection;
-using System.Threading;
-using System.Windows.Threading;
+﻿using SharpAvi.Utilities;
+using System;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Codecs
 {
@@ -14,15 +13,11 @@ namespace SharpAvi.Codecs
     /// Especially useful for unmanaged encoders like <see cref="Mpeg4VideoEncoderVcm"/> in multi-threaded scenarios
     /// like asynchronous encoding.
     /// </para>
-    /// <para>
-    /// Uses <see cref="Dispatcher"/> under the hood.
-    /// </para>
     /// </remarks>
     public class SingleThreadedVideoEncoderWrapper : IVideoEncoder, IDisposable
     {
         private readonly IVideoEncoder encoder;
-        private readonly Thread thread;
-        private readonly Dispatcher dispatcher;
+        private readonly SingleThreadTaskScheduler scheduler;
 
         /// <summary>
         /// Creates a new instance of <see cref="SingleThreadedVideoEncoderWrapper"/>.
@@ -35,20 +30,14 @@ namespace SharpAvi.Codecs
         {
             Argument.IsNotNull(encoderFactory, nameof(encoderFactory));
 
-            this.thread = new Thread(RunDispatcher)
-            {
-                IsBackground = true,
-                Name = typeof(SingleThreadedVideoEncoderWrapper).Name
-            };
-            var dispatcherCreated = new AutoResetEvent(false);
-            thread.Start(dispatcherCreated);
-            dispatcherCreated.WaitOne();
-            this.dispatcher = Dispatcher.FromThread(thread);
+            scheduler = new SingleThreadTaskScheduler();
 
             // TODO: Create encoder on the first frame
-            this.encoder = DispatcherInvokeAndPropagateException(encoderFactory);
-            if (encoder == null)
+            encoder = SchedulerInvoke(encoderFactory);
+            if (encoder is null)
+            {
                 throw new InvalidOperationException("Encoder factory has created no instance.");
+            }
         }
 
         /// <summary>
@@ -56,16 +45,13 @@ namespace SharpAvi.Codecs
         /// </summary>
         public void Dispose()
         {
-            if (thread.IsAlive)
+            if (!scheduler.IsDisposed)
             {
-                var encoderDisposable = encoder as IDisposable;
-                if (encoderDisposable != null)
+                if (encoder is IDisposable disposable)
                 {
-                    DispatcherInvokeAndPropagateException(encoderDisposable.Dispose);
+                    new Task(disposable.Dispose).RunSynchronously(scheduler);
                 }
-
-                dispatcher.InvokeShutdown();
-                thread.Join();
+                scheduler.Dispose();
             }
         }
 
@@ -74,7 +60,7 @@ namespace SharpAvi.Codecs
         {
             get
             {
-                return DispatcherInvokeAndPropagateException(() => encoder.Codec);
+                return SchedulerInvoke(() => encoder.Codec);
             }
         }
 
@@ -85,7 +71,7 @@ namespace SharpAvi.Codecs
         {
             get
             {
-                return DispatcherInvokeAndPropagateException(() => encoder.BitsPerPixel);
+                return SchedulerInvoke(() => encoder.BitsPerPixel);
             }
         }
 
@@ -96,7 +82,7 @@ namespace SharpAvi.Codecs
         {
             get
             {
-                return DispatcherInvokeAndPropagateException(() => encoder.MaxEncodedSize);
+                return SchedulerInvoke(() => encoder.MaxEncodedSize);
             }
         }
 
@@ -105,7 +91,7 @@ namespace SharpAvi.Codecs
         /// </summary>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
-            var result = DispatcherInvokeAndPropagateException(
+            var result = SchedulerInvoke(
                 () => EncodeFrame(source, srcOffset, destination, destOffset));
             isKeyFrame = result.IsKeyFrame;
             return result.EncodedLength;
@@ -135,7 +121,7 @@ namespace SharpAvi.Codecs
                 var srcLength = source.Length;
                 var destIntPtr = new IntPtr(destPtr);
                 var destLength = destination.Length;
-                result = DispatcherInvokeAndPropagateException(
+                result = SchedulerInvoke(
                     () => EncodeFrame(srcIntPtr, srcLength, destIntPtr, destLength));
             }
             isKeyFrame = result.IsKeyFrame;
@@ -163,63 +149,11 @@ namespace SharpAvi.Codecs
         }
 
 
-        private void DispatcherInvokeAndPropagateException(Action action)
+        private TResult SchedulerInvoke<TResult>(Func<TResult> func)
         {
-            Exception exOnDispatcherThread = null;
-            dispatcher.Invoke(new Action(() =>
-            {
-                try
-                {
-                    action.Invoke();
-                }
-                catch (Exception ex)
-                {
-                    exOnDispatcherThread = ex;
-                }
-            }));
-
-            if (exOnDispatcherThread != null)
-            {
-                WrapAndRethrowException(exOnDispatcherThread);
-            }
-        }
-
-        private TResult DispatcherInvokeAndPropagateException<TResult>(Func<TResult> func)
-        {
-            Exception exOnDispatcherThread = null;
-            var result = (TResult)dispatcher.Invoke(new Func<TResult>(() =>
-            {
-                try
-                {
-                    return func.Invoke();
-                }
-                catch (Exception ex)
-                {
-                    exOnDispatcherThread = ex;
-                    return default(TResult);
-                }
-            }));
-
-            if (exOnDispatcherThread != null)
-            {
-                WrapAndRethrowException(exOnDispatcherThread);
-            }
-
-            return result;
-        }
-
-        private static void WrapAndRethrowException(Exception wrappedException)
-        {
-            throw new TargetInvocationException("Error calling wrapped encoder.", wrappedException);
-        }
-
-        private void RunDispatcher(object parameter)
-        {
-            AutoResetEvent dispatcherCreated = (AutoResetEvent)parameter;
-            var dispatcher = Dispatcher.CurrentDispatcher;
-            dispatcherCreated.Set();
-
-            Dispatcher.Run();
+            var task = new Task<TResult>(func);
+            task.RunSynchronously(scheduler);
+            return task.Result;
         }
     }
 }
