@@ -96,11 +96,7 @@ namespace SharpAvi.Sample
             }
             else if (codec == KnownFourCCs.Codecs.MotionJpeg)
             {
-#if NET5_0_OR_GREATER
-                throw new NotImplementedException("Motion JPEG encoding is not implemented yet on .NET 5 and higher.");
-#else
                 return writer.AddMotionJpegVideoStream(screenWidth, screenHeight, quality);
-#endif
             }
             else
             {

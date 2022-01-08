@@ -23,7 +23,7 @@ namespace SharpAvi.Codecs
     /// This also produces a little overhead on the file size.
     /// </para>
     /// </remarks>
-    public class MotionJpegVideoEncoderWpf : IVideoEncoder
+    public sealed class MotionJpegVideoEncoderWpf : IVideoEncoder
     {
         private readonly Int32Rect rect;
         private readonly int quality;

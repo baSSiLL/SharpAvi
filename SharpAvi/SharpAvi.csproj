@@ -41,9 +41,14 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="PresentationCore" Condition="'$(TargetFramework)' == 'net45'" />
-    <Reference Include="System.Windows" Condition="'$(TargetFramework)' == 'net45'" />
-    <Reference Include="WindowsBase" Condition="'$(TargetFramework)' == 'net45'" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <Reference Include="PresentationCore" />
+    <Reference Include="System.Windows" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net50'">
+    <PackageReference Include="JpegLibrary">
+      <Version>0.4.32</Version>
+    </PackageReference>
   </ItemGroup>
 </Project>

@@ -25,7 +25,27 @@ namespace SharpAvi.Codecs
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
 
-#if NET45
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Adds new video stream with <see cref="MotionJpegVideoEncoderJpegLibrary"/>.
+        /// </summary>
+        /// <param name="writer">Writer object to which new stream is added.</param>
+        /// <param name="width">Frame width.</param>
+        /// <param name="height">Frame height.</param>
+        /// <param name="quality">Requested quality of compression.</param>
+        /// <seealso cref="AviWriter.AddEncodingVideoStream"/>
+        /// <seealso cref="MotionJpegVideoEncoderJpegLibrary"/>
+        public static IAviVideoStream AddMotionJpegVideoStream(this AviWriter writer, int width, int height, int quality = 70)
+        {
+            Argument.IsNotNull(writer, nameof(writer));
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsInRange(quality, 1, 100, nameof(quality));
+
+            var encoder = new MotionJpegVideoEncoderJpegLibrary(width, height, quality);
+            return writer.AddEncodingVideoStream(encoder, true, width, height);
+        }
+#else
         /// <summary>
         /// Adds new video stream with <see cref="MotionJpegVideoEncoderWpf"/>.
         /// </summary>
