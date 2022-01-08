@@ -45,6 +45,10 @@ namespace SharpAvi.Codecs
             rect = new Int32Rect(0, 0, width, height);
             this.quality = quality;
 
+#if NET5_0_OR_GREATER
+            buffer = new MemoryStream(MaxEncodedSize);
+#endif
+
             bitmapHolder = new ThreadLocal<WriteableBitmap>(
                 () => new WriteableBitmap(rect.Width, rect.Height, 96, 96, PixelFormats.Bgr32, null),
                 false);
@@ -115,6 +119,8 @@ namespace SharpAvi.Codecs
         }
 
 #if NET5_0_OR_GREATER
+        private readonly MemoryStream buffer;
+
         /// <summary>
         /// Encodes a frame.
         /// </summary>
@@ -136,23 +142,15 @@ namespace SharpAvi.Codecs
             };
             encoderImpl.Frames.Add(BitmapFrame.Create(bitmap));
 
-            throw new NotImplementedException();
-#warning Implement EncodeFrame
-            // TODO: Custom Stream implementation wrapping over a Span?
-            /*
-            using (var stream = new MemoryStream(destination))
-            {
-                stream.Position = srcOffset;
-                encoderImpl.Save(stream);
-                stream.Flush();
-                var length = stream.Position - srcOffset;
-                stream.Close();
+            buffer.SetLength(0);
+            buffer.Position = 0;
+            encoderImpl.Save(buffer);
+            buffer.Flush();
 
-                isKeyFrame = true;
-
-                return (int)length;
-            }
-            */
+            var length = (int)buffer.Length;
+            buffer.GetBuffer().AsSpan(0, length).CopyTo(destination);
+            isKeyFrame = true;
+            return length;
         }
 #endif
 
