@@ -2,8 +2,23 @@
 
 namespace SharpAvi.Utilities
 {
-    internal class BitmapUtils
+    internal static partial class BitmapUtils
     {
+#if NET5_0_OR_GREATER
+        public static unsafe void Bgr32ToBgr24(ReadOnlySpan<byte> source, Span<byte> destination, int pixelCount)
+        {
+            Argument.IsPositive(pixelCount, nameof(pixelCount));
+            Argument.ConditionIsMet(4 * pixelCount <= source.Length,
+                "Source end offset exceeds the source length.");
+            Argument.ConditionIsMet(3 * pixelCount <= destination.Length,
+                "Destination end offset exceeds the destination length.");
+
+            fixed (byte* sourcePtr = source, destinationPtr = destination)
+            {
+                Bgr32ToBgr24(sourcePtr, 0, destinationPtr, 0, pixelCount);
+            }
+        }
+#else
         public static unsafe void Bgr32ToBgr24(byte[] source, int srcOffset, byte[] destination, int destOffset, int pixelCount)
         {
             Argument.IsNotNull(source, nameof(source));
@@ -19,21 +34,6 @@ namespace SharpAvi.Utilities
             fixed (byte* sourcePtr = source, destinationPtr = destination)
             {
                 Bgr32ToBgr24(sourcePtr, srcOffset, destinationPtr, destOffset, pixelCount);
-            }
-        }
-
-#if NET5_0_OR_GREATER
-        public static unsafe void Bgr32ToBgr24(ReadOnlySpan<byte> source, Span<byte> destination, int pixelCount)
-        {
-            Argument.IsPositive(pixelCount, nameof(pixelCount));
-            Argument.ConditionIsMet(4 * pixelCount <= source.Length,
-                "Source end offset exceeds the source length.");
-            Argument.ConditionIsMet(3 * pixelCount <= destination.Length,
-                "Destination end offset exceeds the destination length.");
-
-            fixed (byte* sourcePtr = source, destinationPtr = destination)
-            {
-                Bgr32ToBgr24(sourcePtr, 0, destinationPtr, 0, pixelCount);
             }
         }
 #endif
@@ -71,8 +71,7 @@ namespace SharpAvi.Utilities
                 source.Slice(srcOffset, stride).CopyTo(destination.Slice(destOffset));
             }
         }
-#endif
-
+#else
         public static void FlipVertical(byte[] source, int srcOffset, byte[] destination, int destOffset, int height, int stride)
         {
             Argument.IsNotNull(source, nameof(source));
@@ -93,5 +92,6 @@ namespace SharpAvi.Utilities
                 dest -= stride;
             }
         }
+#endif
     }
 }

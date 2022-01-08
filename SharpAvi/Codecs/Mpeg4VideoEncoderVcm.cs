@@ -302,6 +302,9 @@ namespace SharpAvi.Codecs
             Argument.IsNotNull(destination, nameof(destination));
             Argument.IsNotNegative(destOffset, nameof(destOffset));
 
+#if NET5_0_OR_GREATER
+            return EncodeFrame(source.AsSpan(srcOffset), destination.AsSpan(destOffset), out isKeyFrame);
+#else
             BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
 
             var sourceHandle = GCHandle.Alloc(sourceBuffer, GCHandleType.Pinned);
@@ -318,6 +321,7 @@ namespace SharpAvi.Codecs
                 sourceHandle.Free();
                 encodedHandle.Free();
             }
+#endif
         }
 
 #if NET5_0_OR_GREATER

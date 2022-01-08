@@ -68,6 +68,9 @@ namespace SharpAvi.Codecs
             Argument.IsNotNull(destination, nameof(destination));
             Argument.IsNotNegative(destOffset, nameof(destOffset));
 
+#if NET5_0_OR_GREATER
+            return EncodeFrame(source.AsSpan(srcOffset), destination.AsSpan(destOffset), out isKeyFrame);
+#else
             // Flip vertical and convert to 24 bpp
             for (var y = 0; y < height; y++)
             {
@@ -77,6 +80,7 @@ namespace SharpAvi.Codecs
             }
             isKeyFrame = true;
             return MaxEncodedSize;
+#endif
         }
 
 #if NET5_0_OR_GREATER
