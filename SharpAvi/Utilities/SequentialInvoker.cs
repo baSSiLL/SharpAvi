@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace SharpAvi.Output
+namespace SharpAvi.Utilities
 {
     /// <summary>
     /// Serializes synchronous and asynchronous invocations in one queue.

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpAvi.Codecs
+namespace SharpAvi.Utilities
 {
     internal class BitmapUtils
     {
@@ -47,9 +47,9 @@ namespace SharpAvi.Codecs
             var dest = destinationStart;
             while (src < sourceEnd)
             {
-                *(dest++) = *(src++);
-                *(dest++) = *(src++);
-                *(dest++) = *(src++);
+                *dest++ = *src++;
+                *dest++ = *src++;
+                *dest++ = *src++;
                 src++;
             }
         }

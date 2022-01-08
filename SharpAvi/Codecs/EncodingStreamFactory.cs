@@ -1,4 +1,5 @@
 ﻿using SharpAvi.Output;
+using SharpAvi.Utilities;
 using System;
 using System.Linq;
 

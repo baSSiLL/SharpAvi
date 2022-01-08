@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpAvi.Utilities;
+using System;
 
 namespace SharpAvi.Output
 {

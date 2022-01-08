@@ -1,4 +1,6 @@
-﻿namespace SharpAvi
+﻿using SharpAvi.Utilities;
+
+namespace SharpAvi
 {
     /// <summary>
     /// Contains definitions of known FOURCC values.

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace SharpAvi.Codecs
+namespace SharpAvi.Utilities
 {
 #if NET5_0_OR_GREATER
     internal static class RedirectDllResolver

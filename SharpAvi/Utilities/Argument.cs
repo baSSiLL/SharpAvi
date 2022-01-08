@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpAvi
+namespace SharpAvi.Utilities
 {
     /// <summary>
     /// An utility class for argument checks.

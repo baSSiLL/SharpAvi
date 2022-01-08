@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using SharpAvi.Codecs;
+using SharpAvi.Utilities;
 
 namespace SharpAvi.Output
 {

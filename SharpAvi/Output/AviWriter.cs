@@ -1,4 +1,5 @@
 ﻿using SharpAvi.Codecs;
+using SharpAvi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;

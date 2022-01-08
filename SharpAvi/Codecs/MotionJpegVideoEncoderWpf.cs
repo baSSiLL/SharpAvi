@@ -1,4 +1,5 @@
 ﻿#if NET45
+using SharpAvi.Utilities;
 using System;
 using System.IO;
 using System.Threading;
