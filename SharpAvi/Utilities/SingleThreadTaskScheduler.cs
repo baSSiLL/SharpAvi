@@ -26,11 +26,11 @@ namespace SharpAvi.Utilities
             if (!IsDisposed)
             {
                 tasks.CompleteAdding();
-                tasks.Dispose();
-                while (!tasks.IsCompleted)
+                if (thread.ThreadState != ThreadState.Unstarted)
                 {
-                    Thread.Yield();
+                    thread.Join();
                 }
+                tasks.Dispose();
                 IsDisposed = true;
             }
         }
