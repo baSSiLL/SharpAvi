@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpAvi", "SharpAvi\SharpAvi.csproj", "{07B83677-E9B8-4166-A383-CF3B3D393FBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpAvi", "SharpAvi\SharpAvi.csproj", "{07B83677-E9B8-4166-A383-CF3B3D393FBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.csproj", "{419ABA1F-198D-4E85-8BFB-58EE6FDAE67F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "Sample\Sample.csproj", "{419ABA1F-198D-4E85-8BFB-58EE6FDAE67F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2D19245D-C897-44AF-9D4C-1187702F68C3}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +29,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1D772E7F-38FC-438C-AE1E-BC0A3626D9D5}
 	EndGlobalSection
 EndGlobal

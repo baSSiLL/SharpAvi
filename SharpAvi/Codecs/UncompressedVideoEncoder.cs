@@ -1,4 +1,6 @@
-﻿namespace SharpAvi.Codecs
+﻿using System;
+
+namespace SharpAvi.Codecs
 {
     /// <summary>
     /// Encodes frames in BGR24 format without compression.
@@ -12,7 +14,6 @@
         private readonly int width;
         private readonly int height;
         private readonly int stride;
-        private readonly byte[] sourceBuffer;
 
         /// <summary>
         /// Creates a new instance of <see cref="UncompressedVideoEncoder"/>.
@@ -28,7 +29,6 @@
             this.height = height;
             // Scan lines in Windows bitmaps should be aligned by 4 bytes (DWORDs)
             this.stride = (width * 3 + 3) / 4 * 4;
-            sourceBuffer = new byte[width * height * 4];
         }
 
         #region IVideoEncoder Members
@@ -58,7 +58,6 @@
         /// <summary>
         /// Encodes a frame.
         /// </summary>
-        /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
             Argument.IsNotNull(source, nameof(source));
@@ -68,14 +67,37 @@
             Argument.IsNotNull(destination, nameof(destination));
             Argument.IsNotNegative(destOffset, nameof(destOffset));
 
-            BitmapUtils.FlipVertical(source, srcOffset, sourceBuffer, 0, height, width * 4);
-            for (var i = 0; i < height; i++)
+            // Flip vertical and convert to 24 bpp
+            for (var y = 0; y < height; y++)
             {
-                BitmapUtils.Bgr32ToBgr24(sourceBuffer, i * width * 4, destination, destOffset + i * stride, width);
+                var srcLineOffset = srcOffset + y * width * 4;
+                var destLineOffset = destOffset + (height - 1 - y) * stride;
+                BitmapUtils.Bgr32ToBgr24(source, srcLineOffset, destination, destLineOffset, width);
             }
             isKeyFrame = true;
             return MaxEncodedSize;
         }
+
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Encodes a frame.
+        /// </summary>
+        public int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
+        {
+            Argument.ConditionIsMet(4 * width * height <= source.Length,
+                "Source end offset exceeds the source length.");
+
+            // Flip vertical and convert to 24 bpp
+            for (var y = 0; y < height; y++)
+            {
+                var srcOffset = y * width * 4;
+                var destOffset = (height - 1 - y) * stride;
+                BitmapUtils.Bgr32ToBgr24(source.Slice(srcOffset), destination.Slice(destOffset), width);
+            }
+            isKeyFrame = true;
+            return MaxEncodedSize;
+        }
+#endif
 
         #endregion
     }

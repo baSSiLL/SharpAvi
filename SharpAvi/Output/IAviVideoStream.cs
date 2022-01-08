@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -43,6 +44,22 @@ namespace SharpAvi.Output
         /// The contents of <paramref name="frameData"/> should not be modified until this write operation ends.
         /// </remarks>
         Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length);
+
+#if NET5_0_OR_GREATER
+        /// <summary>Writes a frame to the stream.</summary>
+        /// <param name="isKeyFrame">Is this frame a key frame?</param>
+        /// <param name="frameData">Array containing the frame data.</param>
+        void WriteFrame(bool isKeyFrame, ReadOnlySpan<byte> frameData);
+
+        /// <summary>Asynchronously writes a frame to the stream.</summary>
+        /// <param name="isKeyFrame">Is this frame a key frame?</param>
+        /// <param name="frameData">Array containing the frame data.</param>
+        /// <returns>A task that represents the asynchronous write operation.</returns>
+        /// <remarks>
+        /// The contents of <paramref name="frameData"/> should not be modified until this write operation ends.
+        /// </remarks>
+        Task WriteFrameAsync(bool isKeyFrame, ReadOnlyMemory<byte> frameData);
+#endif
 
         /// <summary>
         /// Number of frames written.

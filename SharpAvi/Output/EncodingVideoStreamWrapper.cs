@@ -81,10 +81,22 @@ namespace SharpAvi.Output
             }
         }
 
-        public override Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length)
+        public override Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int length) 
+            => throw new NotSupportedException("Asynchronous writes are not supported.");
+
+#if NET5_0_OR_GREATER
+        public override void WriteFrame(bool isKeyFrame, ReadOnlySpan<byte> frameData)
         {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
+            Argument.Meets(frameData.Length > 0, nameof(frameData), "Cannot write an empty frame.");
+
+            // Prevent accessing encoded buffer by multiple threads simultaneously
+            lock (syncBuffer)
+            {
+                var encodedLength = encoder.EncodeFrame(frameData, encodedBuffer.AsSpan(), out isKeyFrame);
+                base.WriteFrame(isKeyFrame, encodedBuffer.AsSpan(0, encodedLength));
+            }
         }
+#endif
 
         public override void PrepareForWriting()
         {

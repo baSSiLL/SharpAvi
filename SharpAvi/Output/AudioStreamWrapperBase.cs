@@ -95,6 +95,22 @@ namespace SharpAvi.Output
             return baseStream.WriteBlockAsync(data, startIndex, length);
         }
 
+#if NET5_0_OR_GREATER
+        public virtual void WriteBlock(ReadOnlySpan<byte> data)
+        {
+            Argument.Meets(data.Length > 0, nameof(data), "Cannot write an empty block.");
+
+            baseStream.WriteBlock(data);
+        }
+
+        public virtual Task WriteBlockAsync(ReadOnlyMemory<byte> data)
+        {
+            Argument.Meets(data.Length > 0, nameof(data), "Cannot write an empty block.");
+
+            return baseStream.WriteBlockAsync(data);
+        }
+#endif
+
         public int BlocksWritten
         {
             get { return baseStream.BlocksWritten; }

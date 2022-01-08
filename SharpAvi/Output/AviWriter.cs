@@ -412,6 +412,13 @@ namespace SharpAvi.Output
 
         #region IAviStreamWriteHandler implementation
 
+#if NET5_0_OR_GREATER
+        void IAviStreamWriteHandler.WriteVideoFrame(AviVideoStream stream, bool isKeyFrame, ReadOnlySpan<byte> frameData) 
+            => WriteStreamFrame(stream, isKeyFrame, frameData);
+
+        void IAviStreamWriteHandler.WriteAudioBlock(AviAudioStream stream, ReadOnlySpan<byte> blockData)
+            => WriteStreamFrame(stream, true, blockData);
+#else
         void IAviStreamWriteHandler.WriteVideoFrame(AviVideoStream stream, bool isKeyFrame, byte[] frameData, int startIndex, int count)
         {
             WriteStreamFrame(stream, isKeyFrame, frameData, startIndex, count);
@@ -421,8 +428,13 @@ namespace SharpAvi.Output
         {
             WriteStreamFrame(stream, true, blockData, startIndex, count);
         }
+#endif
 
+#if NET5_0_OR_GREATER
+        private void WriteStreamFrame(AviStreamBase stream, bool isKeyFrame, ReadOnlySpan<byte> frameData)
+#else
         private void WriteStreamFrame(AviStreamBase stream, bool isKeyFrame, byte[] frameData, int startIndex, int count)
+#endif
         {
             lock (syncWrite)
             {
@@ -445,10 +457,18 @@ namespace SharpAvi.Output
 
                 var shouldCreateIndex1Entry = emitIndex1 && isFirstRiff;
 
+#if NET5_0_OR_GREATER
+                var count = frameData.Length;
+#endif
+
                 CreateNewRiffIfNeeded(count + (shouldCreateIndex1Entry ? INDEX1_ENTRY_SIZE : 0));
 
                 var chunk = fileWriter.OpenChunk(stream.ChunkId, count);
+#if NET5_0_OR_GREATER
+                fileWriter.Write(frameData);
+#else
                 fileWriter.Write(frameData, startIndex, count);
+#endif
                 fileWriter.CloseItem(chunk);
 
                 si.OnFrameWritten(chunk.DataSize);

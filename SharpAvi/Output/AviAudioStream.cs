@@ -112,14 +112,29 @@ namespace SharpAvi.Output
             Argument.IsPositive(length, nameof(length));
             Argument.ConditionIsMet(startIndex + length <= data.Length, "End offset exceeds the length of data.");
 
+#if NET5_0_OR_GREATER
+            writeHandler.WriteAudioBlock(this, data);
+#else
             writeHandler.WriteAudioBlock(this, data, startIndex, length);
+#endif
             System.Threading.Interlocked.Increment(ref blocksWritten);
         }
 
         public Task WriteBlockAsync(byte[] data, int startIndex, int length)
+            => throw new NotSupportedException("Asynchronous writes are not supported.");
+
+#if NET5_0_OR_GREATER
+        public void WriteBlock(ReadOnlySpan<byte> data)
         {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
+            Argument.Meets(data.Length > 0, nameof(data), "Cannot write an empty block.");
+
+            writeHandler.WriteAudioBlock(this, data);
+            System.Threading.Interlocked.Increment(ref blocksWritten);
         }
+
+        public Task WriteBlockAsync(ReadOnlyMemory<byte> data)
+            => throw new NotSupportedException("Asynchronous writes are not supported.");
+#endif
 
         public int BlocksWritten
         {

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -33,6 +34,22 @@ namespace SharpAvi.Output
 
             return writeInvoker.InvokeAsync(() => base.WriteFrame(isKeyFrame, frameData, startIndex, length));
         }
+
+#if NET5_0_OR_GREATER
+        public override void WriteFrame(bool isKeyFrame, ReadOnlySpan<byte> frameData)
+        {
+#warning Implement WriteFrame
+            throw new NotImplementedException();
+            //writeInvoker.Invoke(() => base.WriteFrame(isKeyFrame, frameData));
+        }
+
+        public override Task WriteFrameAsync(bool isKeyFrame, ReadOnlyMemory<byte> frameData)
+        {
+            Argument.Meets(frameData.Length > 0, nameof(frameData), "Cannot write an empty frame.");
+
+            return writeInvoker.InvokeAsync(() => base.WriteFrame(isKeyFrame, frameData.Span));
+        }
+#endif
 
         public override void FinishWriting()
         {

@@ -77,6 +77,22 @@ namespace SharpAvi.Output
             return baseStream.WriteFrameAsync(isKeyFrame, frameData, startIndex, length);
         }
 
+#if NET5_0_OR_GREATER
+        public virtual void WriteFrame(bool isKeyFrame, ReadOnlySpan<byte> frameData)
+        {
+            Argument.Meets(frameData.Length > 0, nameof(frameData), "Cannot write an empty frame.");
+
+            baseStream.WriteFrame(isKeyFrame, frameData);
+        }
+
+        public virtual Task WriteFrameAsync(bool isKeyFrame, ReadOnlyMemory<byte> frameData)
+        {
+            Argument.Meets(frameData.Length > 0, nameof(frameData), "Cannot write an empty frame.");
+
+            return baseStream.WriteFrameAsync(isKeyFrame, frameData);
+        }
+#endif
+
         public int FramesWritten
         {
             get { return baseStream.FramesWritten; }

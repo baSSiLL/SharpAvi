@@ -122,10 +122,29 @@ namespace SharpAvi.Output
             }
         }
 
-        public override Task WriteBlockAsync(byte[] data, int startIndex, int length)
+        public override Task WriteBlockAsync(byte[] data, int startIndex, int length) 
+            => throw new NotSupportedException("Asynchronous writes are not supported.");
+
+#if NET5_0_OR_GREATER
+        public override void WriteBlock(ReadOnlySpan<byte> data)
         {
-            throw new NotSupportedException("Asynchronous writes are not supported.");
+            Argument.Meets(data.Length > 0, nameof(data), "Cannot write an empty block.");
+
+            // Prevent accessing encoded buffer by multiple threads simultaneously
+            lock (syncBuffer)
+            {
+                EnsureBufferIsSufficient(data.Length);
+                var encodedLength = encoder.EncodeBlock(data, encodedBuffer.AsSpan());
+                if (encodedLength > 0)
+                {
+                    base.WriteBlock(encodedBuffer.AsSpan(0, encodedLength));
+                }
+            }
         }
+
+        public override Task WriteBlockAsync(ReadOnlyMemory<byte> data)
+            => throw new NotSupportedException("Asynchronous writes are not supported.");
+#endif
 
         public override void PrepareForWriting()
         {

@@ -221,6 +221,24 @@ namespace SharpAvi.Codecs
             return lame.FinishEncoding(destination, destinationOffset);
         }
 
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Encodes block of audio data.
+        /// </summary>
+        public int EncodeBlock(ReadOnlySpan<byte> source, Span<byte> destination)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Flushes internal encoder's buffers.
+        /// </summary>
+        public int Flush(Span<byte> destination)
+        {
+            throw new NotImplementedException();
+        }
+#endif
+
         /// <summary>
         /// Gets maximum length of encoded data.
         /// </summary>

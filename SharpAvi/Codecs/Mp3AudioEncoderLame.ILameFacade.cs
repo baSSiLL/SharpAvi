@@ -1,4 +1,6 @@
-﻿namespace SharpAvi.Codecs
+﻿using System;
+
+namespace SharpAvi.Codecs
 {
     partial class Mp3AudioEncoderLame
     {
@@ -55,6 +57,18 @@
             /// Finalizes the encoding process.
             /// </summary>
             int FinishEncoding(byte[] dest, int destIndex);
+
+#if NET5_0_OR_GREATER
+            /// <summary>
+            /// Encodes a chunk of audio data.
+            /// </summary>
+            int Encode(ReadOnlySpan<byte> source, int sampleCount, Span<byte> dest);
+
+            /// <summary>
+            /// Finalizes the encoding process.
+            /// </summary>
+            int FinishEncoding(Span<byte> dest);
+#endif
         }
     }
 }

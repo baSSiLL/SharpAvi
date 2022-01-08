@@ -1,4 +1,6 @@
-﻿namespace SharpAvi.Codecs
+﻿using System;
+
+namespace SharpAvi.Codecs
 {
     /// <summary>
     /// Encoder of audio streams.
@@ -75,5 +77,24 @@
         /// <returns>The number of bytes written to <paramref name="destination"/>.</returns>
         /// <seealso cref="GetMaxEncodedLength"/>
         int Flush(byte[] destination, int destinationOffset);
+
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Encodes block of audio data.
+        /// </summary>
+        /// <param name="source">Buffer with audio data.</param>
+        /// <param name="destination">Buffer for encoded audio data.</param>
+        /// <returns>The number of bytes written to <paramref name="destination"/>.</returns>
+        /// <seealso cref="GetMaxEncodedLength"/>
+        int EncodeBlock(ReadOnlySpan<byte> source, Span<byte> destination);
+
+        /// <summary>
+        /// Flushes internal encoder buffers if any.
+        /// </summary>
+        /// <param name="destination">Buffer for encoded audio data.</param>
+        /// <returns>The number of bytes written to <paramref name="destination"/>.</returns>
+        /// <seealso cref="GetMaxEncodedLength"/>
+        int Flush(Span<byte> destination);
+#endif
     }
 }

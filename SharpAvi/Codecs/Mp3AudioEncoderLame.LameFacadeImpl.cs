@@ -146,6 +146,42 @@ namespace SharpAvi.Codecs
                 }
             }
 
+#if NET5_0_OR_GREATER
+            public unsafe int Encode(ReadOnlySpan<byte> source, int sampleCount, Span<byte> dest)
+            {
+                int result = -1;
+                fixed (void* sourcePtr = source, destPtr = dest)
+                {
+                    var srcIntPtr = new IntPtr(sourcePtr);
+                    var destIntPtr = new IntPtr(destPtr);
+                    switch (ChannelCount)
+                    {
+                        case 1:
+                            result = lame_encode_buffer(context, srcIntPtr, srcIntPtr, sampleCount, destIntPtr, dest.Length);
+                            break;
+                        case 2:
+                            result = lame_encode_buffer_interleaved(context, srcIntPtr, sampleCount / 2, destIntPtr, dest.Length);
+                            break;
+                        default:
+                            ThrowInvalidChannelCount();
+                            break;
+                    }
+                }
+
+                CheckResult(result >= 0, "lame_encode_buffer");
+                return result;
+            }
+
+            public unsafe int FinishEncoding(Span<byte> dest)
+            {
+                fixed (void* destPtr = dest)
+                {
+                    int result = lame_encode_flush(context, new IntPtr(destPtr), dest.Length);
+                    CheckResult(result >= 0, "lame_encode_flush");
+                    return result;
+                }
+            }
+#endif
 
             private static void CheckResult(bool passCondition, string routineName)
             {

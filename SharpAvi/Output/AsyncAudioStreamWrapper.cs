@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -33,6 +34,24 @@ namespace SharpAvi.Output
 
             return writeInvoker.InvokeAsync(() => base.WriteBlock(data, startIndex, length));
         }
+
+#if NET5_0_OR_GREATER
+        public override void WriteBlock(ReadOnlySpan<byte> data)
+        {
+            Argument.Meets(data.Length > 0, nameof(data), "Cannot write an empty block.");
+
+#warning Implement WriteBlock
+            throw new NotImplementedException();
+            //writeInvoker.Invoke(() => base.WriteBlock(data));
+        }
+
+        public override Task WriteBlockAsync(ReadOnlyMemory<byte> data)
+        {
+            Argument.Meets(data.Length > 0, nameof(data), "Cannot write an empty block.");
+
+            return writeInvoker.InvokeAsync(() => base.WriteBlock(data.Span));
+        }
+#endif
 
         public override void FinishWriting()
         {

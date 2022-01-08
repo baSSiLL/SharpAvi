@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CS0419: Ambiguous reference in cref attribute
+dotnet_diagnostic.CS0419.severity = silent

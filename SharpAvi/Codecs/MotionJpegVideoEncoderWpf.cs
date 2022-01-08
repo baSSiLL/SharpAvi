@@ -82,7 +82,6 @@ namespace SharpAvi.Codecs
         /// <summary>
         /// Encodes a frame.
         /// </summary>
-        /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
             Argument.IsNotNull(source, nameof(source));
@@ -114,6 +113,48 @@ namespace SharpAvi.Codecs
                 return (int)length;
             }
         }
+
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Encodes a frame.
+        /// </summary>
+        public unsafe int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
+        {
+            Argument.ConditionIsMet(4 * rect.Width * rect.Height <= source.Length,
+                "Source end offset exceeds the source length.");
+
+            var bitmap = bitmapHolder.Value;
+            fixed (void* srcPtr = source)
+            {
+                var srcIntPtr = new IntPtr(srcPtr);
+                bitmap.WritePixels(rect, srcIntPtr, source.Length, rect.Width * 4);
+            }
+
+            var encoderImpl = new JpegBitmapEncoder
+            {
+                QualityLevel = quality
+            };
+            encoderImpl.Frames.Add(BitmapFrame.Create(bitmap));
+
+            throw new NotImplementedException();
+#warning Implement EncodeFrame
+            // TODO: Custom Stream implementation wrapping over a Span?
+            /*
+            using (var stream = new MemoryStream(destination))
+            {
+                stream.Position = srcOffset;
+                encoderImpl.Save(stream);
+                stream.Flush();
+                var length = stream.Position - srcOffset;
+                stream.Close();
+
+                isKeyFrame = true;
+
+                return (int)length;
+            }
+            */
+        }
+#endif
 
         #endregion
     }

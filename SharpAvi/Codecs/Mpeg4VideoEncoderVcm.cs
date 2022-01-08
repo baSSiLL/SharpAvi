@@ -287,7 +287,6 @@ namespace SharpAvi.Codecs
         }
 
         /// <summary>Encodes a frame.</summary>
-        /// <seealso cref="IVideoEncoder.EncodeFrame"/>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
             Argument.IsNotNull(source, nameof(source));
@@ -303,38 +302,60 @@ namespace SharpAvi.Codecs
             var encodedHandle = GCHandle.Alloc(destination, GCHandleType.Pinned);
             try
             {
-                var outInfo = outBitmapInfo;
-                outInfo.ImageSize = (uint)destination.Length;
-                var inInfo = inBitmapInfo;
-                int outFlags;
-                int chunkID;
-                var flags = framesFromLastKey >= keyFrameRate ? VfwApi.ICCOMPRESS_KEYFRAME : 0;
+                var sourcePtr = sourceHandle.AddrOfPinnedObject();
+                var encodedPtr = encodedHandle.AddrOfPinnedObject();
 
-                var result = VfwApi.ICCompress(compressorHandle, flags,
-                    ref outInfo, encodedHandle.AddrOfPinnedObject(), ref inInfo, sourceHandle.AddrOfPinnedObject(),
-                    out chunkID, out outFlags, frameIndex,
-                    0, quality, IntPtr.Zero, IntPtr.Zero);
-                CheckICResult(result);
-                frameIndex++;
-
-
-                isKeyFrame = (outFlags & VfwApi.AVIIF_KEYFRAME) == VfwApi.AVIIF_KEYFRAME;
-                if (isKeyFrame)
-                {
-                    framesFromLastKey = 1;
-                }
-                else
-                {
-                    framesFromLastKey++;
-                }
-
-                return (int)outInfo.ImageSize;
+                return EncodeFrame(sourcePtr, encodedPtr, (uint)(destination.Length - destOffset), out isKeyFrame);
             }
             finally
             {
                 sourceHandle.Free();
                 encodedHandle.Free();
             }
+        }
+
+#if NET5_0_OR_GREATER
+        /// <summary>Encodes a frame.</summary>
+        public unsafe int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
+        {
+            Argument.ConditionIsMet(4 * width * height <= source.Length,
+                "Source end offset exceeds the source length.");
+
+            fixed (void* srcPtr = source, destPtr = destination)
+            {
+                var srcIntPtr = new IntPtr(srcPtr);
+                var destIntPtr = new IntPtr(destPtr);
+                return EncodeFrame(srcIntPtr, destIntPtr, (uint)destination.Length, out isKeyFrame);
+            }
+        }
+#endif
+
+        private int EncodeFrame(IntPtr sourcePtr, IntPtr destinationPtr, uint destinationSize, out bool isKeyFrame)
+        {
+            var outInfo = outBitmapInfo;
+            outInfo.ImageSize = destinationSize;
+            var inInfo = inBitmapInfo;
+            var flags = framesFromLastKey >= keyFrameRate ? VfwApi.ICCOMPRESS_KEYFRAME : 0;
+
+            var result = VfwApi.ICCompress(compressorHandle, flags,
+                ref outInfo, destinationPtr, ref inInfo, sourcePtr,
+                out _, out var outFlags, frameIndex,
+                0, quality, IntPtr.Zero, IntPtr.Zero);
+            CheckICResult(result);
+            frameIndex++;
+
+
+            isKeyFrame = (outFlags & VfwApi.AVIIF_KEYFRAME) == VfwApi.AVIIF_KEYFRAME;
+            if (isKeyFrame)
+            {
+                framesFromLastKey = 1;
+            }
+            else
+            {
+                framesFromLastKey++;
+            }
+
+            return (int)outInfo.ImageSize;
         }
 
         #endregion

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace SharpAvi.Output
 {
@@ -85,6 +86,33 @@ namespace SharpAvi.Output
         /// The contents of <paramref name="data"/> should not be modified until this write operation ends.
         /// </remarks>
         Task WriteBlockAsync(byte[] data, int startIndex, int length);
+
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Writes a block of audio data.
+        /// </summary>
+        /// <param name="data">Data buffer.</param>
+        /// <remarks>
+        /// Division of audio data into blocks may be arbitrary.
+        /// However, it is reasonable to write blocks of approximately the same duration
+        /// as a single video frame.
+        /// </remarks>
+        void WriteBlock(ReadOnlySpan<byte> data);
+
+        /// <summary>
+        /// Asynchronously writes a block of audio data.
+        /// </summary>
+        /// <param name="data">Data buffer.</param>
+        /// <returns>
+        /// A task representing the asynchronous write operation.
+        /// </returns>
+        /// <remarks>
+        /// Division of audio data into blocks may be arbitrary.
+        /// However, it is reasonable to write blocks of approximately the same duration
+        /// as a single video frame.
+        /// </remarks>
+        Task WriteBlockAsync(ReadOnlyMemory<byte> data);
+#endif
 
         /// <summary>
         /// Number of blocks written.

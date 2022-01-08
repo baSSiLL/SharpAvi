@@ -101,7 +101,7 @@ namespace SharpAvi.Codecs
         }
 
         /// <summary>
-        /// Encodes video frame.
+        /// Encodes a video frame.
         /// </summary>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
@@ -110,6 +110,18 @@ namespace SharpAvi.Codecs
             isKeyFrame = result.IsKeyFrame;
             return result.EncodedLength;
         }
+
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Encodes a video frame.
+        /// </summary>
+        public int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
+        {
+#warning Implement EncodeFrame
+            // TODO: Convert to pointers and then convert back to Span's inside a lambda
+            throw new NotImplementedException();
+        }
+#endif
 
         private EncodeResult EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset)
         {
