@@ -36,13 +36,20 @@ namespace SharpAvi.Output
         }
 
 #if NET5_0_OR_GREATER
-        public override void WriteBlock(ReadOnlySpan<byte> data)
+        public unsafe override void WriteBlock(ReadOnlySpan<byte> data)
         {
             Argument.Meets(data.Length > 0, nameof(data), "Cannot write an empty block.");
 
-#warning Implement WriteBlock
-            throw new NotImplementedException();
-            //writeInvoker.Invoke(() => base.WriteBlock(data));
+            fixed (void* ptr = data)
+            {
+                var dataPtr = new IntPtr(ptr);
+                var dataLength = data.Length;
+                writeInvoker.Invoke(() =>
+                {
+                    var dataSpan = new Span<byte>(dataPtr.ToPointer(), dataLength);
+                    base.WriteBlock(dataSpan);
+                });
+            }
         }
 
         public override Task WriteBlockAsync(ReadOnlyMemory<byte> data)

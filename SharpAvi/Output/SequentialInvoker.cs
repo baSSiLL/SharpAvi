@@ -16,11 +16,8 @@ namespace SharpAvi.Output
         /// </summary>
         public SequentialInvoker()
         {
-            var tcs = new TaskCompletionSource<bool>();
-            tcs.SetResult(true);
-
             // Initialize lastTask to already completed task
-            lastTask = tcs.Task;
+            lastTask = Task.FromResult(true);
         }
 
         /// <summary>

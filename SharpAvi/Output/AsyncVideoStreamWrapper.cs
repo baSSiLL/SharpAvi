@@ -36,11 +36,20 @@ namespace SharpAvi.Output
         }
 
 #if NET5_0_OR_GREATER
-        public override void WriteFrame(bool isKeyFrame, ReadOnlySpan<byte> frameData)
+        public unsafe override void WriteFrame(bool isKeyFrame, ReadOnlySpan<byte> frameData)
         {
-#warning Implement WriteFrame
-            throw new NotImplementedException();
-            //writeInvoker.Invoke(() => base.WriteFrame(isKeyFrame, frameData));
+            Argument.Meets(frameData.Length > 0, nameof(frameData), "Cannot write an empty frame.");
+
+            fixed (void* ptr = frameData)
+            {
+                var dataPtr = new IntPtr(ptr);
+                var dataLength = frameData.Length;
+                writeInvoker.Invoke(() =>
+                {
+                    var dataSpan = new Span<byte>(dataPtr.ToPointer(), dataLength);
+                    base.WriteFrame(isKeyFrame, dataSpan);
+                });
+            }
         }
 
         public override Task WriteFrameAsync(bool isKeyFrame, ReadOnlyMemory<byte> frameData)
