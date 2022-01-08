@@ -168,6 +168,11 @@ namespace SharpAvi.Codecs
             Argument.IsNotNegative(frameCount, nameof(frameCount));
             Argument.IsInRange(quality, 1, 100, nameof(quality));
 
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                throw new PlatformNotSupportedException($"{nameof(Mpeg4VideoEncoderVcm)} only supports the Windows platform.");
+            }
+
             this.width = width;
             this.height = height;
             sourceBuffer = new byte[width * height * 4];

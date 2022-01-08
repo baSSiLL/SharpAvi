@@ -24,6 +24,7 @@ namespace SharpAvi.Codecs
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
 
+#if NET45
         /// <summary>
         /// Adds new video stream with <see cref="MotionJpegVideoEncoderWpf"/>.
         /// </summary>
@@ -43,6 +44,7 @@ namespace SharpAvi.Codecs
             var encoder = new MotionJpegVideoEncoderWpf(width, height, quality);
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
+#endif
 
         /// <summary>
         /// Adds new video stream with <see cref="Mpeg4VideoEncoderVcm"/>.

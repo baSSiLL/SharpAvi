@@ -93,7 +93,6 @@ namespace SharpAvi.Codecs
                 lameFacadeType = facadeAsm.GetType(typeof(Mp3AudioEncoderLame).Namespace + ".Runtime.LameFacadeImpl");
             }
         }
-#endif
 
         private static Assembly GenerateLameFacadeAssembly(string lameDllName)
         {
@@ -131,6 +130,7 @@ namespace SharpAvi.Codecs
 
             return source;
         }
+#endif
 
         private static bool IsLibraryLoaded(string libraryName)
         {

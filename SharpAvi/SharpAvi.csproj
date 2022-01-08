@@ -1,12 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	<TargetFrameworks>net45;net50-windows</TargetFrameworks>
+	<TargetFrameworks>net45;net50</TargetFrameworks>
 	<Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>Library</OutputType>
-    <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -46,6 +42,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
+    <Reference Include="PresentationCore" Condition="'$(TargetFramework)' == 'net45'" />
+    <Reference Include="System.Windows" Condition="'$(TargetFramework)' == 'net45'" />
+    <Reference Include="WindowsBase" Condition="'$(TargetFramework)' == 'net45'" />
   </ItemGroup>
 </Project>
