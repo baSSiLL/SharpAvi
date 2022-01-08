@@ -111,18 +111,6 @@ namespace SharpAvi.Codecs
             return result.EncodedLength;
         }
 
-#if NET5_0_OR_GREATER
-        /// <summary>
-        /// Encodes a video frame.
-        /// </summary>
-        public int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
-        {
-#warning Implement EncodeFrame
-            // TODO: Convert to pointers and then convert back to Span's inside a lambda
-            throw new NotImplementedException();
-        }
-#endif
-
         private EncodeResult EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset)
         {
             bool isKeyFrame;
@@ -133,6 +121,40 @@ namespace SharpAvi.Codecs
                 IsKeyFrame = isKeyFrame
             };
         }
+
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Encodes a video frame.
+        /// </summary>
+        public unsafe int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
+        {
+            EncodeResult result;
+            fixed (void* srcPtr = source, destPtr = destination)
+            {
+                var srcIntPtr = new IntPtr(srcPtr);
+                var srcLength = source.Length;
+                var destIntPtr = new IntPtr(destPtr);
+                var destLength = destination.Length;
+                result = DispatcherInvokeAndPropagateException(
+                    () => EncodeFrame(srcIntPtr, srcLength, destIntPtr, destLength));
+            }
+            isKeyFrame = result.IsKeyFrame;
+            return result.EncodedLength;
+        }
+
+        private unsafe EncodeResult EncodeFrame(IntPtr source, int srcLength, IntPtr destination, int destLength)
+        {
+            bool isKeyFrame;
+            var sourceSpan = new Span<byte>(source.ToPointer(), srcLength);
+            var destSpan = new Span<byte>(destination.ToPointer(), destLength);
+            var result = encoder.EncodeFrame(sourceSpan, destSpan, out isKeyFrame);
+            return new EncodeResult
+            {
+                EncodedLength = result,
+                IsKeyFrame = isKeyFrame
+            };
+        }
+#endif
 
         private struct EncodeResult
         {
