@@ -34,7 +34,7 @@ namespace SharpAvi.Sample
             var codecs = new List<CodecInfo>();
             codecs.Add(new CodecInfo(KnownFourCCs.Codecs.Uncompressed, "(none)"));
             codecs.Add(new CodecInfo(KnownFourCCs.Codecs.MotionJpeg, "Motion JPEG"));
-            codecs.AddRange(Mpeg4VideoEncoderVcm.GetAvailableCodecs());
+            codecs.AddRange(Mpeg4VcmVideoEncoder.GetAvailableCodecs());
             AvailableCodecs = codecs;
         }
 
@@ -166,7 +166,7 @@ namespace SharpAvi.Sample
 
         public int MaximumAudioQuality
         {
-            get { return Mp3AudioEncoderLame.SupportedBitRates.Length - 1; }
+            get { return Mp3LameAudioEncoder.SupportedBitRates.Length - 1; }
         }
 
         public bool Is64BitProcess

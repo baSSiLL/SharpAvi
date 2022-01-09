@@ -27,48 +27,48 @@ namespace SharpAvi.Codecs
 
 #if NET5_0_OR_GREATER
         /// <summary>
-        /// Adds new video stream with <see cref="MotionJpegVideoEncoderJpegLibrary"/>.
+        /// Adds new video stream with <see cref="MJpegLibVideoEncoder"/>.
         /// </summary>
         /// <param name="writer">Writer object to which new stream is added.</param>
         /// <param name="width">Frame width.</param>
         /// <param name="height">Frame height.</param>
         /// <param name="quality">Requested quality of compression.</param>
         /// <seealso cref="AviWriter.AddEncodingVideoStream"/>
-        /// <seealso cref="MotionJpegVideoEncoderJpegLibrary"/>
-        public static IAviVideoStream AddMotionJpegVideoStream(this AviWriter writer, int width, int height, int quality = 70)
+        /// <seealso cref="MJpegLibVideoEncoder"/>
+        public static IAviVideoStream AddMJpegLibVideoStream(this AviWriter writer, int width, int height, int quality = 70)
         {
             Argument.IsNotNull(writer, nameof(writer));
             Argument.IsPositive(width, nameof(width));
             Argument.IsPositive(height, nameof(height));
             Argument.IsInRange(quality, 1, 100, nameof(quality));
 
-            var encoder = new MotionJpegVideoEncoderJpegLibrary(width, height, quality);
+            var encoder = new MJpegLibVideoEncoder(width, height, quality);
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
 #else
         /// <summary>
-        /// Adds new video stream with <see cref="MotionJpegVideoEncoderWpf"/>.
+        /// Adds new video stream with <see cref="MJpegWpfVideoEncoder"/>.
         /// </summary>
         /// <param name="writer">Writer object to which new stream is added.</param>
         /// <param name="width">Frame width.</param>
         /// <param name="height">Frame height.</param>
         /// <param name="quality">Requested quality of compression.</param>
         /// <seealso cref="AviWriter.AddEncodingVideoStream"/>
-        /// <seealso cref="MotionJpegVideoEncoderWpf"/>
-        public static IAviVideoStream AddMotionJpegVideoStream(this AviWriter writer, int width, int height, int quality = 70)
+        /// <seealso cref="MJpegWpfVideoEncoder"/>
+        public static IAviVideoStream AddMJpegWpfVideoStream(this AviWriter writer, int width, int height, int quality = 70)
         {
             Argument.IsNotNull(writer, nameof(writer));
             Argument.IsPositive(width, nameof(width));
             Argument.IsPositive(height, nameof(height));
             Argument.IsInRange(quality, 1, 100, nameof(quality));
 
-            var encoder = new MotionJpegVideoEncoderWpf(width, height, quality);
+            var encoder = new MJpegWpfVideoEncoder(width, height, quality);
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
 #endif
 
         /// <summary>
-        /// Adds new video stream with <see cref="Mpeg4VideoEncoderVcm"/>.
+        /// Adds new video stream with <see cref="Mpeg4VcmVideoEncoder"/>.
         /// </summary>
         /// <param name="writer">Writer object to which new stream is added.</param>
         /// <param name="width">Frame width.</param>
@@ -78,11 +78,11 @@ namespace SharpAvi.Codecs
         /// <param name="quality">Requested quality of compression.</param>
         /// <param name="codec">Specific MPEG-4 codec to use.</param>
         /// <param name="forceSingleThreadedAccess">
-        /// When <c>true</c>, the created <see cref="Mpeg4VideoEncoderVcm"/> instance is wrapped into
+        /// When <c>true</c>, the created <see cref="Mpeg4VcmVideoEncoder"/> instance is wrapped into
         /// <see cref="SingleThreadedVideoEncoderWrapper"/>.
         /// </param>
         /// <seealso cref="AviWriter.AddEncodingVideoStream"/>
-        /// <seealso cref="Mpeg4VideoEncoderVcm"/>
+        /// <seealso cref="Mpeg4VcmVideoEncoder"/>
         /// <seealso cref="SingleThreadedVideoEncoderWrapper"/>
         public static IAviVideoStream AddMpeg4VideoStream(this AviWriter writer, int width, int height, 
             double fps, int frameCount = 0, int quality = 70, FourCC? codec = null, 
@@ -96,8 +96,8 @@ namespace SharpAvi.Codecs
             Argument.IsInRange(quality, 1, 100, nameof(quality));
 
             var encoderFactory = codec.HasValue
-                ? new Func<IVideoEncoder>(() => new Mpeg4VideoEncoderVcm(width, height, fps, frameCount, quality, codec.Value))
-                : new Func<IVideoEncoder>(() => new Mpeg4VideoEncoderVcm(width, height, fps, frameCount, quality));
+                ? new Func<IVideoEncoder>(() => new Mpeg4VcmVideoEncoder(width, height, fps, frameCount, quality, codec.Value))
+                : new Func<IVideoEncoder>(() => new Mpeg4VcmVideoEncoder(width, height, fps, frameCount, quality));
             var encoder = forceSingleThreadedAccess
                 ? new SingleThreadedVideoEncoderWrapper(encoderFactory)
                 : encoderFactory.Invoke();
@@ -105,18 +105,18 @@ namespace SharpAvi.Codecs
         }
 
         /// <summary>
-        /// Adds new audio stream with <see cref="Mp3AudioEncoderLame"/>.
+        /// Adds new audio stream with <see cref="Mp3LameAudioEncoder"/>.
         /// </summary>
         /// <seealso cref="AviWriter.AddEncodingAudioStream"/>
-        /// <seealso cref="Mp3AudioEncoderLame"/>
+        /// <seealso cref="Mp3LameAudioEncoder"/>
         public static IAviAudioStream AddMp3AudioStream(this AviWriter writer, int channelCount, int sampleRate, int outputBitRateKbps = 160)
         {
             Argument.IsNotNull(writer, nameof(writer));
             Argument.IsInRange(channelCount, 1, 2, nameof(channelCount));
             Argument.IsPositive(sampleRate, nameof(sampleRate));
-            Argument.Meets(Mp3AudioEncoderLame.SupportedBitRates.Contains(outputBitRateKbps), nameof(outputBitRateKbps));
+            Argument.Meets(Mp3LameAudioEncoder.SupportedBitRates.Contains(outputBitRateKbps), nameof(outputBitRateKbps));
 
-            var encoder = new Mp3AudioEncoderLame(channelCount, sampleRate, outputBitRateKbps);
+            var encoder = new Mp3LameAudioEncoder(channelCount, sampleRate, outputBitRateKbps);
             return writer.AddEncodingAudioStream(encoder, true);
         }
     }

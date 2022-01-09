@@ -27,7 +27,7 @@ namespace SharpAvi.Codecs
     /// <see cref="SingleThreadedVideoEncoderWrapper"/> for the stable work.
     /// </para>
     /// </remarks>
-    public class Mpeg4VideoEncoderVcm : IVideoEncoder, IDisposable
+    public class Mpeg4VcmVideoEncoder : IVideoEncoder, IDisposable
     {
         /// <summary>
         /// Default preferred order of the supported codecs.
@@ -131,7 +131,7 @@ namespace SharpAvi.Codecs
         private bool needEnd;
 
         /// <summary>
-        /// Creates a new instance of <see cref="Mpeg4VideoEncoderVcm"/>.
+        /// Creates a new instance of <see cref="Mpeg4VcmVideoEncoder"/>.
         /// </summary>
         /// <param name="width">Frame width.</param>
         /// <param name="height">Frame height.</param>
@@ -161,7 +161,7 @@ namespace SharpAvi.Codecs
         /// the encoder is not guaranteed to work properly.
         /// </para>
         /// </remarks>
-        public Mpeg4VideoEncoderVcm(int width, int height, double fps, int frameCount, int quality, params FourCC[] codecPreference)
+        public Mpeg4VcmVideoEncoder(int width, int height, double fps, int frameCount, int quality, params FourCC[] codecPreference)
         {
             Argument.IsPositive(width, nameof(width));
             Argument.IsPositive(height, nameof(height));
@@ -171,7 +171,7 @@ namespace SharpAvi.Codecs
 
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {
-                throw new PlatformNotSupportedException($"{nameof(Mpeg4VideoEncoderVcm)} only supports the Windows platform.");
+                throw new PlatformNotSupportedException($"{nameof(Mpeg4VcmVideoEncoder)} only supports the Windows platform.");
             }
 
             this.width = width;
@@ -225,7 +225,7 @@ namespace SharpAvi.Codecs
         /// <summary>
         /// Performs any necessary cleanup before this instance is garbage-collected.
         /// </summary>
-        ~Mpeg4VideoEncoderVcm()
+        ~Mpeg4VcmVideoEncoder()
         {
             Dispose();
         }

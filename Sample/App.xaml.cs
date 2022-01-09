@@ -18,7 +18,7 @@ namespace SharpAvi.Sample
             // Set LAME DLL path for MP3 encoder
             var asmDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             var dllName = string.Format("lameenc{0}.dll", Environment.Is64BitProcess ? "64" : "32");
-            Mp3AudioEncoderLame.SetLameDllLocation(Path.Combine(asmDir, dllName));
+            Mp3LameAudioEncoder.SetLameDllLocation(Path.Combine(asmDir, dllName));
         }
     }
 }

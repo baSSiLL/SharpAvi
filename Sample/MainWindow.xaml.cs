@@ -82,7 +82,7 @@ namespace SharpAvi.Sample
             recordingTimer.Start();
 
             lastFileName = System.IO.Path.Combine(outputFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".avi");
-            var bitRate = Mp3AudioEncoderLame.SupportedBitRates.OrderBy(br => br).ElementAt(audioQuality);
+            var bitRate = Mp3LameAudioEncoder.SupportedBitRates.OrderBy(br => br).ElementAt(audioQuality);
             recorder = new Recorder(lastFileName, 
                 encoder, encodingQuality, 
                 audioSourceIndex, audioWaveFormat, encodeAudio, bitRate);
@@ -149,7 +149,7 @@ namespace SharpAvi.Sample
             audioSourceIndex = -1;
             audioWaveFormat = SupportedWaveFormat.WAVE_FORMAT_44M16;
             encodeAudio = true;
-            audioQuality = (Mp3AudioEncoderLame.SupportedBitRates.Length + 1) / 2;
+            audioQuality = (Mp3LameAudioEncoder.SupportedBitRates.Length + 1) / 2;
 
             minimizeOnStart = true;
         }

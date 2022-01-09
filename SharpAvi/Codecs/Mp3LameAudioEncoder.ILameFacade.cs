@@ -2,13 +2,13 @@
 
 namespace SharpAvi.Codecs
 {
-    partial class Mp3AudioEncoderLame
+    partial class Mp3LameAudioEncoder
     {
         /// <summary>
         /// Interface is used to access the API of the LAME DLL.
         /// </summary>
         /// <remarks>
-        /// Clients of <see cref="Mp3AudioEncoderLame"/> class need not to work with
+        /// Clients of <see cref="Mp3LameAudioEncoder"/> class need not to work with
         /// this interface directly.
         /// </remarks>
         public interface ILameFacade

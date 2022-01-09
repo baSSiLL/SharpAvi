@@ -18,7 +18,7 @@ namespace SharpAvi.Codecs
     /// The class is designed for using only a single instance at a time.
     /// Find information about and downloads of the LAME project at http://lame.sourceforge.net/
     /// </remarks>
-    public partial class Mp3AudioEncoderLame : IAudioEncoder, IDisposable
+    public partial class Mp3LameAudioEncoder : IAudioEncoder, IDisposable
     {
         /// <summary>
         /// Supported output bit rates (in kilobits per second).
@@ -91,13 +91,13 @@ namespace SharpAvi.Codecs
             if (lameFacadeType is null || lastLameLibraryName != libraryName)
             {
                 var facadeAsm = GenerateLameFacadeAssembly(libraryName);
-                lameFacadeType = facadeAsm.GetType(typeof(Mp3AudioEncoderLame).Namespace + ".Runtime.LameFacadeImpl");
+                lameFacadeType = facadeAsm.GetType(typeof(Mp3LameAudioEncoder).Namespace + ".Runtime.LameFacadeImpl");
             }
         }
 
         private static Assembly GenerateLameFacadeAssembly(string lameDllName)
         {
-            var thisAsm = typeof(Mp3AudioEncoderLame).Assembly;
+            var thisAsm = typeof(Mp3LameAudioEncoder).Assembly;
             var compiler = new Microsoft.CSharp.CSharpCodeProvider();
             var compilerOptions = new System.CodeDom.Compiler.CompilerParameters()
             {
@@ -149,7 +149,7 @@ namespace SharpAvi.Codecs
         private readonly byte[] formatData;
 
         /// <summary>
-        /// Creates a new instance of <see cref="Mp3AudioEncoderLame"/>.
+        /// Creates a new instance of <see cref="Mp3LameAudioEncoder"/>.
         /// </summary>
         /// <param name="channelCount">Channel count.</param>
         /// <param name="sampleRate">Sample rate (in samples per second).</param>
@@ -158,7 +158,7 @@ namespace SharpAvi.Codecs
         /// Encoder expects audio data in 16-bit samples.
         /// Stereo data should be interleaved: left sample first, right sample second.
         /// </remarks>
-        public Mp3AudioEncoderLame(int channelCount, int sampleRate, int outputBitRateKbps)
+        public Mp3LameAudioEncoder(int channelCount, int sampleRate, int outputBitRateKbps)
         {
             Argument.IsInRange(channelCount, 1, 2, nameof(channelCount));
             Argument.IsPositive(sampleRate, nameof(sampleRate));

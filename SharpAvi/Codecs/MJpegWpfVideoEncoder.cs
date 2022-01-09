@@ -23,14 +23,14 @@ namespace SharpAvi.Codecs
     /// This also produces a little overhead on the file size.
     /// </para>
     /// </remarks>
-    public sealed class MotionJpegVideoEncoderWpf : IVideoEncoder
+    public sealed class MJpegWpfVideoEncoder : IVideoEncoder
     {
         private readonly Int32Rect rect;
         private readonly int quality;
         private readonly ThreadLocal<WriteableBitmap> bitmapHolder;
 
         /// <summary>
-        /// Creates a new instance of <see cref="MotionJpegVideoEncoderWpf"/>.
+        /// Creates a new instance of <see cref="MJpegWpfVideoEncoder"/>.
         /// </summary>
         /// <param name="width">Frame width.</param>
         /// <param name="height">Frame height.</param>
@@ -38,7 +38,7 @@ namespace SharpAvi.Codecs
         /// Compression quality in the range [1..100].
         /// Less values mean less size and lower image quality.
         /// </param>
-        public MotionJpegVideoEncoderWpf(int width, int height, int quality)
+        public MJpegWpfVideoEncoder(int width, int height, int quality)
         {
             Argument.IsPositive(width, nameof(width));
             Argument.IsPositive(height, nameof(height));

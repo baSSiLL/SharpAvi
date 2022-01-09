@@ -14,7 +14,7 @@ namespace SharpAvi.Codecs
     /// <remarks>
     /// This implementation relies on the <c>JpegLibrary</c> by yigolden.
     /// </remarks>
-    public sealed class MotionJpegVideoEncoderJpegLibrary : IVideoEncoder
+    public sealed class MJpegLibVideoEncoder : IVideoEncoder
     {
         private readonly int width;
         private readonly int height;
@@ -24,7 +24,7 @@ namespace SharpAvi.Codecs
         private readonly JpegEncoder jpegEncoder;
 
         /// <summary>
-        /// Creates a new instance of <see cref="MotionJpegVideoEncoderJpegLibrary"/>.
+        /// Creates a new instance of <see cref="MJpegLibVideoEncoder"/>.
         /// </summary>
         /// <param name="width">Frame width.</param>
         /// <param name="height">Frame height.</param>
@@ -37,7 +37,7 @@ namespace SharpAvi.Codecs
         /// Set to <c>true</c> if your priority is the size of a file (saves about 400 bytes per frame),
         /// or keep the default <c>false</c> if your priority is the speed of encoding.
         /// </param>
-        public MotionJpegVideoEncoderJpegLibrary(int width, int height, int quality, bool removeDht = true)
+        public MJpegLibVideoEncoder(int width, int height, int quality, bool removeDht = true)
         {
             Argument.IsPositive(width, nameof(width));
             Argument.IsPositive(height, nameof(height));
