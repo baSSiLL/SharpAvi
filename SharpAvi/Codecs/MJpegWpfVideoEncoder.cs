@@ -1,4 +1,4 @@
-﻿#if NET45
+﻿#if NET45 || NET5_0_OR_GREATER && WINDOWS
 using SharpAvi.Utilities;
 using System;
 using System.IO;
@@ -46,6 +46,10 @@ namespace SharpAvi.Codecs
 
             rect = new Int32Rect(0, 0, width, height);
             this.quality = quality;
+
+#if NET5_0_OR_GREATER
+            buffer = new MemoryStream(MaxEncodedSize);
+#endif
 
             bitmapHolder = new ThreadLocal<WriteableBitmap>(
                 () => new WriteableBitmap(rect.Width, rect.Height, 96, 96, PixelFormats.Bgr32, null),
@@ -115,6 +119,42 @@ namespace SharpAvi.Codecs
                 return (int)length;
             }
         }
+
+#if NET5_0_OR_GREATER
+        private readonly MemoryStream buffer;
+
+        /// <summary>
+        /// Encodes a frame.
+        /// </summary>
+        public unsafe int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
+        {
+            Argument.ConditionIsMet(4 * rect.Width * rect.Height <= source.Length,
+                "Source end offset exceeds the source length.");
+
+            var bitmap = bitmapHolder.Value;
+            fixed (void* srcPtr = source)
+            {
+                var srcIntPtr = new IntPtr(srcPtr);
+                bitmap.WritePixels(rect, srcIntPtr, source.Length, rect.Width * 4);
+            }
+
+            var encoderImpl = new JpegBitmapEncoder
+            {
+                QualityLevel = quality
+            };
+            encoderImpl.Frames.Add(BitmapFrame.Create(bitmap));
+
+            buffer.SetLength(0);
+            buffer.Position = 0;
+            encoderImpl.Save(buffer);
+            buffer.Flush();
+
+            var length = (int)buffer.Length;
+            buffer.GetBuffer().AsSpan(0, length).CopyTo(destination);
+            isKeyFrame = true;
+            return length;
+        }
+#endif
 
         #endregion
     }

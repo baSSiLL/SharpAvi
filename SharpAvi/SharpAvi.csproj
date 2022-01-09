@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	<TargetFrameworks>net45;net50</TargetFrameworks>
+	<TargetFrameworks>net45;net50;net50-windows</TargetFrameworks>
 	<Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>Library</OutputType>
   </PropertyGroup>
@@ -46,7 +46,10 @@
     <Reference Include="System.Windows" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net50'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net50-windows'">
+	  <UseWPF>true</UseWPF>  
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'net45'">
     <PackageReference Include="JpegLibrary">
       <Version>0.4.32</Version>
     </PackageReference>

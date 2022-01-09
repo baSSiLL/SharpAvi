@@ -96,11 +96,7 @@ namespace SharpAvi.Sample
             }
             else if (codec == KnownFourCCs.Codecs.MotionJpeg)
             {
-#if NET5_0_OR_GREATER
-                return writer.AddMJpegLibVideoStream(screenWidth, screenHeight, quality);
-#else
                 return writer.AddMJpegWpfVideoStream(screenWidth, screenHeight, quality);
-#endif
             }
             else
             {
