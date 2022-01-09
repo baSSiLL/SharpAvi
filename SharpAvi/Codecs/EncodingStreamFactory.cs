@@ -45,6 +45,26 @@ namespace SharpAvi.Codecs
             var encoder = new MJpegLibVideoEncoder(width, height, quality);
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
+
+        /// <summary>
+        /// Adds new video stream with <see cref="MJpegImageSharpVideoEncoder"/>.
+        /// </summary>
+        /// <param name="writer">Writer object to which new stream is added.</param>
+        /// <param name="width">Frame width.</param>
+        /// <param name="height">Frame height.</param>
+        /// <param name="quality">Requested quality of compression.</param>
+        /// <seealso cref="AviWriter.AddEncodingVideoStream"/>
+        /// <seealso cref="MJpegImageSharpVideoEncoder"/>
+        public static IAviVideoStream AddMJpegImageSharpVideoStream(this AviWriter writer, int width, int height, int quality = 70)
+        {
+            Argument.IsNotNull(writer, nameof(writer));
+            Argument.IsPositive(width, nameof(width));
+            Argument.IsPositive(height, nameof(height));
+            Argument.IsInRange(quality, 1, 100, nameof(quality));
+
+            var encoder = new MJpegImageSharpVideoEncoder(width, height, quality);
+            return writer.AddEncodingVideoStream(encoder, true, width, height);
+        }
 #endif
 
 #if NET45 || NET5_0_OR_GREATER && WINDOWS
@@ -86,8 +106,8 @@ namespace SharpAvi.Codecs
         /// <seealso cref="AviWriter.AddEncodingVideoStream"/>
         /// <seealso cref="Mpeg4VcmVideoEncoder"/>
         /// <seealso cref="SingleThreadedVideoEncoderWrapper"/>
-        public static IAviVideoStream AddMpeg4VideoStream(this AviWriter writer, int width, int height, 
-            double fps, int frameCount = 0, int quality = 70, FourCC? codec = null, 
+        public static IAviVideoStream AddMpeg4VcmVideoStream(this AviWriter writer, int width, int height,
+            double fps, int frameCount = 0, int quality = 70, FourCC? codec = null,
             bool forceSingleThreadedAccess = false)
         {
             Argument.IsNotNull(writer, nameof(writer));
@@ -111,7 +131,7 @@ namespace SharpAvi.Codecs
         /// </summary>
         /// <seealso cref="AviWriter.AddEncodingAudioStream"/>
         /// <seealso cref="Mp3LameAudioEncoder"/>
-        public static IAviAudioStream AddMp3AudioStream(this AviWriter writer, int channelCount, int sampleRate, int outputBitRateKbps = 160)
+        public static IAviAudioStream AddMp3LameAudioStream(this AviWriter writer, int channelCount, int sampleRate, int outputBitRateKbps = 160)
         {
             Argument.IsNotNull(writer, nameof(writer));
             Argument.IsInRange(channelCount, 1, 2, nameof(channelCount));

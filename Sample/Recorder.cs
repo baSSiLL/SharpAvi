@@ -100,7 +100,7 @@ namespace SharpAvi.Sample
             }
             else
             {
-                return writer.AddMpeg4VideoStream(screenWidth, screenHeight, (double)writer.FramesPerSecond,
+                return writer.AddMpeg4VcmVideoStream(screenWidth, screenHeight, (double)writer.FramesPerSecond,
                     // It seems that all tested MPEG-4 VfW codecs ignore the quality affecting parameters passed through VfW API
                     // They only respect the settings from their own configuration dialogs, and Mpeg4VideoEncoder currently has no support for this
                     quality: quality,
@@ -117,7 +117,7 @@ namespace SharpAvi.Sample
             if (encode)
             {
                 // LAME DLL path is set in App.OnStartup()
-                return writer.AddMp3AudioStream(waveFormat.Channels, waveFormat.SampleRate, bitRate);
+                return writer.AddMp3LameAudioStream(waveFormat.Channels, waveFormat.SampleRate, bitRate);
             }
             else
             {

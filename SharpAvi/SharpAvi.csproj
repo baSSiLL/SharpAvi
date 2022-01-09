@@ -53,5 +53,8 @@
     <PackageReference Include="JpegLibrary">
       <Version>0.4.32</Version>
     </PackageReference>
+	<PackageReference Include="SixLabors.ImageSharp">
+      <Version>1.0.4</Version>
+	</PackageReference>
   </ItemGroup>
 </Project>
