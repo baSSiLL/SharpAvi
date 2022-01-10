@@ -137,30 +137,15 @@ namespace SharpAvi.Output
             => throw new NotSupportedException("Asynchronous writes are not supported.");
 #endif
 
-        public int BlocksWritten
-        {
-            get { return blocksWritten; }
-        }
+        public int BlocksWritten => blocksWritten;
 
 
-        public override FourCC StreamType
-        {
-            get { return KnownFourCCs.StreamTypes.Audio; }
-        }
+        public override FourCC StreamType => KnownFourCCs.StreamTypes.Audio;
 
-        protected override FourCC GenerateChunkId()
-        {
- 	        return KnownFourCCs.Chunks.AudioData(Index);
-        }
+        protected override FourCC GenerateChunkId() => KnownFourCCs.Chunks.AudioData(Index);
 
-        public override void WriteHeader()
-        {
-            writeHandler.WriteStreamHeader(this);
-        }
+        public override void WriteHeader() => writeHandler.WriteStreamHeader(this);
 
-        public override void WriteFormat()
-        {
-            writeHandler.WriteStreamFormat(this);
-        }
+        public override void WriteFormat() => writeHandler.WriteStreamFormat(this);
     }
 }

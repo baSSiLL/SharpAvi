@@ -45,21 +45,15 @@ namespace SharpAvi.Output
         /// <summary> Video codec. </summary>
         public override FourCC Codec
         {
-            get { return encoder.Codec; }
-            set
-            {
-                ThrowPropertyDefinedByEncoder();
-            }
+            get => encoder.Codec;
+            set => ThrowPropertyDefinedByEncoder();
         }
 
         /// <summary> Bits per pixel. </summary>
         public override BitsPerPixel BitsPerPixel
         {
-            get { return encoder.BitsPerPixel; }
-            set
-            {
-                ThrowPropertyDefinedByEncoder();
-            }
+            get => encoder.BitsPerPixel;
+            set => ThrowPropertyDefinedByEncoder();
         }
 
         /// <summary>Encodes and writes a frame.</summary>
@@ -105,9 +99,7 @@ namespace SharpAvi.Output
         }
 
 
-        private void ThrowPropertyDefinedByEncoder()
-        {
-            throw new NotSupportedException("The value of the property is defined by the encoder.");
-        }
+        private void ThrowPropertyDefinedByEncoder() 
+            => throw new NotSupportedException("The value of the property is defined by the encoder.");
     }
 }

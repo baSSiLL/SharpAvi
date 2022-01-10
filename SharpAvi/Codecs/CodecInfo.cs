@@ -5,30 +5,22 @@
     /// </summary>
     public class CodecInfo
     {
-        private readonly FourCC codec;
-        private readonly string name;
 
         /// <summary>
         /// Creates a new instance of <see cref="CodecInfo"/>.
         /// </summary>
         public CodecInfo(FourCC codec, string name)
         {
-            this.codec = codec;
-            this.name = name;
+            this.Codec = codec;
+            this.Name = name;
         }
 
         /// <summary>Codec ID.</summary>
-        public FourCC Codec
-        {
-            get { return codec; }
-        }
+        public FourCC Codec { get; }
 
         /// <summary>
         /// Descriptive codec name that may be show to a user.
         /// </summary>
-        public string Name
-        {
-            get { return name; }
-        }
+        public string Name { get; }
     }
 }

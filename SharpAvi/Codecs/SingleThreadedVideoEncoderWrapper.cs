@@ -33,11 +33,8 @@ namespace SharpAvi.Codecs
             scheduler = new SingleThreadTaskScheduler();
 
             // TODO: Create encoder on the first frame
-            encoder = SchedulerInvoke(encoderFactory);
-            if (encoder is null)
-            {
-                throw new InvalidOperationException("Encoder factory has created no instance.");
-            }
+            encoder = SchedulerInvoke(encoderFactory)
+                ?? throw new InvalidOperationException("Encoder factory has created no instance.");
         }
 
         /// <summary>
@@ -56,35 +53,17 @@ namespace SharpAvi.Codecs
         }
 
         /// <summary>Codec ID.</summary>
-        public FourCC Codec
-        {
-            get
-            {
-                return SchedulerInvoke(() => encoder.Codec);
-            }
-        }
+        public FourCC Codec => SchedulerInvoke(() => encoder.Codec);
 
         /// <summary>
         /// Number of bits per pixel in encoded image.
         /// </summary>
-        public BitsPerPixel BitsPerPixel
-        {
-            get
-            {
-                return SchedulerInvoke(() => encoder.BitsPerPixel);
-            }
-        }
+        public BitsPerPixel BitsPerPixel => SchedulerInvoke(() => encoder.BitsPerPixel);
 
         /// <summary>
         /// Determines the amount of space needed in the destination buffer for storing the encoded data of a single frame.
         /// </summary>
-        public int MaxEncodedSize
-        {
-            get
-            {
-                return SchedulerInvoke(() => encoder.MaxEncodedSize);
-            }
-        }
+        public int MaxEncodedSize => SchedulerInvoke(() => encoder.MaxEncodedSize);
 
         /// <summary>
         /// Encodes a video frame.

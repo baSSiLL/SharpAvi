@@ -60,18 +60,12 @@ namespace SharpAvi.Codecs
         #region IVideoEncoder Members
 
         /// <summary>Video codec.</summary>
-        public FourCC Codec
-        {
-            get { return KnownFourCCs.Codecs.MotionJpeg; }
-        }
+        public FourCC Codec => KnownFourCCs.Codecs.MotionJpeg;
 
         /// <summary>
         /// Number of bits per pixel in encoded image.
         /// </summary>
-        public BitsPerPixel BitsPerPixel
-        {
-            get { return BitsPerPixel.Bpp24; }
-        }
+        public BitsPerPixel BitsPerPixel => BitsPerPixel.Bpp24;
 
         /// <summary>
         /// Maximum size of encoded frmae.
@@ -81,7 +75,7 @@ namespace SharpAvi.Codecs
             get
             {
                 // Assume that JPEG is always less than raw bitmap when dimensions are not tiny
-                return Math.Max(rect.Width * rect.Height * 4, 1024);
+                return Math.Max(rect.Width * rect.Height * 3, 1024);
             }
         }
 

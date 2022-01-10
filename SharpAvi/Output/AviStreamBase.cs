@@ -6,7 +6,6 @@ namespace SharpAvi.Output
     internal abstract class AviStreamBase : IAviStream, IAviStreamInternal
     {
         private bool isFrozen;
-        private readonly int index;
         private string name;
         private FourCC chunkId;
 
@@ -14,13 +13,10 @@ namespace SharpAvi.Output
         {
             Argument.IsNotNegative(index, nameof(index));
 
-            this.index = index;
+            this.Index = index;
         }
 
-        public int Index
-        {
-            get { return index; }
-        }
+        public int Index { get; }
 
         public string Name
         {

@@ -277,58 +277,37 @@ namespace SharpAvi.Codecs
         /// <summary>
         /// Number of audio channels.
         /// </summary>
-        public int ChannelCount
-        {
-            get { return lame.ChannelCount; }
-        }
+        public int ChannelCount => lame.ChannelCount;
 
         /// <summary>
         /// Sample rate.
         /// </summary>
-        public int SamplesPerSecond
-        {
-            get { return lame.OutputSampleRate; }
-        }
+        public int SamplesPerSecond => lame.OutputSampleRate;
 
         /// <summary>
         /// Bits per sample per single channel.
         /// </summary>
-        public int BitsPerSample
-        {
-            get { return SAMPLE_BYTE_SIZE * 8; }
-        }
+        public int BitsPerSample => SAMPLE_BYTE_SIZE * 8;
 
         /// <summary>
         /// Audio format.
         /// </summary>
-        public short Format
-        {
-            get { return AudioFormats.Mp3; }
-        }
+        public short Format => AudioFormats.Mp3;
 
         /// <summary>
         /// Byte rate of the stream.
         /// </summary>
-        public int BytesPerSecond
-        {
-            get { return lame.OutputBitRate * 1000 / 8; }
-        }
+        public int BytesPerSecond => lame.OutputBitRate * 1000 / 8;
 
         /// <summary>
         /// Minimum amount of data.
         /// </summary>
-        public int Granularity
-        {
-            get { return 1; }
-        }
+        public int Granularity => 1;
 
         /// <summary>
         /// Format-specific data.
         /// </summary>
-        public byte[] FormatSpecificData
-        {
-            get { return formatData; }
-        }
+        public byte[] FormatSpecificData => formatData;
 
 
         private byte[] FillFormatData()

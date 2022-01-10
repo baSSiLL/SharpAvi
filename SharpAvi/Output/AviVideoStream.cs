@@ -101,30 +101,16 @@ namespace SharpAvi.Output
             => throw new NotSupportedException("Asynchronous writes are not supported.");
 #endif
 
-        public int FramesWritten
-        {
-            get { return framesWritten; }
-        }
+        public int FramesWritten => framesWritten;
 
 
-        public override FourCC StreamType
-        {
-            get { return KnownFourCCs.StreamTypes.Video; }
-        }
+        public override FourCC StreamType => KnownFourCCs.StreamTypes.Video;
 
-        protected override FourCC GenerateChunkId()
-        {
-            return KnownFourCCs.Chunks.VideoFrame(Index, Codec != KnownFourCCs.Codecs.Uncompressed);
-        }
+        protected override FourCC GenerateChunkId() 
+            => KnownFourCCs.Chunks.VideoFrame(Index, Codec != KnownFourCCs.Codecs.Uncompressed);
 
-        public override void WriteHeader()
-        {
-            writeHandler.WriteStreamHeader(this);
-        }
+        public override void WriteHeader() => writeHandler.WriteStreamHeader(this);
 
-        public override void WriteFormat()
-        {
-            writeHandler.WriteStreamFormat(this);
-        }
+        public override void WriteFormat() => writeHandler.WriteStreamFormat(this);
     }
 }

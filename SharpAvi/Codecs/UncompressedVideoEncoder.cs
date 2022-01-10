@@ -35,26 +35,17 @@ namespace SharpAvi.Codecs
         #region IVideoEncoder Members
 
         /// <summary>Video codec.</summary>
-        public FourCC Codec
-        {
-            get { return KnownFourCCs.Codecs.Uncompressed; }
-        }
+        public FourCC Codec => KnownFourCCs.Codecs.Uncompressed;
 
         /// <summary>
         /// Number of bits per pixel in encoded image.
         /// </summary>
-        public BitsPerPixel BitsPerPixel
-        {
-            get { return BitsPerPixel.Bpp24; }
-        }
+        public BitsPerPixel BitsPerPixel => BitsPerPixel.Bpp24;
 
         /// <summary>
         /// Maximum size of encoded frame.
         /// </summary>
-        public int MaxEncodedSize
-        {
-            get { return stride * height; }
-        }
+        public int MaxEncodedSize => stride * height;
 
         /// <summary>
         /// Encodes a frame.

@@ -150,10 +150,7 @@ namespace SharpAvi.Output
         private int maxSuperIndexEntries = 256;
 
         /// <summary>AVI streams that have been added so far.</summary>
-        public IReadOnlyList<IAviStream> Streams
-        {
-            get { return streams; }
-        }
+        public IReadOnlyList<IAviStream> Streams => streams;
 
         /// <summary>Adds new video stream.</summary>
         /// <param name="width">Frame's width.</param>
@@ -337,10 +334,7 @@ namespace SharpAvi.Output
             }
         }
 
-        void IDisposable.Dispose()
-        {
-            Close();
-        }
+        void IDisposable.Dispose() => Close();
 
         private void CheckNotStartedWriting()
         {

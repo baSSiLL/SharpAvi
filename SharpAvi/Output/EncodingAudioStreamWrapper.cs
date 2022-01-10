@@ -192,9 +192,7 @@ namespace SharpAvi.Output
             encodedBuffer = new byte[newLength];
         }
 
-        private void ThrowPropertyDefinedByEncoder()
-        {
-            throw new NotSupportedException("The value of the property is defined by the encoder.");
-        }
+        private void ThrowPropertyDefinedByEncoder() 
+            => throw new NotSupportedException("The value of the property is defined by the encoder.");
     }
 }

@@ -1,5 +1,4 @@
 ﻿using SharpAvi.Utilities;
-using System;
 using System.Linq;
 
 namespace SharpAvi
@@ -77,65 +76,39 @@ namespace SharpAvi
         /// <summary>
         /// Determines whether this instance is equal to other object.
         /// </summary>
-        public override bool Equals(object obj)
-        {
-            if (obj is FourCC)
-            {
-                return (FourCC)obj == this;
-            }
-            else
-            {
-                return base.Equals(obj);
-            }
-        }
+        public override bool Equals(object obj) 
+            => obj is FourCC ? (FourCC)obj == this : base.Equals(obj);
 
 
         /// <summary>
         /// Converts an integer value to <see cref="FourCC"/>.
         /// </summary>
-        public static implicit operator FourCC(uint value)
-        {
-            return new FourCC(value);
-        }
+        public static implicit operator FourCC(uint value) => new FourCC(value);
 
         /// <summary>
         /// Converts a string value to <see cref="FourCC"/>.
         /// </summary>
-        public static implicit operator FourCC(string value)
-        {
-            return new FourCC(value);
-        }
+        public static implicit operator FourCC(string value) => new FourCC(value);
 
         /// <summary>
         /// Gets the integer value of <see cref="FourCC"/> instance.
         /// </summary>
-        public static explicit operator uint(FourCC value)
-        {
-            return value.valueDWord;
-        }
+        public static explicit operator uint(FourCC value) => value.valueDWord;
 
         /// <summary>
         /// Gets the string value of <see cref="FourCC"/> instance.
         /// </summary>
-        public static explicit operator string(FourCC value)
-        {
-            return value.valueString;
-        }
+        public static explicit operator string(FourCC value) => value.valueString;
 
         /// <summary>
         /// Determines whether two instances of <see cref="FourCC"/> are equal.
         /// </summary>
-        public static bool operator ==(FourCC value1, FourCC value2)
-        {
-            return value1.valueDWord == value2.valueDWord;
-        }
+        public static bool operator ==(FourCC value1, FourCC value2) 
+            => value1.valueDWord == value2.valueDWord;
 
         /// <summary>
         /// Determines whether two instances of <see cref="FourCC"/> are not equal.
         /// </summary>
-        public static bool operator !=(FourCC value1, FourCC value2)
-        {
-            return !(value1 == value2);
-        }
+        public static bool operator !=(FourCC value1, FourCC value2) => !(value1 == value2);
     }
 }

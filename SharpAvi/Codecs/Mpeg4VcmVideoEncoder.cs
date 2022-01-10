@@ -32,12 +32,8 @@ namespace SharpAvi.Codecs
         /// <summary>
         /// Default preferred order of the supported codecs.
         /// </summary>
-        public static ReadOnlyCollection<FourCC> DefaultCodecPreference
-        {
-            get { return defaultCodecPreference; }
-        }
-        private static readonly ReadOnlyCollection<FourCC> defaultCodecPreference =
-            new ReadOnlyCollection<FourCC>(
+        public static ReadOnlyCollection<FourCC> DefaultCodecPreference { get; } 
+            = new ReadOnlyCollection<FourCC>(
                 new[]
                 {
                     KnownFourCCs.Codecs.MicrosoftMpeg4V3,
@@ -273,24 +269,15 @@ namespace SharpAvi.Codecs
         #region IVideoEncoder Members
 
         /// <summary>Video codec.</summary>
-        public FourCC Codec
-        {
-            get { return outBitmapInfo.Compression; }
-        }
+        public FourCC Codec => outBitmapInfo.Compression;
 
         /// <summary>Number of bits per pixel in the encoded image.</summary>
-        public BitsPerPixel BitsPerPixel
-        {
-            get { return BitsPerPixel.Bpp24; }
-        }
+        public BitsPerPixel BitsPerPixel => BitsPerPixel.Bpp24;
 
         /// <summary>
         /// Maximum size of the encoded frame.
         /// </summary>
-        public int MaxEncodedSize
-        {
-            get { return maxEncodedSize; }
-        }
+        public int MaxEncodedSize => maxEncodedSize;
 
         /// <summary>Encodes a frame.</summary>
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
