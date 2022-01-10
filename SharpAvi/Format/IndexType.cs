@@ -1,4 +1,4 @@
-﻿namespace SharpAvi
+﻿namespace SharpAvi.Format
 {
     internal enum IndexType : byte
     {

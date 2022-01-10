@@ -1,4 +1,4 @@
-﻿namespace SharpAvi
+﻿namespace SharpAvi.Format
 {
     /// <summary>
     /// Entry of AVI v1 index.

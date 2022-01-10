@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpAvi
+namespace SharpAvi.Format
 {
     [Flags]
     internal enum MainHeaderFlags : uint
