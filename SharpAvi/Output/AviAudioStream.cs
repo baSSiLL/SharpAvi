@@ -114,11 +114,11 @@ namespace SharpAvi.Output
             Argument.ConditionIsMet(startIndex + length <= data.Length, "End offset exceeds the length of data.");
 
 #if NET5_0_OR_GREATER
-            writeHandler.WriteAudioBlock(this, data);
+            WriteBlock(data.AsSpan(startIndex, length));
 #else
             writeHandler.WriteAudioBlock(this, data, startIndex, length);
-#endif
             System.Threading.Interlocked.Increment(ref blocksWritten);
+#endif
         }
 
         public Task WriteBlockAsync(byte[] data, int startIndex, int length)

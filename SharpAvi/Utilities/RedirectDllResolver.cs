@@ -1,11 +1,11 @@
-﻿using System;
+﻿#if NET5_0_OR_GREATER
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace SharpAvi.Utilities
 {
-#if NET5_0_OR_GREATER
     internal static class RedirectDllResolver
     {
         private static readonly object sync = new();
@@ -38,5 +38,5 @@ namespace SharpAvi.Utilities
             return NativeLibrary.Load(targetLibraryName, assembly, searchPath);
         }
     }
-#endif
 }
+#endif

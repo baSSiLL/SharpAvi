@@ -84,6 +84,7 @@ namespace SharpAvi.Codecs
             return writer.AddEncodingVideoStream(encoder, true, width, height);
         }
 
+#if !NETSTANDARD
         /// <summary>
         /// Adds new audio stream with <see cref="Mp3LameAudioEncoder"/>.
         /// </summary>
@@ -99,5 +100,6 @@ namespace SharpAvi.Codecs
             var encoder = new Mp3LameAudioEncoder(channelCount, sampleRate, outputBitRateKbps);
             return writer.AddEncodingAudioStream(encoder, true);
         }
+#endif
     }
 }

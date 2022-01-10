@@ -78,11 +78,11 @@ namespace SharpAvi.Output
             Argument.ConditionIsMet(startIndex + count <= frameData.Length, "End offset exceeds the length of frame data.");
 
 #if NET5_0_OR_GREATER
-            writeHandler.WriteVideoFrame(this, isKeyFrame, frameData.AsSpan(startIndex, count));
+            WriteFrame(isKeyFrame, frameData.AsSpan(startIndex, count));
 #else
             writeHandler.WriteVideoFrame(this, isKeyFrame, frameData, startIndex, count);
-#endif
             System.Threading.Interlocked.Increment(ref framesWritten);
+#endif
         }
 
         public Task WriteFrameAsync(bool isKeyFrame, byte[] frameData, int startIndex, int count) 
@@ -94,6 +94,7 @@ namespace SharpAvi.Output
             Argument.Meets(frameData.Length > 0, nameof(frameData), "Cannot write an empty frame.");
 
             writeHandler.WriteVideoFrame(this, isKeyFrame, frameData);
+            System.Threading.Interlocked.Increment(ref framesWritten);
         }
 
         public Task WriteFrameAsync(bool isKeyFrame, ReadOnlyMemory<byte> frameData)

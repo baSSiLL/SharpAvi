@@ -1,4 +1,5 @@
-﻿// Thanks to NAudio.Lame project (by Corey Murtagh) for inspiration
+﻿#if !NETSTANDARD
+// Thanks to NAudio.Lame project (by Corey Murtagh) for inspiration
 // https://github.com/Corey-M/NAudio.Lame
 
 using SharpAvi.Utilities;
@@ -326,3 +327,4 @@ namespace SharpAvi.Codecs
         }
     }
 }
+#endif

@@ -18,7 +18,9 @@ namespace SharpAvi.ImageSharp
         private readonly int width;
         private readonly int height;
         private readonly JpegEncoder jpegEncoder;
-        private readonly MemoryStream buffer = new MemoryStream();
+#if NET5_0_OR_GREATER
+        private readonly MemoryStream buffer;
+#endif
 
         /// <summary>
         /// Creates a new instance of <see cref="MJpegImageSharpVideoEncoder"/>.
@@ -38,6 +40,9 @@ namespace SharpAvi.ImageSharp
             this.width = width;
             this.height = height;
 
+#if NET5_0_OR_GREATER
+            buffer = new MemoryStream(MaxEncodedSize);
+#endif
             jpegEncoder = new JpegEncoder()
             {
                 Quality = quality
@@ -69,9 +74,18 @@ namespace SharpAvi.ImageSharp
             Argument.IsNotNull(destination, nameof(destination));
             Argument.IsNotNegative(destOffset, nameof(destOffset));
 
-            return EncodeFrame(source.AsSpan(srcOffset), destination.AsSpan(destOffset), out isKeyFrame);
+            int length;
+            using (var stream = new MemoryStream(destination))
+            {
+                stream.Position = destOffset;
+                length = LoadAndEncodeImage(source.AsSpan(srcOffset), stream);
+            }
+
+            isKeyFrame = true;
+            return length;
         }
 
+#if NET5_0_OR_GREATER
         /// <summary>
         /// Encodes a frame.
         /// </summary>
@@ -80,17 +94,24 @@ namespace SharpAvi.ImageSharp
             Argument.ConditionIsMet(4 * width * height <= source.Length,
                 "Source end offset exceeds the source length.");
 
-            using (var image = Image.LoadPixelData<SixLabors.ImageSharp.PixelFormats.Bgra32>(source, width, height))
-            {
-                buffer.SetLength(0);
-                jpegEncoder.Encode(image, buffer);
-                buffer.Flush();
-            }
-
-            var length = (int)buffer.Length;
+            buffer.SetLength(0);
+            var length = LoadAndEncodeImage(source, buffer);
             buffer.GetBuffer().AsSpan(0, length).CopyTo(destination);
+
             isKeyFrame = true;
             return length;
+        }
+#endif
+
+        private int LoadAndEncodeImage(ReadOnlySpan<byte> source, Stream destination)
+        {
+            var startPosition = (int)destination.Position;
+            using (var image = Image.LoadPixelData<SixLabors.ImageSharp.PixelFormats.Bgra32>(source, width, height))
+            {
+                jpegEncoder.Encode(image, destination);
+            }
+            destination.Flush();
+            return (int)(destination.Position - startPosition);
         }
     }
 }

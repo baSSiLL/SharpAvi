@@ -421,14 +421,10 @@ namespace SharpAvi.Output
             => WriteStreamFrame(stream, true, blockData);
 #else
         void IAviStreamWriteHandler.WriteVideoFrame(AviVideoStream stream, bool isKeyFrame, byte[] frameData, int startIndex, int count)
-        {
-            WriteStreamFrame(stream, isKeyFrame, frameData, startIndex, count);
-        }
+            => WriteStreamFrame(stream, isKeyFrame, frameData, startIndex, count);
 
         void IAviStreamWriteHandler.WriteAudioBlock(AviAudioStream stream, byte[] blockData, int startIndex, int count)
-        {
-            WriteStreamFrame(stream, true, blockData, startIndex, count);
-        }
+            => WriteStreamFrame(stream, true, blockData, startIndex, count);
 #endif
 
 #if NET5_0_OR_GREATER
@@ -474,7 +470,7 @@ namespace SharpAvi.Output
 
                 si.OnFrameWritten(chunk.DataSize);
                 var dataSize = (uint)chunk.DataSize;
-                // Set highest bit for non-key frames according to the OpenDML spec
+                // Set the highest bit for non-key frames according to the OpenDML spec
                 if (!isKeyFrame)
                 {
                     dataSize |= 0x80000000U;
