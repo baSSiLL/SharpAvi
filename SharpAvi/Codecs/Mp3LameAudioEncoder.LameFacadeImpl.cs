@@ -10,14 +10,14 @@ namespace SharpAvi.Codecs
 #if NET5_0_OR_GREATER
     partial class Mp3LameAudioEncoder
     {
-        private class LameFacadeImpl : ILameFacade, IDisposable
+        private sealed class LameFacadeImpl : ILameFacade, IDisposable
 #else
     // On .NET Framework 4.5 use compilation in runtime to override the DLL name.
     // This source code is stored as an embedded resource. The DLL_NAME constant
     // is replaced before the compilation.
     namespace Runtime
     { 
-        public class LameFacadeImpl : Mp3LameAudioEncoder.ILameFacade, IDisposable
+        public sealed class LameFacadeImpl : Mp3LameAudioEncoder.ILameFacade, IDisposable
 #endif
 
         {
@@ -41,6 +41,7 @@ namespace SharpAvi.Codecs
                 {
                     lame_close(context);
                     closed = true;
+                    GC.SuppressFinalize(this);
                 }
             }
 

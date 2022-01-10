@@ -25,14 +25,7 @@ namespace SharpAvi.Output
         }
         private readonly IAviAudioStreamInternal baseStream;
 
-        public virtual void Dispose()
-        {
-            var baseStreamDisposable = baseStream as IDisposable;
-            if (baseStreamDisposable != null)
-            {
-                baseStreamDisposable.Dispose();
-            }
-        }
+        public virtual void Dispose() => (baseStream as IDisposable)?.Dispose();
 
         public virtual int ChannelCount
         {

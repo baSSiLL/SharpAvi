@@ -97,11 +97,8 @@ namespace SharpAvi.Sample
 
             try
             {
-                if (recorder != null)
-                {
-                    recorder.Dispose();
-                    recorder = null;
-                }
+                recorder?.Dispose();
+                recorder = null;
             }
             finally
             {

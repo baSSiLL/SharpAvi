@@ -21,7 +21,7 @@ namespace SharpAvi.Codecs
     /// The class is designed for using only a single instance at a time.
     /// Find information about and downloads of the LAME project at http://lame.sourceforge.net/
     /// </remarks>
-    public partial class Mp3LameAudioEncoder : IAudioEncoder, IDisposable
+    public sealed partial class Mp3LameAudioEncoder : IAudioEncoder, IDisposable
     {
         /// <summary>
         /// Supported output bit rates (in kilobits per second).
@@ -204,14 +204,7 @@ namespace SharpAvi.Codecs
         /// <summary>
         /// Releases resources.
         /// </summary>
-        public void Dispose()
-        {
-            var lameDisposable = lame as IDisposable;
-            if (lameDisposable != null)
-            {
-                lameDisposable.Dispose();
-            }
-        }
+        public void Dispose() => (lame as IDisposable)?.Dispose();
 
         /// <summary>
         /// Encodes block of audio data.

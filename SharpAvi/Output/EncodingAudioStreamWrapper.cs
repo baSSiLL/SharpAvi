@@ -28,11 +28,7 @@ namespace SharpAvi.Output
         {
             if (ownsEncoder)
             {
-                var encoderDisposable = encoder as IDisposable;
-                if (encoderDisposable != null)
-                {
-                    encoderDisposable.Dispose();
-                }
+                (encoder as IDisposable)?.Dispose();
             }
 
             base.Dispose();
