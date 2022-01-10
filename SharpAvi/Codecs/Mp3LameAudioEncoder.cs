@@ -52,16 +52,15 @@ namespace SharpAvi.Codecs
             {
                 var libraryName = Path.GetFileName(lameLibraryPath);
                 if (!IsLibraryLoaded(libraryName))
+#if NET5_0_OR_GREATER
                 {
-#if NET5_0_OR_GREATER
                     NativeLibrary.Load(lameLibraryPath);
-#else
-                    LoadLameLibrary45(lameLibraryPath);
-#endif
                 }
-#if NET5_0_OR_GREATER
                 ResolveFacadeImpl50(libraryName);
 #else
+                {
+                    LoadLameLibrary45(lameLibraryPath);
+                }
                 ResolveFacadeImpl45(libraryName);
 #endif
                 lastLameLibraryName = libraryName;
@@ -209,7 +208,11 @@ namespace SharpAvi.Codecs
             Argument.IsNotNull(destination, nameof(destination));
             Argument.IsNotNegative(destinationOffset, nameof(destinationOffset));
 
+#if NET5_0_OR_GREATER
+            return EncodeBlock(source.AsSpan(sourceOffset, sourceCount), destination.AsSpan(destinationOffset));
+#else
             return lame.Encode(source, sourceOffset, sourceCount / SAMPLE_BYTE_SIZE, destination, destinationOffset);
+#endif
         }
 
         /// <summary>
@@ -220,7 +223,11 @@ namespace SharpAvi.Codecs
             Argument.IsNotNull(destination, nameof(destination));
             Argument.IsNotNegative(destinationOffset, nameof(destinationOffset));
 
+#if NET5_0_OR_GREATER
+            return Flush(destination.AsSpan(destinationOffset));
+#else
             return lame.FinishEncoding(destination, destinationOffset);
+#endif
         }
 
 #if NET5_0_OR_GREATER
@@ -229,7 +236,9 @@ namespace SharpAvi.Codecs
         /// </summary>
         public int EncodeBlock(ReadOnlySpan<byte> source, Span<byte> destination)
         {
-            throw new NotImplementedException();
+            Argument.Meets(source.Length > 0, nameof(source), "Cannot write an empty block.");
+
+            return lame.Encode(source, source.Length / SAMPLE_BYTE_SIZE, destination);
         }
 
         /// <summary>
@@ -237,7 +246,7 @@ namespace SharpAvi.Codecs
         /// </summary>
         public int Flush(Span<byte> destination)
         {
-            throw new NotImplementedException();
+            return lame.FinishEncoding(destination);
         }
 #endif
 

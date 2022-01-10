@@ -197,7 +197,12 @@ namespace SharpAvi.Sample
                 }
 
                 // Start asynchronous (encoding and) writing of the new frame
+                // Overloads with Memory parameters are available on .NET 5+
+#if NET5_0_OR_GREATER
+                videoWriteTask = videoStream.WriteFrameAsync(true, buffer.AsMemory(0, buffer.Length));
+#else
                 videoWriteTask = videoStream.WriteFrameAsync(true, buffer, 0, buffer.Length);
+#endif
 
                 timeTillNextFrame = TimeSpan.FromSeconds(shotsTaken / (double)writer.FramesPerSecond - stopwatch.Elapsed.TotalSeconds);
                 if (timeTillNextFrame < TimeSpan.Zero)
@@ -233,9 +238,14 @@ namespace SharpAvi.Sample
         private void audioSource_DataAvailable(object sender, WaveInEventArgs e)
         {
             var signalled = WaitHandle.WaitAny(new WaitHandle[] { videoFrameWritten, stopThread });
-            if (signalled == 0)
+            if (signalled == 0 && e.BytesRecorded > 0)
             {
+                // Overloads with Span parameters are available on .NET 5+
+#if NET5_0_OR_GREATER
+                audioStream.WriteBlock(e.Buffer.AsSpan(0, e.BytesRecorded));
+#else
                 audioStream.WriteBlock(e.Buffer, 0, e.BytesRecorded);
+#endif
                 audioBlockWritten.Set();
             }
         }
