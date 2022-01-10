@@ -1,4 +1,5 @@
 ﻿using SharpAvi.Utilities;
+using System;
 using System.Linq;
 
 namespace SharpAvi
@@ -9,7 +10,7 @@ namespace SharpAvi
     /// <remarks>
     /// FOURCCs are used widely across AVI format.
     /// </remarks>
-    public struct FourCC
+    public struct FourCC : IEquatable<FourCC>
     {
         private readonly uint valueDWord;
         private readonly string valueString;
@@ -68,16 +69,20 @@ namespace SharpAvi
         /// <summary>
         /// Gets hash code of this instance.
         /// </summary>
-        public override int GetHashCode()
-        {
-            return valueDWord.GetHashCode();
-        }
+        public override int GetHashCode() => valueDWord.GetHashCode();
 
         /// <summary>
         /// Determines whether this instance is equal to other object.
         /// </summary>
         public override bool Equals(object obj) 
-            => obj is FourCC ? (FourCC)obj == this : base.Equals(obj);
+            => obj is FourCC other ? Equals(other) : base.Equals(obj);
+
+        /// <summary>
+        /// Determines whether this instance is equal to another <see cref="FourCC"/> value.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool Equals(FourCC other) => this.valueDWord == other.valueDWord;
 
 
         /// <summary>
@@ -103,12 +108,11 @@ namespace SharpAvi
         /// <summary>
         /// Determines whether two instances of <see cref="FourCC"/> are equal.
         /// </summary>
-        public static bool operator ==(FourCC value1, FourCC value2) 
-            => value1.valueDWord == value2.valueDWord;
+        public static bool operator ==(FourCC value1, FourCC value2) => value1.Equals(value2);
 
         /// <summary>
         /// Determines whether two instances of <see cref="FourCC"/> are not equal.
         /// </summary>
-        public static bool operator !=(FourCC value1, FourCC value2) => !(value1 == value2);
+        public static bool operator !=(FourCC value1, FourCC value2) => !value1.Equals(value2);
     }
 }
