@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Mp3LameAudioEncoder is not supported on .NET Standard yet
+#if !NETSTANDARD
+using System;
 
 namespace SharpAvi.Codecs
 {
@@ -48,16 +50,6 @@ namespace SharpAvi.Codecs
             /// </summary>
             void PrepareEncoding();
 
-            /// <summary>
-            /// Encodes a chunk of audio data.
-            /// </summary>
-            int Encode(byte[] source, int sourceIndex, int sampleCount, byte[] dest, int destIndex);
-
-            /// <summary>
-            /// Finalizes the encoding process.
-            /// </summary>
-            int FinishEncoding(byte[] dest, int destIndex);
-
 #if NET5_0_OR_GREATER
             /// <summary>
             /// Encodes a chunk of audio data.
@@ -68,7 +60,18 @@ namespace SharpAvi.Codecs
             /// Finalizes the encoding process.
             /// </summary>
             int FinishEncoding(Span<byte> dest);
+#else
+            /// <summary>
+            /// Encodes a chunk of audio data.
+            /// </summary>
+            int Encode(byte[] source, int sourceIndex, int sampleCount, byte[] dest, int destIndex);
+
+            /// <summary>
+            /// Finalizes the encoding process.
+            /// </summary>
+            int FinishEncoding(byte[] dest, int destIndex);
 #endif
         }
     }
 }
+#endif

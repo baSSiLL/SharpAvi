@@ -28,19 +28,13 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Codecs\LameFacadeImpl.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Codecs\LameFacadeImpl.cs" />
-    <Compile Remove="Output\SequentialInvoker35.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
+  <!-- References to WPF for targets on the Windows platform -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
     <Reference Include="PresentationCore" />
     <Reference Include="System.Windows" />
@@ -49,4 +43,8 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net50-windows'">
 	  <UseWPF>true</UseWPF>  
   </PropertyGroup>
+  <!-- LameFacadeImpl is compiled in runtime from an embedded resource on .NET 4.5 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <EmbeddedResource Include="Codecs\Mp3LameAudioEncoder.LameFacadeImpl.cs" />
+  </ItemGroup>
 </Project>

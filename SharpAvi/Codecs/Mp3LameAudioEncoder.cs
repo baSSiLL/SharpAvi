@@ -1,6 +1,8 @@
-﻿#if !NETSTANDARD
-// Thanks to NAudio.Lame project (by Corey Murtagh) for inspiration
+﻿// Thanks to NAudio.Lame project (by Corey Murtagh) for inspiration
 // https://github.com/Corey-M/NAudio.Lame
+
+// Mp3LameAudioEncoder is not supported on .NET Standard yet
+#if !NETSTANDARD
 
 using SharpAvi.Utilities;
 using System;
@@ -13,7 +15,7 @@ using System.Runtime.InteropServices;
 namespace SharpAvi.Codecs
 {
     /// <summary>
-    /// Mpeg Layer 3 (MP3) audio encoder using the LAME codec in external DLL.
+    /// Mpeg Layer 3 (MP3) audio encoder using the LAME codec in an external DLL.
     /// </summary>
     /// <remarks>
     /// The class is designed for using only a single instance at a time.
@@ -70,6 +72,8 @@ namespace SharpAvi.Codecs
 #if NET5_0_OR_GREATER
         private static void ResolveFacadeImpl50(string libraryName)
         {
+            // Redirect [DllImport]s in LameFacadeImpl to a specified library
+            // using a custom DLL resolver for NativeLibrary
             RedirectDllResolver.SetRedirect(LameFacadeImpl.DLL_NAME, libraryName);
             lameFacadeType = typeof(LameFacadeImpl);
         }
@@ -90,44 +94,58 @@ namespace SharpAvi.Codecs
         {
             if (lameFacadeType is null || lastLameLibraryName != libraryName)
             {
+                // Generate a new in-memory assembly with another version
+                // of LameFacadeImpl class referencing a specified DLL name
                 var facadeAsm = GenerateLameFacadeAssembly(libraryName);
-                lameFacadeType = facadeAsm.GetType(typeof(Mp3LameAudioEncoder).Namespace + ".Runtime.LameFacadeImpl");
+
+                // A new class has the same full name as the original one,
+                // just is loaded from a different assembly
+                lameFacadeType = facadeAsm.GetType(typeof(Runtime.LameFacadeImpl).FullName);
             }
         }
 
         private static Assembly GenerateLameFacadeAssembly(string lameDllName)
         {
+            // Get a modified source with proper DLL name
+            // Should be good for .NET Framework 4.5 without any define constants.
+            // Otherwise, add proper define(s) to the compiler options
             var thisAsm = typeof(Mp3LameAudioEncoder).Assembly;
+            var source = GetLameFacadeAssemblySource(lameDllName, thisAsm);
+
+            // Compile it to a new in-memory assembly
             var compiler = new Microsoft.CSharp.CSharpCodeProvider();
             var compilerOptions = new System.CodeDom.Compiler.CompilerParameters()
             {
-                 GenerateInMemory = true,
-                 GenerateExecutable = false,
-                 IncludeDebugInformation = false,
-                 CompilerOptions = "/optimize",
-                 ReferencedAssemblies = {"mscorlib.dll", thisAsm.Location}
+                GenerateInMemory = true,
+                GenerateExecutable = false,
+                IncludeDebugInformation = false,
+                CompilerOptions = "/optimize",
+                ReferencedAssemblies = { "mscorlib.dll", thisAsm.Location }
             };
-            var source = GetLameFacadeAssemblySource(lameDllName, thisAsm);
             var compilerResult = compiler.CompileAssemblyFromSource(compilerOptions, source);
             if (compilerResult.Errors.HasErrors)
             {
                 throw new Exception("Could not generate LAME facade assembly.");
             }
+
             return compilerResult.CompiledAssembly;
         }
 
         private static string GetLameFacadeAssemblySource(string lameDllName, Assembly resourceAsm)
         {
+            // Load the original source code of LameFacadeImple from resources
+            var resourceName = $"{typeof(Mp3LameAudioEncoder).FullName}.{nameof(Runtime.LameFacadeImpl)}.cs";
             string source;
-            using (var sourceStream = resourceAsm.GetManifestResourceStream("SharpAvi.Codecs.LameFacadeImpl.cs"))
+            using (var sourceStream = resourceAsm.GetManifestResourceStream(resourceName))
             using (var sourceReader = new StreamReader(sourceStream))
             {
                 source = sourceReader.ReadToEnd();
                 sourceReader.Close();
             }
 
+            // Replace the DLL name in the source
             var lameDllNameLiteral = string.Format("\"{0}\"", lameDllName);
-            source = source.Replace("\"lame_enc.dll\"", lameDllNameLiteral);
+            source = source.Replace($"\"{Runtime.LameFacadeImpl.DLL_NAME}\"", lameDllNameLiteral);
 
             return source;
         }

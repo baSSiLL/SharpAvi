@@ -1,12 +1,25 @@
-﻿using System;
+﻿// Mp3LameAudioEncoder is not supported on .NET Standard yet
+#if !NETSTANDARD
+using System;
 using System.Runtime.InteropServices;
 
 namespace SharpAvi.Codecs
 {
+    // On .NET 5+ using a custom resolver of native DLLs.
+    // So LameFacadeImpl is compiled normally and linked to a proper DLL on load.
+#if NET5_0_OR_GREATER
     partial class Mp3LameAudioEncoder
     {
-#if NET5_0_OR_GREATER
         private class LameFacadeImpl : ILameFacade, IDisposable
+#else
+    // On .NET Framework 4.5 use compilation in runtime to override the DLL name.
+    // This source code is stored as an embedded resource. The DLL_NAME constant
+    // is replaced before the compilation.
+    namespace Runtime
+    { 
+        public class LameFacadeImpl : Mp3LameAudioEncoder.ILameFacade, IDisposable
+#endif
+
         {
             private readonly IntPtr context;
             private bool closed;
@@ -96,6 +109,42 @@ namespace SharpAvi.Codecs
                 CheckResult(result == 0, "lame_init_params");
             }
 
+#if NET5_0_OR_GREATER
+            public unsafe int Encode(ReadOnlySpan<byte> source, int sampleCount, Span<byte> dest)
+            {
+                int result = -1;
+                fixed (void* sourcePtr = source, destPtr = dest)
+                {
+                    var srcIntPtr = new IntPtr(sourcePtr);
+                    var destIntPtr = new IntPtr(destPtr);
+                    switch (ChannelCount)
+                    {
+                        case 1:
+                            result = lame_encode_buffer(context, srcIntPtr, srcIntPtr, sampleCount, destIntPtr, dest.Length);
+                            break;
+                        case 2:
+                            result = lame_encode_buffer_interleaved(context, srcIntPtr, sampleCount / 2, destIntPtr, dest.Length);
+                            break;
+                        default:
+                            ThrowInvalidChannelCount();
+                            break;
+                    }
+                }
+
+                CheckResult(result >= 0, "lame_encode_buffer");
+                return result;
+            }
+
+            public unsafe int FinishEncoding(Span<byte> dest)
+            {
+                fixed (void* destPtr = dest)
+                {
+                    int result = lame_encode_flush(context, new IntPtr(destPtr), dest.Length);
+                    CheckResult(result >= 0, "lame_encode_flush");
+                    return result;
+                }
+            }
+#else
             public int Encode(byte[] source, int sourceIndex, int sampleCount, byte[] dest, int destIndex)
             {
                 GCHandle sourceHandle = GCHandle.Alloc(source, GCHandleType.Pinned);
@@ -143,42 +192,6 @@ namespace SharpAvi.Codecs
                 finally
                 {
                     destHandle.Free();
-                }
-            }
-
-#if NET5_0_OR_GREATER
-            public unsafe int Encode(ReadOnlySpan<byte> source, int sampleCount, Span<byte> dest)
-            {
-                int result = -1;
-                fixed (void* sourcePtr = source, destPtr = dest)
-                {
-                    var srcIntPtr = new IntPtr(sourcePtr);
-                    var destIntPtr = new IntPtr(destPtr);
-                    switch (ChannelCount)
-                    {
-                        case 1:
-                            result = lame_encode_buffer(context, srcIntPtr, srcIntPtr, sampleCount, destIntPtr, dest.Length);
-                            break;
-                        case 2:
-                            result = lame_encode_buffer_interleaved(context, srcIntPtr, sampleCount / 2, destIntPtr, dest.Length);
-                            break;
-                        default:
-                            ThrowInvalidChannelCount();
-                            break;
-                    }
-                }
-
-                CheckResult(result >= 0, "lame_encode_buffer");
-                return result;
-            }
-
-            public unsafe int FinishEncoding(Span<byte> dest)
-            {
-                fixed (void* destPtr = dest)
-                {
-                    int result = lame_encode_flush(context, new IntPtr(destPtr), dest.Length);
-                    CheckResult(result >= 0, "lame_encode_flush");
-                    return result;
                 }
             }
 #endif
@@ -303,6 +316,6 @@ namespace SharpAvi.Codecs
 
             #endregion
         }
-#endif
     }
 }
+#endif
