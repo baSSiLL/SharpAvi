@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>3.0.0</Version>
+    <Authors>baSSiLL</Authors>
+    <Company />
+    <Product>SharpAvi</Product>
+    <Description>An implementation of Motion JPEG video encoder for SharpAvi using SixLabors.ImageSharp library.</Description>
+    <Copyright>Copyright © Vasili Maslov 2022</Copyright>
+    <PackageProjectUrl>https://github.com/baSSiLL/SharpAvi</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/baSSiLL/SharpAvi.git</RepositoryUrl>
+    <PackageTags>SharpAvi ImageSharp AVI MJPG M-JPEG video</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\SharpAvi\Utilities\Argument.cs" Link="Argument.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+    <PackageReference Include="System.Memory" Version="4.5.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpAvi\SharpAvi.csproj" />
+  </ItemGroup>
+
+</Project>

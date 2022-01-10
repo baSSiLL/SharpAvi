@@ -13,6 +13,7 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpAvi.ImageSharp\SharpAvi.ImageSharp.csproj" />
     <ProjectReference Include="..\SharpAvi\SharpAvi.csproj" />
   </ItemGroup>
   <ItemGroup>

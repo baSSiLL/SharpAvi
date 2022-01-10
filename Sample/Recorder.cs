@@ -10,11 +10,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using SharpAvi.ImageSharp;
 
 namespace SharpAvi.Sample
 {
     internal class Recorder : IDisposable
     {
+        public static readonly FourCC MJPEG_IMAGE_SHARP = "IMG#";
+
         private readonly int screenWidth;
         private readonly int screenHeight;
         private readonly AviWriter writer;
@@ -96,7 +99,14 @@ namespace SharpAvi.Sample
             }
             else if (codec == KnownFourCCs.Codecs.MotionJpeg)
             {
+                // Use M-JPEG based on WPF (Windows only)
                 return writer.AddMJpegWpfVideoStream(screenWidth, screenHeight, quality);
+            }
+            else if (codec == MJPEG_IMAGE_SHARP)
+            {
+                // Use M-JPEG based on the SixLabors.ImageSharp package (cross-platform)
+                // Included in the SharpAvi.ImageSharp package
+                return writer.AddMJpegImageSharpVideoStream(screenWidth, screenHeight, quality);
             }
             else
             {

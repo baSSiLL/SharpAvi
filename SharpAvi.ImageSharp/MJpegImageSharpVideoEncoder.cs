@@ -1,21 +1,27 @@
-﻿#if NET5_0_OR_GREATER
+﻿using SharpAvi.Codecs;
 using SharpAvi.Utilities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using System;
 using System.IO;
 
-namespace SharpAvi.Codecs
+namespace SharpAvi.ImageSharp
 {
+    /// <summary>
+    /// Encodes frames in Motion JPEG format.
+    /// </summary>
+    /// <remarks>
+    /// The implementation relies on <see cref="JpegEncoder"/> from the <c>SixLabors.ImageSharp</c> package.
+    /// </remarks>
     public sealed class MJpegImageSharpVideoEncoder : IVideoEncoder
     {
         private readonly int width;
         private readonly int height;
         private readonly JpegEncoder jpegEncoder;
-        private readonly MemoryStream buffer = new();
+        private readonly MemoryStream buffer = new MemoryStream();
 
         /// <summary>
-        /// Creates a new instance of <see cref="MJpegLibVideoEncoder"/>.
+        /// Creates a new instance of <see cref="MJpegImageSharpVideoEncoder"/>.
         /// </summary>
         /// <param name="width">Frame width.</param>
         /// <param name="height">Frame height.</param>
@@ -74,10 +80,12 @@ namespace SharpAvi.Codecs
             Argument.ConditionIsMet(4 * width * height <= source.Length,
                 "Source end offset exceeds the source length.");
 
-            using var image = Image.LoadPixelData<SixLabors.ImageSharp.PixelFormats.Bgra32>(source, width, height);
-            buffer.SetLength(0);
-            jpegEncoder.Encode(image, buffer);
-            buffer.Flush();
+            using (var image = Image.LoadPixelData<SixLabors.ImageSharp.PixelFormats.Bgra32>(source, width, height))
+            {
+                buffer.SetLength(0);
+                jpegEncoder.Encode(image, buffer);
+                buffer.Flush();
+            }
 
             var length = (int)buffer.Length;
             buffer.GetBuffer().AsSpan(0, length).CopyTo(destination);
@@ -86,4 +94,3 @@ namespace SharpAvi.Codecs
         }
     }
 }
-#endif

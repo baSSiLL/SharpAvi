@@ -49,12 +49,4 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net50-windows'">
 	  <UseWPF>true</UseWPF>  
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net45'">
-    <PackageReference Include="JpegLibrary">
-      <Version>0.4.32</Version>
-    </PackageReference>
-	<PackageReference Include="SixLabors.ImageSharp">
-      <Version>1.0.4</Version>
-	</PackageReference>
-  </ItemGroup>
 </Project>

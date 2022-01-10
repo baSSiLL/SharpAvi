@@ -33,7 +33,8 @@ namespace SharpAvi.Sample
         {
             var codecs = new List<CodecInfo>();
             codecs.Add(new CodecInfo(KnownFourCCs.Codecs.Uncompressed, "(none)"));
-            codecs.Add(new CodecInfo(KnownFourCCs.Codecs.MotionJpeg, "Motion JPEG"));
+            codecs.Add(new CodecInfo(KnownFourCCs.Codecs.MotionJpeg, "Motion JPEG (WPF)"));
+            codecs.Add(new CodecInfo(Recorder.MJPEG_IMAGE_SHARP, "Motion JPEG (ImageSharp)"));
             codecs.AddRange(Mpeg4VcmVideoEncoder.GetAvailableCodecs());
             AvailableCodecs = codecs;
         }
