@@ -106,18 +106,17 @@ namespace SharpAvi.Codecs
             };
             encoderImpl.Frames.Add(BitmapFrame.Create(bitmap));
 
+            int length;
             using (var stream = new MemoryStream(destination))
             {
-                stream.Position = srcOffset;
+                stream.Position = destOffset;
                 encoderImpl.Save(stream);
                 stream.Flush();
-                var length = stream.Position - srcOffset;
-                stream.Close();
-
-                isKeyFrame = true;
-
-                return (int)length;
+                length = (int)stream.Length - destOffset;
             }
+
+            isKeyFrame = true;
+            return length;
         }
 
 #if NET5_0_OR_GREATER
@@ -145,7 +144,6 @@ namespace SharpAvi.Codecs
             encoderImpl.Frames.Add(BitmapFrame.Create(bitmap));
 
             buffer.SetLength(0);
-            buffer.Position = 0;
             encoderImpl.Save(buffer);
             buffer.Flush();
 
