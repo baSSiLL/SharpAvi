@@ -1,11 +1,11 @@
-﻿using System;
+﻿using NAudio.Wave;
+using SharpAvi.Codecs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
-using NAudio.Wave;
-using SharpAvi.Codecs;
 
 namespace SharpAvi.Sample
 {
@@ -32,8 +32,8 @@ namespace SharpAvi.Sample
         private void InitAvailableCodecs()
         {
             var codecs = new List<CodecInfo>();
-            codecs.Add(new CodecInfo(KnownFourCCs.Codecs.Uncompressed, "(none)"));
-            codecs.Add(new CodecInfo(KnownFourCCs.Codecs.MotionJpeg, "Motion JPEG (WPF)"));
+            codecs.Add(new CodecInfo(CodecIds.Uncompressed, "(none)"));
+            codecs.Add(new CodecInfo(CodecIds.MotionJpeg, "Motion JPEG (WPF)"));
             codecs.Add(new CodecInfo(Recorder.MJPEG_IMAGE_SHARP, "Motion JPEG (ImageSharp)"));
             codecs.AddRange(Mpeg4VcmVideoEncoder.GetAvailableCodecs());
             AvailableCodecs = codecs;

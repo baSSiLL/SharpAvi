@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using SharpAvi.Codecs;
+using SharpAvi.ImageSharp;
 using SharpAvi.Output;
 using System;
 using System.Diagnostics;
@@ -10,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using SharpAvi.ImageSharp;
 
 namespace SharpAvi.Sample
 {
@@ -93,11 +93,11 @@ namespace SharpAvi.Sample
         private IAviVideoStream CreateVideoStream(FourCC codec, int quality)
         {
             // Select encoder type based on FOURCC of codec
-            if (codec == KnownFourCCs.Codecs.Uncompressed)
+            if (codec == CodecIds.Uncompressed)
             {
                 return writer.AddUncompressedVideoStream(screenWidth, screenHeight);
             }
-            else if (codec == KnownFourCCs.Codecs.MotionJpeg)
+            else if (codec == CodecIds.MotionJpeg)
             {
                 // Use M-JPEG based on WPF (Windows only)
                 return writer.AddMJpegWpfVideoStream(screenWidth, screenHeight, quality);

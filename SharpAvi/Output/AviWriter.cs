@@ -545,7 +545,7 @@ namespace SharpAvi.Output
             fileWriter.Write((ushort)videoStream.BitsPerPixel); // bits per pixel
             fileWriter.Write((uint)videoStream.Codec); // compression (codec FOURCC)
             // 0 size is safer for uncompressed formats not to bother with stride calculation
-            var sizeInBytes = videoStream.Codec == KnownFourCCs.Codecs.Uncompressed
+            var sizeInBytes = videoStream.Codec == CodecIds.Uncompressed
                 ? 0
                 : videoStream.Width * videoStream.Height * (((int)videoStream.BitsPerPixel) / 8);
             fileWriter.Write((uint)sizeInBytes); // image size in bytes
@@ -554,7 +554,7 @@ namespace SharpAvi.Output
 
             // Writing grayscale palette for 8-bit uncompressed stream
             // Otherwise, no palette
-            if (videoStream.BitsPerPixel == BitsPerPixel.Bpp8 && videoStream.Codec == KnownFourCCs.Codecs.Uncompressed)
+            if (videoStream.BitsPerPixel == BitsPerPixel.Bpp8 && videoStream.Codec == CodecIds.Uncompressed)
             {
                 fileWriter.Write(256U); // palette colors used
                 fileWriter.Write(0U); // palette colors important

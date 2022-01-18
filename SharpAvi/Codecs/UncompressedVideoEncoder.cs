@@ -35,7 +35,7 @@ namespace SharpAvi.Codecs
         #region IVideoEncoder Members
 
         /// <summary>Video codec.</summary>
-        public FourCC Codec => KnownFourCCs.Codecs.Uncompressed;
+        public FourCC Codec => CodecIds.Uncompressed;
 
         /// <summary>
         /// Number of bits per pixel in encoded image.

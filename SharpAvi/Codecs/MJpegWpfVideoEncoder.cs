@@ -1,4 +1,5 @@
 ﻿#if NET45 || NET5_0_OR_GREATER && WINDOWS
+using SharpAvi.Format;
 using SharpAvi.Utilities;
 using System;
 using System.IO;
@@ -60,7 +61,7 @@ namespace SharpAvi.Codecs
         #region IVideoEncoder Members
 
         /// <summary>Video codec.</summary>
-        public FourCC Codec => KnownFourCCs.Codecs.MotionJpeg;
+        public FourCC Codec => CodecIds.MotionJpeg;
 
         /// <summary>
         /// Number of bits per pixel in encoded image.

@@ -50,7 +50,7 @@ namespace SharpAvi.ImageSharp
         }
 
         /// <summary>Video codec.</summary>
-        public FourCC Codec => KnownFourCCs.Codecs.MotionJpeg;
+        public FourCC Codec => CodecIds.MotionJpeg;
 
         /// <summary>
         /// Number of bits per pixel in encoded image.

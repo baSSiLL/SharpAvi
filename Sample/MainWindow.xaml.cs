@@ -138,7 +138,7 @@ namespace SharpAvi.Sample
             var exePath = new Uri(System.Reflection.Assembly.GetEntryAssembly().Location).LocalPath;
             outputFolder = System.IO.Path.GetDirectoryName(exePath);
 
-            encoder = KnownFourCCs.Codecs.MotionJpeg;
+            encoder = CodecIds.MotionJpeg;
             encodingQuality = 70;
 
             audioSourceIndex = -1;

@@ -1,16 +1,16 @@
 ﻿using SharpAvi.Utilities;
 
-namespace SharpAvi
+namespace SharpAvi.Format
 {
     /// <summary>
     /// Contains definitions of known FOURCC values.
     /// </summary>
-    public static class KnownFourCCs
+    internal static class KnownFourCCs
     {
         /// <summary>
         /// RIFF chunk indentifiers used in AVI format.
         /// </summary>
-        public static class Chunks
+        internal static class Chunks
         {
             /// <summary>Main AVI header.</summary>
             public static readonly FourCC AviHeader = new FourCC("avih");
@@ -70,7 +70,7 @@ namespace SharpAvi
         /// <summary>
         /// RIFF lists identifiers used in AVI format.
         /// </summary>
-        public static class Lists
+        internal static class Lists
         {
             /// <summary>Top-level AVI list.</summary>
             public static readonly FourCC Avi = new FourCC("AVI");
@@ -94,7 +94,7 @@ namespace SharpAvi
         /// <summary>
         /// Identifiers of the list types used in RIFF format.
         /// </summary>
-        public static class ListTypes
+        internal static class ListTypes
         {
             /// <summary>Top-level list type.</summary>
             public static readonly FourCC Riff = new FourCC("RIFF");
@@ -106,7 +106,7 @@ namespace SharpAvi
         /// <summary>
         /// Identifiers of the stream types used in AVI format.
         /// </summary>
-        public static class StreamTypes
+        internal static class StreamTypes
         {
             /// <summary>Video stream.</summary>
             public static readonly FourCC Video = new FourCC("vids");
@@ -115,35 +115,11 @@ namespace SharpAvi
             public static readonly FourCC Audio = new FourCC("auds");
         }
 
-        /// <summary>Identifiers of various codecs.</summary>
-        public static class Codecs
-        {
-            /// <summary>Identifier used for non-compressed data.</summary>
-            public static readonly FourCC Uncompressed = new FourCC(0);
-
-            /// <summary>Motion JPEG.</summary>
-            public static readonly FourCC MotionJpeg = new FourCC("MJPG");
-
-            /// <summary>Microsoft MPEG-4 V3.</summary>
-            public static readonly FourCC MicrosoftMpeg4V3 = new FourCC("MP43");
-
-            /// <summary>Microsoft MPEG-4 V2.</summary>
-            public static readonly FourCC MicrosoftMpeg4V2 = new FourCC("MP42");
-
-            /// <summary>Xvid MPEG-4.</summary>
-            public static readonly FourCC Xvid = new FourCC("XVID");
-
-            /// <summary>DivX MPEG-4.</summary>
-            public static readonly FourCC DivX = new FourCC("DIVX");
-
-            /// <summary>x264 H.264/MPEG-4 AVC.</summary>
-            public static readonly FourCC X264 = new FourCC("X264");
-        }
 
         /// <summary>
         /// Identifiers of codec types used in Video for Windows API.
         /// </summary>
-        public static class CodecTypes
+        internal static class CodecTypes
         {
             /// <summary>Video codec.</summary>
             public static readonly FourCC Video = new FourCC("VIDC");

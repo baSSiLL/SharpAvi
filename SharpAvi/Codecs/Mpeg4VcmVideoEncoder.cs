@@ -1,4 +1,5 @@
-﻿using SharpAvi.Utilities;
+﻿using SharpAvi.Format;
+using SharpAvi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -36,11 +37,11 @@ namespace SharpAvi.Codecs
             = new ReadOnlyCollection<FourCC>(
                 new[]
                 {
-                    KnownFourCCs.Codecs.MicrosoftMpeg4V3,
-                    KnownFourCCs.Codecs.MicrosoftMpeg4V2,
-                    KnownFourCCs.Codecs.Xvid,
-                    KnownFourCCs.Codecs.X264,
-                    KnownFourCCs.Codecs.DivX,
+                    CodecIds.MicrosoftMpeg4V3,
+                    CodecIds.MicrosoftMpeg4V2,
+                    CodecIds.Xvid,
+                    CodecIds.X264,
+                    CodecIds.DivX,
                 });
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace SharpAvi.Codecs
         {
             var result = new List<CodecInfo>();
 
-            var inBitmapInfo = CreateBitmapInfo(8, 8, 32, KnownFourCCs.Codecs.Uncompressed);
+            var inBitmapInfo = CreateBitmapInfo(8, 8, 32, CodecIds.Uncompressed);
             inBitmapInfo.ImageSize = (uint)4;
 
             foreach (var codec in DefaultCodecPreference)
@@ -174,7 +175,7 @@ namespace SharpAvi.Codecs
             this.height = height;
             sourceBuffer = new byte[width * height * 4];
 
-            inBitmapInfo = CreateBitmapInfo(width, height, 32, KnownFourCCs.Codecs.Uncompressed);
+            inBitmapInfo = CreateBitmapInfo(width, height, 32, CodecIds.Uncompressed);
             inBitmapInfo.ImageSize = (uint)sourceBuffer.Length;
 
             if (codecPreference == null || codecPreference.Length == 0)

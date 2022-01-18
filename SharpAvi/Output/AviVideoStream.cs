@@ -1,4 +1,5 @@
-﻿using SharpAvi.Utilities;
+﻿using SharpAvi.Format;
+using SharpAvi.Utilities;
 using System;
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ namespace SharpAvi.Output
             this.width = width;
             this.height = height;
             this.bitsPerPixel = bitsPerPixel;
-            this.streamCodec = KnownFourCCs.Codecs.Uncompressed;
+            this.streamCodec = CodecIds.Uncompressed;
         }
 
 
@@ -107,7 +108,7 @@ namespace SharpAvi.Output
         public override FourCC StreamType => KnownFourCCs.StreamTypes.Video;
 
         protected override FourCC GenerateChunkId() 
-            => KnownFourCCs.Chunks.VideoFrame(Index, Codec != KnownFourCCs.Codecs.Uncompressed);
+            => KnownFourCCs.Chunks.VideoFrame(Index, Codec != CodecIds.Uncompressed);
 
         public override void WriteHeader() => writeHandler.WriteStreamHeader(this);
 
