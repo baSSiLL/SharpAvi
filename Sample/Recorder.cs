@@ -1,6 +1,5 @@
 ﻿using NAudio.Wave;
 using SharpAvi.Codecs;
-using SharpAvi.ImageSharp;
 using SharpAvi.Output;
 using System;
 using System.Diagnostics;

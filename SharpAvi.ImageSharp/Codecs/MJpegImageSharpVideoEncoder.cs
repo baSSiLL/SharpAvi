@@ -1,11 +1,10 @@
-﻿using SharpAvi.Codecs;
-using SharpAvi.Utilities;
+﻿using SharpAvi.Utilities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using System;
 using System.IO;
 
-namespace SharpAvi.ImageSharp
+namespace SharpAvi.Codecs
 {
     /// <summary>
     /// Encodes frames in Motion JPEG format.

@@ -14,10 +14,11 @@
     <RepositoryUrl>https://github.com/baSSiLL/SharpAvi.git</RepositoryUrl>
     <PackageTags>SharpAvi ImageSharp AVI MJPG M-JPEG video</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RootNamespace>SharpAvi</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\SharpAvi\Utilities\Argument.cs" Link="Argument.cs" />
+    <Compile Include="..\SharpAvi\Utilities\Argument.cs" Link="Utilities\Argument.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +31,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpAvi\SharpAvi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Utilities\" />
   </ItemGroup>
 
 </Project>

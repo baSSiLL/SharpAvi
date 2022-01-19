@@ -41,7 +41,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net50-windows'">
-	  <UseWPF>true</UseWPF>  
+	<UseWPF>true</UseWPF>  
   </PropertyGroup>
   <!-- LameFacadeImpl is compiled in runtime from an embedded resource on .NET 4.5 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">

@@ -1,12 +1,12 @@
 ﻿using SharpAvi.Output;
 using SharpAvi.Utilities;
 
-namespace SharpAvi.ImageSharp
+namespace SharpAvi.Codecs
 {
     /// <summary>
     /// Contains extension methods for creating video streams.
     /// </summary>
-    public static class Extensions
+    public static class ImageSharpEncoderStreamFactory
     {
         /// <summary>
         /// Adds new video stream with <see cref="MJpegImageSharpVideoEncoder"/>.
