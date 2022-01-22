@@ -10,9 +10,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2D19245D-C897-44AF-9D4C-1187702F68C3}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpAvi.ImageSharp", "SharpAvi.ImageSharp\SharpAvi.ImageSharp.csproj", "{ED29C1C8-634A-4325-A5B0-1F3563D50BB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpAvi.ImageSharp", "SharpAvi.ImageSharp\SharpAvi.ImageSharp.csproj", "{ED29C1C8-634A-4325-A5B0-1F3563D50BB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
