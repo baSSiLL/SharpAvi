@@ -1,3 +1,5 @@
+# Getting Started
+
 There are a few namespaces in the library:
 ```cs
 // Contains common types for AVI format like FourCC
