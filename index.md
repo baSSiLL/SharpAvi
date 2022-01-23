@@ -1,6 +1,6 @@
 Below are several articles that should provide you an easy start. 
 
-[Getting Started](Getting-Started)
+[Getting Started](getting-started.md)
 
 [Using Video Encoders](Using-Video-Encoders)
 
