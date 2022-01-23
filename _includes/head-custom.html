@@ -1,7 +1,7 @@
 <script>
   window.onload = function () {
     const titleElement = document.getElementById('project_title')
-    const url = '{{site.github.url}}'
+    const url = '{{site.github.baseurl}}'
     if (titleElement != null && url !== '') {
       const titleHtml = titleElement.innerHTML
       titleElement.innerHTML = `<a href="${url}" style="text-decoration: none; color: inherit;">${titleHtml}</a>`
