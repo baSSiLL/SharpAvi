@@ -1,0 +1,2 @@
+﻿**SharpAvi.ImageSharp** contains a cross-platform Motion JPEG encoder for [SharpAvi](https://www.nuget.org/packages/SharpAvi/).
+It is based on the [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp) library.

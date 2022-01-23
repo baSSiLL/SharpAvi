@@ -8,13 +8,15 @@
     <Authors>baSSiLL</Authors>
     <Company />
     <Product>SharpAvi</Product>
-    <Description>An implementation of Motion JPEG video encoder for SharpAvi using SixLabors.ImageSharp library.</Description>
+    <Description>A Motion JPEG video encoder for SharpAvi based on the SixLabors.ImageSharp library.</Description>
     <Copyright>Copyright © Vasili Maslov 2022</Copyright>
     <PackageProjectUrl>https://github.com/baSSiLL/SharpAvi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/baSSiLL/SharpAvi.git</RepositoryUrl>
     <PackageTags>SharpAvi ImageSharp AVI MJPG M-JPEG video</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RootNamespace>SharpAvi</RootNamespace>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/baSSiLL/SharpAvi/releases/tag/v3.0.0</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,11 +24,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+    <Content Include="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </Content>
   </ItemGroup>
-	
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Memory" Version="4.5.4" />
+
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
   </ItemGroup>
 
   <ItemGroup>

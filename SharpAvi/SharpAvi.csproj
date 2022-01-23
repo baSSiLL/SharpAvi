@@ -13,13 +13,14 @@
     <Company />
     <PackageProjectUrl>https://github.com/baSSiLL/SharpAvi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/baSSiLL/SharpAvi.git</RepositoryUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageTags>AVI video authoring encoding OpenDML</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>3.0.0</Version>
 	<AssemblyVersion>$(Version).0</AssemblyVersion>
 	<FileVersion>$(Version).0</FileVersion>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<PackageReleaseNotes>https://github.com/baSSiLL/SharpAvi/releases/tag/v3.0.0</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -27,6 +28,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
@@ -42,5 +52,13 @@
   <!-- LameFacadeImpl is compiled in runtime from an embedded resource on .NET 4.5 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
     <EmbeddedResource Include="Codecs\Mp3LameAudioEncoder.LameFacadeImpl.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="readme.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
   </ItemGroup>
 </Project>

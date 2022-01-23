@@ -5,7 +5,7 @@ Writing uncompressed AVI does not require any external dependencies, it's a pure
 Files are produced in compliance with the [OpenDML extensions](http://www.jmcgowan.com/avitech.html#OpenDML) which allow (nearly) unlimited file size (no 2GB limit).
 
 A video is created by supplying individual in-memory bitmaps and audio samples.
-There are some built-in encoders for video and audio.
+There are a few built-in encoders for video and audio.
 Output format is always AVI, regardless of a specific codec used.
 
 The project is published to NuGet as a few packages:
