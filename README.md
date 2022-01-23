@@ -1,4 +1,4 @@
-**SharpAvi** is a simple .NET library for creating video files in AVI format.
+**SharpAvi** is a simple .NET library for creating video files in the AVI format.
 
 If you want to render some video sequence, but do not want to touch native APIs like DirectShow or to depend on command-line utilities like FFmpeg then **SharpAvi** may be what you need.
 Writing uncompressed AVI does not require any external dependencies, it's a pure .NET code.
@@ -11,14 +11,14 @@ Output format is always AVI, regardless of a specific codec used.
 The project is published to NuGet as a few packages:
 * [SharpAvi](https://www.nuget.org/packages/SharpAvi/)  
   Contains core functions and some encoders which do not depend on external packages.
-  * A Motion JPEG video encoder based on WPF. Supported in **net45** and **net50-windows** targets.
-  * An MPEG-4 video encoder based on the Video for Windows (VFW) API. Supported in all targets when running on Windows.
-  * [LAME](https://lame.sourceforge.io/)-based MP3 audio encoder. Supported in **net45**, **net50** and **net50-windows** targets.
+  * A Motion JPEG video encoder based on WPF.
+  * An MPEG-4 video encoder based on the Video for Windows (VFW) API.
+  * [LAME](https://lame.sourceforge.io/)-based MP3 audio encoder.
 * [SharpAvi.ImageSharp](https://www.nuget.org/packages/SharpAvi.ImageSharp/)  
   Contains a Motion JPEG video encoder based on [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp).  
   It's a cross-platform alternative to the WPF-based encoder.
 
-To get started, jump to the [project's wiki](https://github.com/baSSiLL/SharpAvi/wiki/Home).
+To get started, jump to [the project's docs](http://bassill.github.io/SharpAvi).
 
 ***
 
