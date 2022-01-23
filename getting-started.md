@@ -15,7 +15,7 @@ Writing an AVI file starts with creating an instance of the `AviWriter` class, s
 var writer = new AviWriter("test.avi")
 {
     FramesPerSecond = 30,
-    // Emitting AVI v1 index in addition to OpenDML index (AVI v2)
+    // Emitting the AVI v1 index in addition to the OpenDML index (AVI v2)
     // improves compatibility with some software, including 
     // standard Windows programs like Media Player and File Explorer
     EmitIndex1 = true
@@ -49,10 +49,10 @@ while (/* !finished */)
     ...
 
     // write data to a frame
-    stream.WriteFrame(true, // is key frame? (many codecs use concept of key frames, for others - all frames are keys)
-                      frameData, // array with frame data
-                      0, // starting index in the array
-                      frameData.Length // length of the data
+    stream.WriteFrame(true, // is a key frame? (many codecs use the concept of key frames, for others - all frames are keys)
+                      frameData, // an array with frame data
+                      0, // a starting index in the array
+                      frameData.Length // a length of the data
     );
 }
 ```
