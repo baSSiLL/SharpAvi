@@ -1,3 +1,5 @@
+Hi there!
+It seems that you want to use **SharpAvi** or to find out whether it suits your needs.
 Below are several articles that should provide you an easy start. 
 
 [Getting Started](getting-started.md)
@@ -8,4 +10,4 @@ Below are several articles that should provide you an easy start.
 
 [Asynchronous Writing](asynchronous-writing.md)
 
-Public surface of the API has XML documentation comments. Sources include sample screen capturing application. Hope this all helps :)
+A public surface of the API is covered with XML documentation comments. Source code also includes a sample screen capturing application. Hope this all helps :)

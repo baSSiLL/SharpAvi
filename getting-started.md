@@ -10,7 +10,7 @@ using SharpAvi.Output;
 using SharpAvi.Codecs;
 ```
 
-Writing an AVI file starts with creating an instance of the `AviWriter` class, specifying the path of the target file. This effectively creates the file. Usually, you will also specify a frame rate value:
+Writing an AVI file starts with creating an instance of the `AviWriter` class, specifying the path of a target file. This effectively creates a file. Usually, you will also specify a frame rate value:
 ```cs
 var writer = new AviWriter("test.avi")
 {
@@ -22,13 +22,13 @@ var writer = new AviWriter("test.avi")
 };
 ```
 
-Next, you define the streams of the file. Often, all you need is a single video stream:
+Next, you define streams of the file. Often, all you need is a single video stream:
 ```cs
 // returns IAviVideoStream
 var stream = writer.AddVideoStream();
 ```
 
-You get an object implementing the `IAviVideoStream` interface. The interface contains several properties, the most important of which are `Width` and `Height`, defining the dimensions of a frame, and `Codec`, a FOURCC value defining the format of the stream's data. Let's use uncompressed stream with 32 bits per pixel.
+You get an object implementing the `IAviVideoStream` interface. The interface contains several properties, the most important of which are `Width` and `Height`, defining the dimensions of a frame, and `Codec`, a [FOURCC](https://wikipedia.org/wiki/FourCC) value defining the format of the stream's data. Let's use an uncompressed stream with 32 bits per pixel.
 ```cs
 // set standard VGA resolution
 stream.Width = 640;
@@ -40,7 +40,7 @@ stream.Codec = KnownFourCCs.Codecs.Uncompressed;
 stream.BitsPerPixel = BitsPerPixel.Bpp32;
 ```
 
-Now you are ready to write the frames. AVI expects uncompressed data in format of standard Windows DIB, that is bottom-up bitmap of the specified bit-depth. For each frame, put its data in byte array and call `IAviVideoStream.WriteFrame()`.
+Now you are ready to write frames. AVI expects uncompressed data in the format of a standard Windows DIB, that is a _bottom-up_ bitmap of the specified bit-depth. For each frame, put its data in a byte array and call `IAviVideoStream.WriteFrame`.
 ```cs
 var frameData = new byte[stream.Width * stream.Height * 4];
 while (/* !finished */)
@@ -57,14 +57,16 @@ while (/* !finished */)
 }
 ```
 
-You don't need to specify the number of frames beforehand, just write as many frames as you need. When done, just call the `AviWriter.Close()`, and file is ready to be played. That's it!
+You don't need to specify the number of frames beforehand, just write as many frames as you need. When done, just call the `AviWriter.Close`, and file is ready to be played. That's it!
 ```cs
 writer.Close();
 ```
 
+**Tip.** Although you don't need to specify the number of frames, the `AviWriter` has to reserve an index space in the beginning of a file which can accomodate a certain amount of frames. If you intend to write videos lasting for more than a few hours you may want to increase a value of the `AviWriter.MaxSuperIndexEntries` property to reserve more index space and thus allow for more frames to be written.
+
 You can easily add one or more audio streams into the mix. See [Working with Audio Streams](working-with-audio-streams.md).
 
-Writing uncompressed data is simple, yet leads to enormous file sizes. Though **SharpAvi** makes big AVI files readable by the most players (supporting OpenDML), it's often worth compressing the data.
+Writing uncompressed data is simple, yet leads to enormous file sizes. Although **SharpAvi** makes big AVI files readable by most players supporting OpenDML, it's often worth compressing the data.
 If you already have pre-compressed frames (for example, when copying from other video file) just set the properties of the stream properly to describe the compression used. Then you can simply write your compressed data to the stream.
 
 However, usually you have uncompressed data which need to be compressed somehow. **SharpAvi** provides this ability through the concept of _encoders_. Follow to [Using Video Encoders](using-video-encoders.md).
