@@ -62,9 +62,9 @@ You don't need to specify the number of frames beforehand, just write as many fr
 writer.Close();
 ```
 
-You can easily add one or more audio streams into the mix. See [Working with Audio Streams](Working-with-Audio-Streams).
+You can easily add one or more audio streams into the mix. See [Working with Audio Streams](working-with-audio-streams.md).
 
 Writing uncompressed data is simple, yet leads to enormous file sizes. Though **SharpAvi** makes big AVI files readable by the most players (supporting OpenDML), it's often worth compressing the data.
 If you already have pre-compressed frames (for example, when copying from other video file) just set the properties of the stream properly to describe the compression used. Then you can simply write your compressed data to the stream.
 
-However, usually you have uncompressed data which need to be compressed somehow. **SharpAvi** provides this ability through the concept of _encoders_. Follow to [Using Video Encoders](Using-Video-Encoders).
+However, usually you have uncompressed data which need to be compressed somehow. **SharpAvi** provides this ability through the concept of _encoders_. Follow to [Using Video Encoders](using-video-encoders.md).
