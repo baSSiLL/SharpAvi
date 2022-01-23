@@ -18,7 +18,7 @@ The project is published to NuGet as a few packages:
   Contains a Motion JPEG video encoder based on [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp).  
   It's a cross-platform alternative to the WPF-based encoder.
 
-To get started, jump to [the project's docs](http://bassill.github.io/SharpAvi).
+To get started, jump to [the project's docs](https://bassill.github.io/SharpAvi).
 
 ***
 
