@@ -8,7 +8,7 @@
     <StartupObject />
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Copyright>Copyright © Vasili Maslov 2013-2022</Copyright>
-    <Description>A simple library for creating video files in AVI format.</Description>
+    <Description>A simple library for creating video files in the AVI format.</Description>
     <Authors>baSSiLL</Authors>
     <Company />
     <PackageProjectUrl>https://github.com/baSSiLL/SharpAvi</PackageProjectUrl>
