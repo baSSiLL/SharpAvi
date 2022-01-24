@@ -62,7 +62,7 @@ var encoder = new Mpeg4VideoEncoder(stream.Width, stream.Height,
                                     );
 ```
 
-**Note.** Regardless of an encoder used, SharpAVI always produces an AVI file. The encoder is only used to compress the stream data, and does not change the format of a video file.
+> :memo: **Note.** Regardless of an encoder used, SharpAVI always produces an AVI file. The encoder is only used to compress the stream data, and does not change the format of a video file.
 
 ## Threading issues
 

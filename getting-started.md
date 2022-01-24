@@ -62,7 +62,7 @@ You don't need to specify the number of frames beforehand, just write as many fr
 writer.Close();
 ```
 
-**Tip.** Although you don't need to specify the number of frames, the `AviWriter` has to reserve an index space in the beginning of a file which can accomodate a certain amount of frames. If you intend to write videos lasting for more than a few hours you may want to increase a value of the `AviWriter.MaxSuperIndexEntries` property to reserve more index space and thus allow for more frames to be written.
+> :bulb: **Tip.** Although you don't need to specify the number of frames, the `AviWriter` has to reserve an index space in the beginning of a file which can accomodate a certain amount of frames. If you intend to write videos lasting for more than a few hours you may want to increase a value of the `AviWriter.MaxSuperIndexEntries` property to reserve more index space and thus allow for more frames to be written.
 
 You can easily add one or more audio streams into the mix. See [Working with Audio Streams](working-with-audio-streams.md).
 
