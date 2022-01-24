@@ -9,12 +9,14 @@ There are a few built-in encoders for video and audio.
 Output format is always AVI, regardless of a specific codec used.
 
 The project is published to NuGet as a few packages:
-* [SharpAvi](https://www.nuget.org/packages/SharpAvi/)  
+* [SharpAvi  
+  ![NuGet Badge](https://buildstats.info/nuget/SharpAvi)](https://www.nuget.org/packages/SharpAvi/)  
   Contains core functions and some encoders which do not depend on external packages.
   * A Motion JPEG video encoder based on WPF.
   * An MPEG-4 video encoder based on the Video for Windows (VFW) API.
   * [LAME](https://lame.sourceforge.io/)-based MP3 audio encoder.
-* [SharpAvi.ImageSharp](https://www.nuget.org/packages/SharpAvi.ImageSharp/)  
+* [SharpAvi.ImageSharp  
+  ![NuGet Badge](https://buildstats.info/nuget/SharpAvi.ImageSharp)](https://www.nuget.org/packages/SharpAvi.ImageSharp/)  
   Contains a Motion JPEG video encoder based on [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp).  
   It's a cross-platform alternative to the WPF-based encoder.
 
