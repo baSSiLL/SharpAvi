@@ -54,9 +54,6 @@
     <EmbeddedResource Include="Codecs\Mp3LameAudioEncoder.LameFacadeImpl.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="5.0.0" />
-  </ItemGroup>
-  <ItemGroup>
     <None Update="readme.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>

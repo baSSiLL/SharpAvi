@@ -3,6 +3,8 @@
 using System;
 using System.Runtime.InteropServices;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace SharpAvi.Codecs
 {
     // On .NET 5+ using a custom resolver of native DLLs.
@@ -319,4 +321,7 @@ namespace SharpAvi.Codecs
         }
     }
 }
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
 #endif
