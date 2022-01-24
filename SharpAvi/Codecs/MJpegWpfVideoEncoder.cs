@@ -107,7 +107,7 @@ namespace SharpAvi.Codecs
                 stream.Position = destOffset;
                 encoderImpl.Save(stream);
                 stream.Flush();
-                length = (int)stream.Length - destOffset;
+                length = (int)stream.Position - destOffset;
             }
 
             isKeyFrame = true;
