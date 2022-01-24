@@ -31,6 +31,20 @@ namespace SharpAvi.Codecs
     public class Mpeg4VcmVideoEncoder : IVideoEncoder, IDisposable
     {
         /// <summary>
+        /// Checks whether <see cref="Mpeg4VcmVideoEncoder"/> is supported on this platform.
+        /// </summary>
+        /// <returns><c>True</c> if supported, <c>false</c> otherwise.</returns>
+        public static bool IsSupported() => Environment.OSVersion.Platform == PlatformID.Win32NT;
+
+        private static void CheckSupportedPlatform()
+        {
+            if (!IsSupported())
+            {
+                throw new PlatformNotSupportedException($"{nameof(Mpeg4VcmVideoEncoder)} is only supported on the Windows platform.");
+            }
+        }
+
+        /// <summary>
         /// Default preferred order of the supported codecs.
         /// </summary>
         public static ReadOnlyCollection<FourCC> DefaultCodecPreference { get; } 
@@ -47,8 +61,13 @@ namespace SharpAvi.Codecs
         /// <summary>
         /// Gets info about the supported codecs that are installed on the system.
         /// </summary>
+        /// <exception cref="PlatformNotSupportedException">
+        /// Running not on Windows.
+        /// </exception>
         public static CodecInfo[] GetAvailableCodecs()
         {
+            CheckSupportedPlatform();
+
             var result = new List<CodecInfo>();
 
             var inBitmapInfo = CreateBitmapInfo(8, 8, 32, CodecIds.Uncompressed);
@@ -147,6 +166,9 @@ namespace SharpAvi.Codecs
         /// <exception cref="InvalidOperationException">
         /// No compatible codec was found in the system.
         /// </exception>
+        /// <exception cref="PlatformNotSupportedException">
+        /// Running not on Windows.
+        /// </exception>
         /// <remarks>
         /// <para>
         /// It is not guaranteed that the codec will respect the specified <paramref name="quality"/> value.
@@ -166,10 +188,7 @@ namespace SharpAvi.Codecs
             Argument.IsNotNegative(frameCount, nameof(frameCount));
             Argument.IsInRange(quality, 1, 100, nameof(quality));
 
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            {
-                throw new PlatformNotSupportedException($"{nameof(Mpeg4VcmVideoEncoder)} only supports the Windows platform.");
-            }
+            CheckSupportedPlatform();
 
             this.width = width;
             this.height = height;
