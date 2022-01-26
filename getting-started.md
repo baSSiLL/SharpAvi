@@ -6,7 +6,7 @@ There are a few namespaces in the library:
 using SharpAvi;
 // Contains types used for writing like AviWriter
 using SharpAvi.Output;
-// Contains types related to encoding like Mpeg4VideoEncoderVcm
+// Contains types related to encoding like Mpeg4VcmVideoEncoder
 using SharpAvi.Codecs;
 ```
 
@@ -33,9 +33,9 @@ You get an object implementing the `IAviVideoStream` interface. The interface co
 // set standard VGA resolution
 stream.Width = 640;
 stream.Height = 480;
-// class SharpAvi.KnownFourCCs.Codecs contains FOURCCs for several well-known codecs
+// class SharpAvi.CodecIds contains FOURCCs for several well-known codecs
 // Uncompressed is the default value, just set it for clarity
-stream.Codec = KnownFourCCs.Codecs.Uncompressed;
+stream.Codec = CodecIds.Uncompressed;
 // Uncompressed format requires to also specify bits per pixel
 stream.BitsPerPixel = BitsPerPixel.Bpp32;
 ```
@@ -57,6 +57,11 @@ while (/* !finished */)
 }
 ```
 
+> :bulb: **Tip.** In .NET 5.0+ targets, there is an overload of the `WriteFrame` taking a `ReadOnlySpan<byte>`. So you can use other source for a frame data than a byte array and don't need to specify a starting index and a length explicitly.
+> ```cs
+> stream.WriteFrame(true, frameData.AsSpan());
+> ```
+
 You don't need to specify the number of frames beforehand, just write as many frames as you need. When done, just call the `AviWriter.Close`, and file is ready to be played. That's it!
 ```cs
 writer.Close();
@@ -67,6 +72,6 @@ writer.Close();
 You can easily add one or more audio streams into the mix. See [Working with Audio Streams](working-with-audio-streams.md).
 
 Writing uncompressed data is simple, yet leads to enormous file sizes. Although **SharpAvi** makes big AVI files readable by most players supporting OpenDML, it's often worth compressing the data.
-If you already have pre-compressed frames (for example, when copying from other video file) just set the properties of the stream properly to describe the compression used. Then you can simply write your compressed data to the stream.
+If you already have pre-compressed frames (for example, when copying from another video file) just set the properties of the stream properly to describe the compression used. Then you can simply write your compressed data to the stream.
 
 However, usually you have uncompressed data which need to be compressed somehow. **SharpAvi** provides this ability through the concept of _encoders_. Follow to [Using Video Encoders](using-video-encoders.md).
