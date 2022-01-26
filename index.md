@@ -13,3 +13,5 @@ Below are several articles that should provide you an easy start.
 [Asynchronous Writing](asynchronous-writing.md)
 
 A public surface of the API is covered with XML documentation comments. Source code also includes a sample screen capturing application. Hope this all helps :)
+
+> :bulb: **Tip.** For documentation on **the older v2** [navigate here](v2/index.md).
