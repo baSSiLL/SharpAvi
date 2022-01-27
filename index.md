@@ -1,5 +1,3 @@
-> :bulb: **Tip.** This documentation will be updated for v3 soon.
-
 Hi there!
 It seems that you want to use **SharpAvi** or to find out whether it suits your needs.
 Below are several articles that should provide you an easy start. 

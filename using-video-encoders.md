@@ -10,51 +10,61 @@ var stream = writer.AddEncodingVideoStream(encoder, width: 640, height: 480);
 
 How to get an encoder instance? More on this [later...](#creating-a-video-encoder) And now look how to use an encoding stream.
 
-First, you don't need to set a codec and bits per pixel for an encoding stream directly, as these are determined by the encoder. Also, a value of the `isKeyFrame` parameter for the `WriteFrame` method is ignored, because the encoder itself defines which frames are keys.
+First, you should not set a codec and bits per pixel for an encoding stream directly, as these are determined by the encoder. Also, a value of the `isKeyFrame` parameter for the `WriteFrame` method is ignored, because the encoder itself defines which frames are keys.
 
-Next, all encoders expect input image data in specific format. It is the BGR32 top-down - 32 bits per pixel, blue byte first, alpha byte not used, top line goes first. This is the format you can often get from existing images. For example, when locking `System.Drawing.Bitmap` instances. Thus, the size of the data is fixed and is determined by the frame dimensions - `Width * Height * 4` bytes. For this reason, encoding streams also ignore a value of the `length` parameter for the `WriteFrame` method.
+Next, all encoders expect input image data in the specific format. It is the BGR32 _top-down_ - 32 bits per pixel, blue byte first, alpha byte not used, top line goes first. This is the format you can often get from existing images. For example, when locking `System.Drawing.Bitmap` instances. Thus, the size of the data is fixed and is determined by the frame dimensions - `Width * Height * 4` bytes. For this reason, encoding streams also ignore a value of the `length` parameter for the `WriteFrame` method.
 
 So, you simply pass an uncompressed top-down BGR32 frame to an encoding stream, and it cares about encoding:
 ```cs
 // Say, you have a System.Drawing.Bitmap
 System.Drawing.Bitmap bitmap;
-// and a buffer of appropriate size for storing its bits
-var buffer = new byte[stream.Width * stream.Height * 4](stream.Width-_-stream.Height-_-4);
 
-// Now copy bits from the bitmap to the buffer
+// Assuming you are in the unsafe context, you can write the bitmap contents right to the stream
 var bits = bitmap.LockBits(new Rectangle(0, 0, stream.Width, stream.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
-Marshal.Copy(bits.Scan0, buffer, 0, buffer.Length);
+encodingStream.WriteFrame(true, new ReadOnlySpan<byte>(bits.Scan0.ToPointer(), bits.Stride * stream.Height));
 bitmap.UnlockBits(bits);
-
-// and flush the buffer to an encoding stream
-encodingStream.WriteFrame(true, buffer, 0, buffer.Length);
 ```
 
 ## Creating a video encoder
 
 Now about a video encoder. This is an object which implements the `IVideoEncoder` interface. This interface provides properties to determine the data format for the stream, and a method for encoding. **SharpAvi** includes several implementations which may be sufficient for many cases. If your case is not included, you are encouraged to write your own implementation of the interface for a preferred codec :)
 
+### Uncompressed
+
 The simplest is the `UncompressedVideoEncoder`. It does no real encoding, just flips image vertically and converts BGR32 data to BGR24 data to reduce the size.
 ```cs
 var encoder = new UncompressedVideoEncoder(stream.Width, stream.Height);
 ```
 
-Next is the `MotionJpegVideoEncoderWpf` which does Motion JPEG encoding. It uses `System.Windows.Media.Imaging.JpegBitmapEncoder` under the hood. Besides dimensions, you provide a desired quality level to its constructor, ranging from 1 (low quality, small size) to 100 (high quality, large size).
+### Motion JPEG
+
+Next is the `MJpegWpfVideoEncoder` which does Motion JPEG encoding. It uses `System.Windows.Media.Imaging.JpegBitmapEncoder` under the hood. Hence it's only available in Windows targets. Besides dimensions, you provide a desired quality level to its constructor, ranging from 1 (low quality, small size) to 100 (high quality, large size).
 ```cs
-var encoder = new MotionJpegVideoEncoderWpf(stream.Width, stream.Height, 70);
+var encoder = new MJpegWpfVideoEncoder(stream.Width, stream.Height, 70);
 ```
 
-Finally, the `Mpeg4VideoEncoderVcm` does MPEG-4 encoding using a _Video for Windows_ (aka _VfW_) or _Video Compression Manager_ (aka _VCM_) compatible codec installed on the system.
+There is an alternative cross-platform Motion JPEG encoder `MJpegImageSharpVideoEncoder` in a separate package **SharpAvi.ImageSharp**. As you might have guessed, it is based on the [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp) library. So it is a good choice if you already use **ImageSharp** in your code.
 
-Currently tested codecs include **Microsoft MPEG-4 V2** and **V3**, [Xvid](https://www.xvid.com/download/), [DivX](http://www.divx.com/en/software/divx) and [x264vfw](http://sourceforge.net/projects/x264vfw/files/). Unfortunately, some of them have only 32-bit versions, others produce errors in 64 bits. The only codec which looks to work reliably in 64 bits is **x264vfw64**. For **x264vfw** (both 32- and 64-bit), it is recommended to check option **Zero Latency** in its configuration utility (installed along with the codec) to prevent picture freezes.
+> :memo: **Note.** From my tests, `MJpegWpfVideoEncoder` works about twice faster than `MJpegImageSharpVideoEncoder` so it makes sense to use the former when it's available.
 
-You can get the list of available codecs with the `Mpeg4VideoEncoderVcm.GetAvailableCodecs` method. When creating an instance of the encoder, you can specify a list of codecs that should be used in order of preference. Otherwise, the default preference list will be used.
+### MPEG-4
+
+Finally, the `Mpeg4VcmVideoEncoder` does MPEG-4 encoding using a _Video for Windows_ (aka _VfW_) or _Video Compression Manager_ (aka _VCM_) compatible codec installed on the system. Apparently, this encoder works on Windows only (but is available for any target).
+
+Currently tested codecs include **Microsoft MPEG-4 V2** and **V3**, [Xvid](https://www.xvid.com/download/), [DivX](http://www.divx.com/en/software/divx) and [x264vfw](http://sourceforge.net/projects/x264vfw/files/). Unfortunately, some of them have only 32-bit versions, others produce errors in 64 bits. The only codec which looks to work reliably in 64 bits is **x264vfw64**.
+
+> :bulb: **Tip.** For **x264vfw** (both 32- and 64-bit), it is recommended to check the option **Zero Latency** in its configuration utility to prevent picture freezes. This configuration utility is installed along with the codec.
+
+You can get the list of available codecs (of mentioned above) with the `Mpeg4VcmVideoEncoder.GetAvailableCodecs` method. When creating an instance of the encoder, you can specify a list of codecs that should be used in order of preference. Otherwise, the default preference list will be used.
+
+> :bulb: **Tip.** You can actually specify other codec IDs (not mentioned above) in the list of preference. And the encoder will try to use that codec if it is found in the system. However, this may not work as you expect.
+
 ```cs
-var codecs = Mpeg4VideoEncoder.GetAvailableCodecs();
+var codecs = Mpeg4VcmVideoEncoder.GetAvailableCodecs();
 // Present available codecs to user or select programmatically
 // ...
 FourCC selectedCodec = KnownFourCCs.Codecs.Xvid;
-var encoder = new Mpeg4VideoEncoder(stream.Width, stream.Height, 
+var encoder = new Mpeg4VcmVideoEncoder(stream.Width, stream.Height, 
                                     30, // frame rate
                                     0, // number of frames, if known beforehand, or zero
                                     70, // quality, though usually ignored :(
@@ -66,10 +76,10 @@ var encoder = new Mpeg4VideoEncoder(stream.Width, stream.Height,
 
 ## Threading issues
 
-As you may notice in the XML docs for the `MotionJpegVideoEncoderWpf` and `Mpeg4VideoEncoderVcm` classes, there is a talk about calling on a single thread. That is, the instances of these classes should be used carefully in multi-threaded scenarios.
+As you may notice in the XML docs for the `Mpeg4VcmVideoEncoder` class, there is a talk about calling on a single thread. That is, the instances of this class should be used carefully in multi-threaded scenarios.
 To help with this, the `SingleThreadedVideoEncoderWrapper` class is at your service. You can wrap an encoder instance, and this wrapper will guarantee that an underlying encoder is always accessed from the same thread, including its instantiation.
 ```cs
-var threadSafeEncoder = new SingleThreadedVideoEncoderWrapper(() => new Mpeg4VideoEncoder(...));
+var threadSafeEncoder = new SingleThreadedVideoEncoderWrapper(() => new Mpeg4VcmVideoEncoder(...));
 ```
 This is particularly useful for [asynchronous writing](asynchronous-writing.md) scenarios.
 
@@ -80,14 +90,16 @@ The `EncodingStreamFactory` class contains extension methods for `AviWriter` whi
 // Stream with UncompressedVideoEncoder
 var uncompressedStream = writer.AddUncompressedVideoStream(640, 480);
 
-// Stream with MotionJpegVideoEncoderWpf
-// Version for .NET 3.5 also includes forceSingleThreadedAccess parameter 
-// as implementation of MotionJpegVideoEncoderWpf for that platform is not thread-safe
-var mjpegStream = writer.AddMotionJpegVideoStream(640, 480, quality: 70);
+// Stream with MJpegWpfVideoEncoder
+var mjpegStream1 = writer.AddMJpegWpfVideoStream(640, 480, quality: 70);
 
-// Stream with Mpeg4VideoEncoderVcm
+// Stream with MJpegImageSharpVideoEncoder
+// This extension method is included in the SharpAvi.ImageSharp package
+var mjpegStream2 = writer.AddMJpegImageSharpVideoStream(640, 480, quality: 70);
+
+// Stream with Mpeg4VcmVideoEncoder
 // Parameter forceSingleThreadedAccess controls the creation of 
 // SingleThreadedVideoEncoderWrapper
 var mpeg4Stream = writer.AddMpeg4VideoStream(640, 480, 30, 
-    quality: 70, codec: KnownFourCCs.Codecs.X264, forceSingleThreadedAccess: true);
+    quality: 70, codec: CodecIds.X264, forceSingleThreadedAccess: true);
 ```
