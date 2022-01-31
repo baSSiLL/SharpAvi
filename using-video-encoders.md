@@ -63,7 +63,7 @@ You can get the list of available codecs (of mentioned above) with the `Mpeg4Vcm
 var codecs = Mpeg4VcmVideoEncoder.GetAvailableCodecs();
 // Present available codecs to user or select programmatically
 // ...
-FourCC selectedCodec = KnownFourCCs.Codecs.Xvid;
+FourCC selectedCodec = CodecIds.Xvid;
 var encoder = new Mpeg4VcmVideoEncoder(stream.Width, stream.Height, 
                                     30, // frame rate
                                     0, // number of frames, if known beforehand, or zero
