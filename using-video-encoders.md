@@ -100,6 +100,6 @@ var mjpegStream2 = writer.AddMJpegImageSharpVideoStream(640, 480, quality: 70);
 // Stream with Mpeg4VcmVideoEncoder
 // Parameter forceSingleThreadedAccess controls the creation of 
 // SingleThreadedVideoEncoderWrapper
-var mpeg4Stream = writer.AddMpeg4VideoStream(640, 480, 30, 
+var mpeg4Stream = writer.AddMpeg4VcmVideoStream(640, 480, 30, 
     quality: 70, codec: CodecIds.X264, forceSingleThreadedAccess: true);
 ```
