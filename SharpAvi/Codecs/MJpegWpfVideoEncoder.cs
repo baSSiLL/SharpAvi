@@ -17,12 +17,6 @@ namespace SharpAvi.Codecs
     /// <para>
     /// The implementation relies on <see cref="JpegBitmapEncoder"/>.
     /// </para>
-    /// <para>
-    /// This encoder is not fully conformant to the Motion JPEG standard, as each encoded frame is a full JPEG picture 
-    /// with its own Huffman tables, and not those fixed Huffman tables defined by the Motion JPEG standard. 
-    /// However, (at least most) modern decoders for Motion JPEG properly handle this situation.
-    /// This also produces a little overhead on the file size.
-    /// </para>
     /// </remarks>
     public sealed class MJpegWpfVideoEncoder : IVideoEncoder
     {

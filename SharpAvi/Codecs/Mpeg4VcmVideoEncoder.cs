@@ -338,7 +338,8 @@ namespace SharpAvi.Codecs
             Argument.ConditionIsMet(4 * width * height <= source.Length,
                 "Source end offset exceeds the source length.");
 
-            fixed (void* srcPtr = source, destPtr = destination)
+            BitmapUtils.FlipVertical(source, sourceBuffer, height, width * 4);
+            fixed (void* srcPtr = sourceBuffer, destPtr = destination)
             {
                 var srcIntPtr = new IntPtr(srcPtr);
                 var destIntPtr = new IntPtr(destPtr);
