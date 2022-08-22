@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	<TargetFrameworks>net45;netstandard2.0;net50;net50-windows</TargetFrameworks>
-	<Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <TargetFrameworks>net45;netstandard2.0;net50;net50-windows</TargetFrameworks>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <PropertyGroup>
@@ -16,11 +16,11 @@
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageTags>AVI video authoring encoding OpenDML</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>3.0.0</Version>
-	<AssemblyVersion>$(Version).0</AssemblyVersion>
-	<FileVersion>$(Version).0</FileVersion>
-	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<PackageReleaseNotes>https://github.com/baSSiLL/SharpAvi/releases/tag/v3.0.0</PackageReleaseNotes>
+    <Version>3.0.1</Version>
+    <AssemblyVersion>$(Version).0</AssemblyVersion>
+    <FileVersion>$(Version).0</FileVersion>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageReleaseNotes>https://github.com/baSSiLL/SharpAvi/releases/tag/v$(Version)</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -47,7 +47,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net50-windows'">
-	<UseWPF>true</UseWPF>  
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
   <!-- LameFacadeImpl is compiled in runtime from an embedded resource on .NET 4.5 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">

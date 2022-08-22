@@ -16,7 +16,10 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RootNamespace>SharpAvi</RootNamespace>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <PackageReleaseNotes>https://github.com/baSSiLL/SharpAvi/releases/tag/v3.0.0</PackageReleaseNotes>
+    <AssemblyVersion>$(Version).0</AssemblyVersion>
+    <FileVersion>$(Version).0</FileVersion>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageReleaseNotes>https://github.com/baSSiLL/SharpAvi/releases/tag/v$(Version)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
