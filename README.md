@@ -8,6 +8,8 @@ A video is created by supplying individual in-memory bitmaps and audio samples.
 There are a few built-in encoders for video and audio.
 Output format is always AVI, regardless of a specific codec used.
 
+:book: To get started, jump to [the project's docs](https://bassill.github.io/SharpAvi).
+
 The project is published to NuGet as a few packages:
 * [SharpAvi  
   ![NuGet Badge](https://buildstats.info/nuget/SharpAvi)](https://www.nuget.org/packages/SharpAvi/)  
@@ -19,8 +21,6 @@ The project is published to NuGet as a few packages:
   ![NuGet Badge](https://buildstats.info/nuget/SharpAvi.ImageSharp)](https://www.nuget.org/packages/SharpAvi.ImageSharp/)  
   Contains a Motion JPEG video encoder based on [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp).  
   It's a cross-platform alternative to the WPF-based encoder.
-
-To get started, jump to [the project's docs](https://bassill.github.io/SharpAvi).
 
 ***
 
