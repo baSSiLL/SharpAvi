@@ -13,6 +13,7 @@ namespace SharpAvi.Output
         private int height;
         private BitsPerPixel bitsPerPixel;
         private int framesWritten;
+        private byte[] bitmapInfoHeader;
 
         public AviVideoStream(int index, IAviStreamWriteHandler writeHandler, 
             int width, int height, BitsPerPixel bitsPerPixel)
@@ -68,6 +69,16 @@ namespace SharpAvi.Output
             {
                 CheckNotFrozen();
                 streamCodec = value;
+            }
+        }
+
+        public byte[] BitmapInfoHeader
+        {
+            get { return bitmapInfoHeader; }
+            set
+            {
+                CheckNotFrozen();
+                bitmapInfoHeader = value;
             }
         }
 

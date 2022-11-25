@@ -537,39 +537,47 @@ namespace SharpAvi.Output
 
         void IAviStreamWriteHandler.WriteStreamFormat(AviVideoStream videoStream)
         {
-            // See BITMAPINFOHEADER structure
-            fileWriter.Write(40U); // size of structure
-            fileWriter.Write(videoStream.Width);
-            fileWriter.Write(videoStream.Height);
-            fileWriter.Write((short)1); // planes
-            fileWriter.Write((ushort)videoStream.BitsPerPixel); // bits per pixel
-            fileWriter.Write((uint)videoStream.Codec); // compression (codec FOURCC)
-            // 0 size is safer for uncompressed formats not to bother with stride calculation
-            var sizeInBytes = videoStream.Codec == CodecIds.Uncompressed
-                ? 0
-                : videoStream.Width * videoStream.Height * (((int)videoStream.BitsPerPixel) / 8);
-            fileWriter.Write((uint)sizeInBytes); // image size in bytes
-            fileWriter.Write(0); // X pixels per meter
-            fileWriter.Write(0); // Y pixels per meter
-
-            // Writing grayscale palette for 8-bit uncompressed stream
-            // Otherwise, no palette
-            if (videoStream.BitsPerPixel == BitsPerPixel.Bpp8 && videoStream.Codec == CodecIds.Uncompressed)
+            var bitmapInfoHeader = videoStream.BitmapInfoHeader;
+            if (bitmapInfoHeader != null)
             {
-                fileWriter.Write(256U); // palette colors used
-                fileWriter.Write(0U); // palette colors important
-                for (int i = 0; i < 256; i++)
-                {
-                    fileWriter.Write((byte)i);
-                    fileWriter.Write((byte)i);
-                    fileWriter.Write((byte)i);
-                    fileWriter.Write((byte)0);
-                }
+                fileWriter.Write(bitmapInfoHeader);
             }
             else
             {
-                fileWriter.Write(0U); // palette colors used
-                fileWriter.Write(0U); // palette colors important
+                // See BITMAPINFOHEADER structure
+                fileWriter.Write(40U); // size of structure
+                fileWriter.Write(videoStream.Width);
+                fileWriter.Write(videoStream.Height);
+                fileWriter.Write((short)1); // planes
+                fileWriter.Write((ushort)videoStream.BitsPerPixel); // bits per pixel
+                fileWriter.Write((uint)videoStream.Codec); // compression (codec FOURCC)
+                                                           // 0 size is safer for uncompressed formats not to bother with stride calculation
+                var sizeInBytes = videoStream.Codec == CodecIds.Uncompressed
+                    ? 0
+                    : videoStream.Width * videoStream.Height * (((int)videoStream.BitsPerPixel) / 8);
+                fileWriter.Write((uint)sizeInBytes); // image size in bytes
+                fileWriter.Write(0); // X pixels per meter
+                fileWriter.Write(0); // Y pixels per meter
+
+                // Writing grayscale palette for 8-bit uncompressed stream
+                // Otherwise, no palette
+                if (videoStream.BitsPerPixel == BitsPerPixel.Bpp8 && videoStream.Codec == CodecIds.Uncompressed)
+                {
+                    fileWriter.Write(256U); // palette colors used
+                    fileWriter.Write(0U); // palette colors important
+                    for (int i = 0; i < 256; i++)
+                    {
+                        fileWriter.Write((byte)i);
+                        fileWriter.Write((byte)i);
+                        fileWriter.Write((byte)i);
+                        fileWriter.Write((byte)0);
+                    }
+                }
+                else
+                {
+                    fileWriter.Write(0U); // palette colors used
+                    fileWriter.Write(0U); // palette colors important
+                }
             }
         }
 

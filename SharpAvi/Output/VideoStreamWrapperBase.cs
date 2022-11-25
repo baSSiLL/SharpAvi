@@ -47,6 +47,12 @@ namespace SharpAvi.Output
             set { BaseStream.Codec = value; }
         }
 
+        public virtual byte[] BitmapInfoHeader
+        {
+            get { return BaseStream.BitmapInfoHeader; }
+            set { BaseStream.BitmapInfoHeader = value; }
+        }
+
         public virtual void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length)
         {
             Argument.IsNotNull(frameData, nameof(frameData));
