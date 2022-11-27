@@ -56,6 +56,22 @@ namespace SharpAvi.Output
             set => ThrowPropertyDefinedByEncoder();
         }
 
+        public override byte[] BitmapInfoHeader
+        {
+            get
+            {
+                if (encoder is IVideoEncoderExtraData extraData)
+                {
+                    return extraData.BitmapInfoHeader;
+                }
+                else
+                {
+                    return BaseStream.BitmapInfoHeader;
+                }
+            }
+            set => ThrowPropertyDefinedByEncoder();
+        }
+
         /// <summary>Encodes and writes a frame.</summary>
         public override void WriteFrame(bool isKeyFrame, byte[] frameData, int startIndex, int length)
         {
@@ -94,6 +110,10 @@ namespace SharpAvi.Output
             // Set properties of the base stream
             BaseStream.Codec = encoder.Codec;
             BaseStream.BitsPerPixel = encoder.BitsPerPixel;
+            if (encoder is IVideoEncoderExtraData extraData)
+            {
+                BaseStream.BitmapInfoHeader = extraData.BitmapInfoHeader;
+            }
 
             base.PrepareForWriting();
         }

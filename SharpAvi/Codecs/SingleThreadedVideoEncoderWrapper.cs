@@ -14,7 +14,7 @@ namespace SharpAvi.Codecs
     /// like asynchronous encoding.
     /// </para>
     /// </remarks>
-    public class SingleThreadedVideoEncoderWrapper : IVideoEncoder, IDisposable
+    public class SingleThreadedVideoEncoderWrapper : IVideoEncoder, IVideoEncoderExtraData, IDisposable
     {
         private readonly IVideoEncoder encoder;
         private readonly SingleThreadTaskScheduler scheduler;
@@ -64,6 +64,21 @@ namespace SharpAvi.Codecs
         /// Determines the amount of space needed in the destination buffer for storing the encoded data of a single frame.
         /// </summary>
         public int MaxEncodedSize => SchedulerInvoke(() => encoder.MaxEncodedSize);
+
+        /// <summary>
+        /// Encoded images header
+        /// </summary>
+        public byte[] BitmapInfoHeader => SchedulerInvoke(() =>
+        {
+            if (encoder is IVideoEncoderExtraData extraData)
+            {
+                return extraData.BitmapInfoHeader;
+            }
+            else
+            {
+                return null;
+            }
+        });
 
         /// <summary>
         /// Encodes a video frame.
